@@ -31,11 +31,11 @@ function ScrollToTop() {
 function App() {
   useEffect(() => {
     Amplify.configure({
-      aws_cognito_region: "us-east-2",
-      aws_user_pools_id: "us-east-2_mX3IaDrPX",
-      aws_user_pools_web_client_id: "3t99aksvkg6lnh8ltigqgrv0o7",
+      aws_cognito_region: "ap-south-1",
+      aws_user_pools_id: "ap-south-1_HSc9Q5dtl",
+      aws_user_pools_web_client_id: "1jq2ul996k93nf7rru4rm2dna2",
       aws_cognito_identity_pool_id:
-        "us-east-2:77be6be8-d5cc-414b-a57f-b419704382ea",
+        "ap-south-1:72ec174e-a45c-4509-afdb-875da18c9231",
       aws_mandatory_sign_in: "enable",
     });
 
