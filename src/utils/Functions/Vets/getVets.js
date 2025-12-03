@@ -15,22 +15,27 @@ export const getVets = async () => {
       config
     );
     const mapdata = userInfo.data.response.record.map((data) => {
-      const fullname = `${data.firstName} ${data.lastName}`;
+      // Use the name field directly from API response
+      const fullname = data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'N/A';
       let availableHours = null;
       let daysOfOperation = null;
-      if (data.availablehours) {
-        availableHours = data.availablehours
+      
+      // Fix: Use camelCase availableHours instead of lowercase availablehours
+      if (data.availableHours && data.availableHours.length > 0) {
+        availableHours = data.availableHours
           .map((timeSlot) => `${timeSlot.from} - ${timeSlot.to}`)
           .join(", ");
       } else {
         availableHours = "Not Known";
       }
 
-      if (data.daysofoperation) {
-        daysOfOperation = data.daysofoperation.join(", ");
+      // Fix: Use camelCase daysOfOperation instead of lowercase daysofoperation
+      if (data.daysOfOperation && data.daysOfOperation.length > 0) {
+        daysOfOperation = data.daysOfOperation.join(", ");
       } else {
         daysOfOperation = "Not Known";
       }
+      
       return {
         name: fullname,
         mobile: data.mobile,
@@ -40,6 +45,7 @@ export const getVets = async () => {
         verified: data.verified.toString(),
         daysOfOperation: daysOfOperation,
         userName: data.userName,
+        clinicName: data.clinicName || "", // Add clinicName to the mapped data
       };
     });
 

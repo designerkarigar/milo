@@ -97,6 +97,11 @@ export const vetColumn = [
     defaultFlex: 1,
   },
   {
+    header: "Clinic Name",  // Add this new column
+    name: "clinicName",
+    defaultFlex: 1.5,
+  },
+  {
     header: "Mobile No",
     name: "mobile",
     defaultFlex: 1,
