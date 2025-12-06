@@ -1,8 +1,7 @@
 import { FadeLoader } from "react-spinners";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
-import { BaseUrlS3 } from "../../utils/Constants/Url";
 
 import {
   CContainer,
@@ -17,26 +16,14 @@ import {
 const PortalBlogs = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [blogData, setBlogData] = useState([
-    {
-      uid: "",
-      photos: [
-        {
-          type: "icon",
-          url: "",
-        },
-      ],
-      title: "",
-      description: "",
-    },
-  ]);
+  const [blogData, setBlogData] = useState([]);
 
   useEffect(() => {
     const getData = async () => {
       try {
         setLoading(true);
-        const BlogData = await getBlogs(1000);
-        setBlogData(BlogData);
+        const BlogData = await getBlogs();
+        setBlogData(BlogData || []);
         setLoading(false);
       } catch (error) {
         alert(error);
@@ -44,7 +31,7 @@ const PortalBlogs = () => {
       }
     };
     getData();
-  }, []);
+  }, [navigate]);
 
   const handleClick = (uid) => {
     navigate(`/dashboard/BlogView?id=${uid}`);
@@ -68,32 +55,49 @@ const PortalBlogs = () => {
           flex-column
           "
       >
-        <CRow className="w-100">
-          {blogData.map((data, index) => (
-            <CCard
-              key={data.uid}
-              style={{ width: "300px", margin: "10px" }}
-              onClick={() => handleClick(data.uid)}
-            >
-              <CCardImage
-                src={
-                  BaseUrlS3 +
-                  (
-                    data.photos.find(
-                      (photoData) => photoData.type === "banner"
-                    ) || {}
-                  ).url
-                }
-                orientation="top"
-                className="mb-0"
-                style={{ padding: "50%" }}
-              />
-              <CCardBody>
-                <p>{data.title}</p>
-              </CCardBody>
-            </CCard>
-          ))}
-        </CRow>
+        {blogData.length === 0 ? (
+          <div className="text-center py-5">
+            <p>No blogs found. Click "Create Blog" to add a new blog.</p>
+          </div>
+        ) : (
+          <CRow className="w-100">
+            {blogData.map((data, index) => (
+              <CCard
+                key={data.uid || index}
+                style={{ width: "300px", margin: "10px", cursor: "pointer" }}
+                onClick={() => handleClick(data.uid)}
+              >
+                <CCardImage
+                  src={
+                    data.photos && data.photos.length > 0
+                      ? data.photos[0].url
+                      : "https://via.placeholder.com/300x200?text=No+Image"
+                  }
+                  orientation="top"
+                  className="mb-0"
+                  style={{ height: "200px", objectFit: "cover" }}
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                  }}
+                />
+                <CCardBody>
+                  <h6>{data.title || "Untitled Blog"}</h6>
+                  {data.description && (
+                    <p className="text-muted small mb-0" style={{ 
+                      overflow: "hidden", 
+                      textOverflow: "ellipsis", 
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical"
+                    }}>
+                      {data.description}
+                    </p>
+                  )}
+                </CCardBody>
+              </CCard>
+            ))}
+          </CRow>
+        )}
 
         <CRow className="justify-content-center mt-3 mb-3">
           <CButtonGroup role="group" aria-label="Basic example">

@@ -7,23 +7,243 @@ import {
   CRow,
   CCol,
   CBadge,
+  CFormInput,
+  CFormTextarea,
+  CFormLabel,
 } from "@coreui/react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserVerification } from "../../../utils/Functions/Users/updateUserVerification";
 import { useImageModal, formatDate } from "./CommonDetailUtils";
+import { updateService } from "../../../utils/Functions/services/updateService";
 
-const ServiceProviderDetailPage = ({ data }) => {
+const ServiceProviderDetailPage = ({ data: initialData }) => {
   const navigate = useNavigate();
   const { openImageModal, ImageModal } = useImageModal();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        fullName: initialData.fullName || "",
+        businessName: initialData.businessName || "",
+        ownerName: initialData.ownerName || "",
+        mobile: initialData.mobile || initialData.phoneNumber || "",
+        email: initialData.email || "",
+        serviceType: initialData.serviceType || "",
+        businessType: initialData.businessType || "",
+        description: initialData.description || "",
+        dateOfBirth: initialData.dateOfBirth || "",
+        experienceYears: initialData.experienceYears || "",
+        yearsOfExperience: initialData.yearsOfExperience || "",
+        specialSkills: Array.isArray(initialData.specialSkills) 
+          ? initialData.specialSkills.join(", ") 
+          : initialData.specialSkills || "",
+        preferredDogSizes: Array.isArray(initialData.preferredDogSizes) 
+          ? initialData.preferredDogSizes.join(", ") 
+          : initialData.preferredDogSizes || "",
+        preferredLocationRadius: initialData.preferredLocationRadius || "",
+        govtIDType: initialData.govtIDType || "",
+        policeVerificationStatus: initialData.policeVerificationStatus || false,
+        backgroundCheckStatus: initialData.backgroundCheckStatus || false,
+        servicesOffered: Array.isArray(initialData.servicesOffered) 
+          ? initialData.servicesOffered.join(", ") 
+          : initialData.servicesOffered || "",
+        services: Array.isArray(initialData.services) 
+          ? initialData.services.join(", ") 
+          : initialData.services || "",
+        petTypesHandled: Array.isArray(initialData.petTypesHandled) 
+          ? initialData.petTypesHandled.join(", ") 
+          : initialData.petTypesHandled || "",
+        petSizesHandled: Array.isArray(initialData.petSizesHandled) 
+          ? initialData.petSizesHandled.join(", ") 
+          : initialData.petSizesHandled || "",
+        bookingCapacityPerDay: initialData.bookingCapacityPerDay || "",
+        serviceRadius: initialData.serviceRadius || "",
+        onSiteAvailable: initialData.onSiteAvailable || false,
+        vanDetails: initialData.vanDetails || {},
+        equipmentList: Array.isArray(initialData.equipmentList) 
+          ? initialData.equipmentList.join(", ") 
+          : initialData.equipmentList || "",
+        govtLicenseType: initialData.govtLicenseType || "",
+        insuranceStatus: initialData.insuranceStatus || false,
+        languagesSpoken: Array.isArray(initialData.languagesSpoken) 
+          ? initialData.languagesSpoken.join(", ") 
+          : initialData.languagesSpoken || "",
+        acceptedPayment: Array.isArray(initialData.acceptedPayment) 
+          ? initialData.acceptedPayment.join(", ") 
+          : initialData.acceptedPayment || "",
+        providesHomeService: initialData.providesHomeService || false,
+        bankName: initialData.bankName || "",
+        accountHolderName: initialData.accountHolderName || "",
+        accountNumber: initialData.accountNumber || "",
+        ifscCode: initialData.ifscCode || "",
+        upiId: initialData.upiId || "",
+        location: initialData.location || {},
+      });
+      setPhotos(initialData.photos || []);
+    }
+  }, [initialData]);
 
   const updateVerification = async (status) => {
     try {
-      await updateUserVerification("serviceProviders", data.uid, status);
+      await updateUserVerification("serviceProviders", initialData.uid, status);
       alert("User Verification Updated");
       window.location.reload();
     } catch (err) {
       alert(err);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleLocationChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: {
+        ...prev.location,
+        [field]: value,
+      },
+    }));
+  };
+
+  const handlePhotoAccept = (index) => {
+    setPhotos((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], verified: true };
+      return updated;
+    });
+  };
+
+  const handlePhotoReject = (index) => {
+    setPhotos((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], verified: false };
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const payload = {
+        ...formData,
+        specialSkills: formData.specialSkills
+          ? formData.specialSkills.split(",").map((item) => item.trim())
+          : [],
+        preferredDogSizes: formData.preferredDogSizes
+          ? formData.preferredDogSizes.split(",").map((item) => item.trim())
+          : [],
+        servicesOffered: formData.servicesOffered
+          ? formData.servicesOffered.split(",").map((item) => item.trim())
+          : [],
+        services: formData.services
+          ? formData.services.split(",").map((item) => item.trim())
+          : [],
+        petTypesHandled: formData.petTypesHandled
+          ? formData.petTypesHandled.split(",").map((item) => item.trim())
+          : [],
+        petSizesHandled: formData.petSizesHandled
+          ? formData.petSizesHandled.split(",").map((item) => item.trim())
+          : [],
+        equipmentList: formData.equipmentList
+          ? formData.equipmentList.split(",").map((item) => item.trim())
+          : [],
+        languagesSpoken: formData.languagesSpoken
+          ? formData.languagesSpoken.split(",").map((item) => item.trim())
+          : [],
+        acceptedPayment: formData.acceptedPayment
+          ? formData.acceptedPayment.split(",").map((item) => item.trim())
+          : [],
+        photos: photos.map((photo) => ({
+          ...photo,
+          verified: photo.verified !== undefined ? photo.verified : true,
+        })),
+      };
+
+      await updateService(initialData.uid, payload);
+      alert("Service provider details updated successfully!");
+      setIsEditMode(false);
+      window.location.reload();
+    } catch (error) {
+      alert("Error updating service provider details: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditMode(false);
+    // Reset all fields to their original values from initialData
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        fullName: initialData.fullName || "",
+        businessName: initialData.businessName || "",
+        ownerName: initialData.ownerName || "",
+        mobile: initialData.mobile || initialData.phoneNumber || "",
+        email: initialData.email || "",
+        serviceType: initialData.serviceType || "",
+        businessType: initialData.businessType || "",
+        description: initialData.description || "",
+        dateOfBirth: initialData.dateOfBirth || "",
+        experienceYears: initialData.experienceYears || "",
+        yearsOfExperience: initialData.yearsOfExperience || "",
+        specialSkills: Array.isArray(initialData.specialSkills) 
+          ? initialData.specialSkills.join(", ") 
+          : initialData.specialSkills || "",
+        preferredDogSizes: Array.isArray(initialData.preferredDogSizes) 
+          ? initialData.preferredDogSizes.join(", ") 
+          : initialData.preferredDogSizes || "",
+        preferredLocationRadius: initialData.preferredLocationRadius || "",
+        govtIDType: initialData.govtIDType || "",
+        policeVerificationStatus: initialData.policeVerificationStatus || false,
+        backgroundCheckStatus: initialData.backgroundCheckStatus || false,
+        servicesOffered: Array.isArray(initialData.servicesOffered) 
+          ? initialData.servicesOffered.join(", ") 
+          : initialData.servicesOffered || "",
+        services: Array.isArray(initialData.services) 
+          ? initialData.services.join(", ") 
+          : initialData.services || "",
+        petTypesHandled: Array.isArray(initialData.petTypesHandled) 
+          ? initialData.petTypesHandled.join(", ") 
+          : initialData.petTypesHandled || "",
+        petSizesHandled: Array.isArray(initialData.petSizesHandled) 
+          ? initialData.petSizesHandled.join(", ") 
+          : initialData.petSizesHandled || "",
+        bookingCapacityPerDay: initialData.bookingCapacityPerDay || "",
+        serviceRadius: initialData.serviceRadius || "",
+        onSiteAvailable: initialData.onSiteAvailable || false,
+        vanDetails: initialData.vanDetails || {},
+        equipmentList: Array.isArray(initialData.equipmentList) 
+          ? initialData.equipmentList.join(", ") 
+          : initialData.equipmentList || "",
+        govtLicenseType: initialData.govtLicenseType || "",
+        insuranceStatus: initialData.insuranceStatus || false,
+        languagesSpoken: Array.isArray(initialData.languagesSpoken) 
+          ? initialData.languagesSpoken.join(", ") 
+          : initialData.languagesSpoken || "",
+        acceptedPayment: Array.isArray(initialData.acceptedPayment) 
+          ? initialData.acceptedPayment.join(", ") 
+          : initialData.acceptedPayment || "",
+        providesHomeService: initialData.providesHomeService || false,
+        bankName: initialData.bankName || "",
+        accountHolderName: initialData.accountHolderName || "",
+        accountNumber: initialData.accountNumber || "",
+        ifscCode: initialData.ifscCode || "",
+        upiId: initialData.upiId || "",
+        location: initialData.location || {},
+      });
+      setPhotos(initialData.photos || []);
     }
   };
 
@@ -42,27 +262,43 @@ const ServiceProviderDetailPage = ({ data }) => {
               <CCardHeader>
                 <div className="d-flex justify-content-between align-items-center">
                   <h4 className="mb-0">
-                    {data.name || data.fullName || data.businessName || "Service Provider Details"}
+                    {initialData.name || initialData.fullName || initialData.businessName || "Service Provider Details"}
                   </h4>
                   <div className="d-flex gap-2">
-                    <CButton
-                      color={data.verified ? "success" : "warning"}
-                      onClick={() => updateVerification(!data.verified)}
-                    >
-                      {data.verified ? "✓ Verified" : "✗ Not Verified"}
-                    </CButton>
+                    {!isEditMode ? (
+                      <>
+                        <CButton color="primary" onClick={() => setIsEditMode(true)}>
+                          Edit Details
+                        </CButton>
+                        <CButton
+                          color={initialData.verified ? "success" : "warning"}
+                          onClick={() => updateVerification(!initialData.verified)}
+                        >
+                          {initialData.verified ? "✓ Verified" : "✗ Not Verified"}
+                        </CButton>
+                      </>
+                    ) : (
+                      <>
+                        <CButton color="success" onClick={handleSave} disabled={loading}>
+                          {loading ? "Saving..." : "Save Changes"}
+                        </CButton>
+                        <CButton color="secondary" onClick={handleCancel}>
+                          Cancel
+                        </CButton>
+                      </>
+                    )}
                   </div>
                 </div>
               </CCardHeader>
               <CCardBody>
                 <CRow>
                   {/* Profile Photo */}
-                  {data.profilePhoto && (
+                  {initialData.profilePhoto && (
                     <CCol xs={12} md={3} className="mb-4">
                       <div className="text-center">
                         <h6>Profile Photo</h6>
                         <img
-                          src={data.profilePhoto}
+                          src={initialData.profilePhoto}
                           alt="Profile"
                           style={{
                             width: "100%",
@@ -72,7 +308,7 @@ const ServiceProviderDetailPage = ({ data }) => {
                             border: "2px solid #dee2e6",
                             cursor: "pointer",
                           }}
-                          onClick={() => openImageModal(data.profilePhoto)}
+                          onClick={() => openImageModal(initialData.profilePhoto)}
                           onError={(e) => {
                             e.target.style.display = "none";
                           }}
@@ -82,51 +318,132 @@ const ServiceProviderDetailPage = ({ data }) => {
                   )}
 
                   {/* Basic Information */}
-                  <CCol xs={12} md={data.profilePhoto ? 9 : 12}>
+                  <CCol xs={12} md={initialData.profilePhoto ? 9 : 12}>
                     <h5 className="mb-3">Basic Information</h5>
-                    <CRow className="mb-2">
-                      <CCol xs={12} sm={6}>
-                        <strong>Name:</strong> {data.name || data.fullName || data.businessName || "N/A"}
-                      </CCol>
-                      {data.businessName && (
-                        <CCol xs={12} sm={6}>
-                          <strong>Owner Name:</strong> {data.ownerName || "N/A"}
-                        </CCol>
-                      )}
-                    </CRow>
-                    <CRow className="mb-2">
-                      <CCol xs={12} sm={6}>
-                        <strong>Mobile:</strong> {data.mobile || data.phoneNumber || "N/A"}
-                      </CCol>
-                      <CCol xs={12} sm={6}>
-                        <strong>Email:</strong> {data.email || "N/A"}
-                      </CCol>
-                    </CRow>
-                    <CRow className="mb-2">
-                      <CCol xs={12} sm={6}>
-                        <strong>Service Type:</strong> {data.serviceType || "N/A"}
-                      </CCol>
-                      {data.businessType && (
-                        <CCol xs={12} sm={6}>
-                          <strong>Business Type:</strong> {data.businessType}
-                        </CCol>
-                      )}
-                    </CRow>
-                    <CRow className="mb-2">
-                      <CCol xs={12} sm={6}>
-                        <strong>UID:</strong> {data.uid || "N/A"}
-                      </CCol>
-                      <CCol xs={12} sm={6}>
-                        <strong>Username:</strong> {data.userName || "N/A"}
-                      </CCol>
-                    </CRow>
-                    {data.description && (
-                      <CRow className="mb-2">
-                        <CCol xs={12}>
-                          <strong>Description:</strong>
-                          <p className="mt-1">{data.description}</p>
-                        </CCol>
-                      </CRow>
+                    {!isEditMode ? (
+                      <>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6}>
+                            <strong>Name:</strong> {initialData.name || initialData.fullName || initialData.businessName || "N/A"}
+                          </CCol>
+                          {initialData.businessName && (
+                            <CCol xs={12} sm={6}>
+                              <strong>Owner Name:</strong> {initialData.ownerName || "N/A"}
+                            </CCol>
+                          )}
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6}>
+                            <strong>Mobile:</strong> {initialData.mobile || initialData.phoneNumber || "N/A"}
+                          </CCol>
+                          <CCol xs={12} sm={6}>
+                            <strong>Email:</strong> {initialData.email || "N/A"}
+                          </CCol>
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6}>
+                            <strong>Service Type:</strong> {initialData.serviceType || "N/A"}
+                          </CCol>
+                          {initialData.businessType && (
+                            <CCol xs={12} sm={6}>
+                              <strong>Business Type:</strong> {initialData.businessType}
+                            </CCol>
+                          )}
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6}>
+                            <strong>UID:</strong> {initialData.uid || "N/A"}
+                          </CCol>
+                          <CCol xs={12} sm={6}>
+                            <strong>Username:</strong> {initialData.userName || "N/A"}
+                          </CCol>
+                        </CRow>
+                        {initialData.description && (
+                          <CRow className="mb-2">
+                            <CCol xs={12}>
+                              <strong>Description:</strong>
+                              <p className="mt-1">{initialData.description}</p>
+                            </CCol>
+                          </CRow>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Name / Full Name</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.name || formData.fullName || ""}
+                              onChange={(e) => handleInputChange("name", e.target.value)}
+                            />
+                          </CCol>
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Business Name</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.businessName || ""}
+                              onChange={(e) => handleInputChange("businessName", e.target.value)}
+                            />
+                          </CCol>
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Owner Name</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.ownerName || ""}
+                              onChange={(e) => handleInputChange("ownerName", e.target.value)}
+                            />
+                          </CCol>
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Mobile</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.mobile || ""}
+                              onChange={(e) => handleInputChange("mobile", e.target.value)}
+                            />
+                          </CCol>
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Email</CFormLabel>
+                            <CFormInput
+                              type="email"
+                              value={formData.email || ""}
+                              onChange={(e) => handleInputChange("email", e.target.value)}
+                            />
+                          </CCol>
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Service Type</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.serviceType || ""}
+                              onChange={(e) => handleInputChange("serviceType", e.target.value)}
+                            />
+                          </CCol>
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} sm={6} className="mb-3">
+                            <CFormLabel>Business Type</CFormLabel>
+                            <CFormInput
+                              type="text"
+                              value={formData.businessType || ""}
+                              onChange={(e) => handleInputChange("businessType", e.target.value)}
+                            />
+                          </CCol>
+                        </CRow>
+                        <CRow className="mb-2">
+                          <CCol xs={12} className="mb-3">
+                            <CFormLabel>Description</CFormLabel>
+                            <CFormTextarea
+                              value={formData.description || ""}
+                              onChange={(e) => handleInputChange("description", e.target.value)}
+                              rows={3}
+                            />
+                          </CCol>
+                        </CRow>
+                      </>
                     )}
                   </CCol>
                 </CRow>
@@ -141,11 +458,11 @@ const ServiceProviderDetailPage = ({ data }) => {
             <CCard>
               <CCardHeader>Service Provider Information</CCardHeader>
               <CCardBody>
-                {data.serviceCategories && data.serviceCategories.length > 0 && (
+                {initialData.serviceCategories && initialData.serviceCategories.length > 0 && (
                   <div className="mb-3">
                     <strong>Service Categories:</strong>
                     <div className="mt-2">
-                      {data.serviceCategories.map((category, idx) => (
+                      {initialData.serviceCategories.map((category, idx) => (
                         <CBadge key={idx} color="info" className="me-1 mb-1">
                           {category}
                         </CBadge>
@@ -153,11 +470,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </div>
                   </div>
                 )}
-                {data.specializations && data.specializations.length > 0 && (
+                {initialData.specializations && initialData.specializations.length > 0 && (
                   <div className="mb-3">
                     <strong>Specializations:</strong>
                     <div className="mt-2">
-                      {data.specializations.map((spec, idx) => (
+                      {initialData.specializations.map((spec, idx) => (
                         <CBadge key={idx} color="success" className="me-1 mb-1">
                           {spec}
                         </CBadge>
@@ -167,23 +484,23 @@ const ServiceProviderDetailPage = ({ data }) => {
                 )}
                 
                 {/* Fields specific to Dog Walker/Trainer */}
-                {data.serviceType === "Dog Walker" || data.serviceType === "Dog Trainer" ? (
+                {initialData.serviceType === "Dog Walker" || initialData.serviceType === "Dog Trainer" ? (
                   <>
-                    {data.dateOfBirth && (
+                    {initialData.dateOfBirth && (
                       <div className="mb-2">
-                        <strong>Date of Birth:</strong> {data.dateOfBirth}
+                        <strong>Date of Birth:</strong> {initialData.dateOfBirth}
                       </div>
                     )}
-                    {data.experienceYears && (
+                    {initialData.experienceYears && (
                       <div className="mb-2">
-                        <strong>Years of Experience:</strong> {data.experienceYears}
+                        <strong>Years of Experience:</strong> {initialData.experienceYears}
                       </div>
                     )}
-                    {data.specialSkills && data.specialSkills.length > 0 && (
+                    {initialData.specialSkills && initialData.specialSkills.length > 0 && (
                       <div className="mb-3">
                         <strong>Special Skills:</strong>
                         <div className="mt-2">
-                          {data.specialSkills.map((skill, idx) => (
+                          {initialData.specialSkills.map((skill, idx) => (
                             <CBadge key={idx} color="warning" className="me-1 mb-1">
                               {skill}
                             </CBadge>
@@ -191,11 +508,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.preferredDogSizes && data.preferredDogSizes.length > 0 && (
+                    {initialData.preferredDogSizes && initialData.preferredDogSizes.length > 0 && (
                       <div className="mb-2">
                         <strong>Preferred Dog Sizes:</strong>
                         <div className="mt-1">
-                          {data.preferredDogSizes.map((size, idx) => (
+                          {initialData.preferredDogSizes.map((size, idx) => (
                             <CBadge key={idx} color="secondary" className="me-1">
                               {size}
                             </CBadge>
@@ -203,21 +520,21 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.preferredLocationRadius && (
+                    {initialData.preferredLocationRadius && (
                       <div className="mb-2">
-                        <strong>Preferred Location Radius:</strong> {data.preferredLocationRadius} km
+                        <strong>Preferred Location Radius:</strong> {initialData.preferredLocationRadius} km
                       </div>
                     )}
-                    {data.govtIDType && (
+                    {initialData.govtIDType && (
                       <div className="mb-2">
-                        <strong>Government ID Type:</strong> {data.govtIDType}
+                        <strong>Government ID Type:</strong> {initialData.govtIDType}
                       </div>
                     )}
-                    {data.govtIDImage && (
+                    {initialData.govtIDImage && (
                       <div className="mb-2">
                         <strong>Government ID:</strong>
                         <img
-                          src={data.govtIDImage}
+                          src={initialData.govtIDImage}
                           alt="Government ID"
                           style={{
                             width: "200px",
@@ -226,35 +543,35 @@ const ServiceProviderDetailPage = ({ data }) => {
                             marginTop: "8px",
                             cursor: "pointer",
                           }}
-                          onClick={() => openImageModal(data.govtIDImage)}
+                          onClick={() => openImageModal(initialData.govtIDImage)}
                         />
                       </div>
                     )}
                     <div className="mb-2">
-                      <strong>Police Verification:</strong> {data.policeVerificationStatus ? "✓ Verified" : "✗ Not Verified"}
+                      <strong>Police Verification:</strong> {initialData.policeVerificationStatus ? "✓ Verified" : "✗ Not Verified"}
                     </div>
                     <div className="mb-2">
-                      <strong>Background Check:</strong> {data.backgroundCheckStatus ? "✓ Passed" : "✗ Not Passed"}
+                      <strong>Background Check:</strong> {initialData.backgroundCheckStatus ? "✓ Passed" : "✗ Not Passed"}
                     </div>
                   </>
                 ) : (
                   <>
                     {/* Fields for Grooming Van/Business services */}
-                    {data.businessType && (
+                    {initialData.businessType && (
                       <div className="mb-2">
-                        <strong>Business Type:</strong> {data.businessType}
+                        <strong>Business Type:</strong> {initialData.businessType}
                       </div>
                     )}
-                    {data.yearsOfExperience || data.experienceYears ? (
+                    {initialData.yearsOfExperience || initialData.experienceYears ? (
                       <div className="mb-2">
-                        <strong>Years of Experience:</strong> {data.yearsOfExperience || data.experienceYears}
+                        <strong>Years of Experience:</strong> {initialData.yearsOfExperience || initialData.experienceYears}
                       </div>
                     ) : null}
-                    {data.servicesOffered && data.servicesOffered.length > 0 && (
+                    {initialData.servicesOffered && initialData.servicesOffered.length > 0 && (
                       <div className="mb-3">
                         <strong>Services Offered:</strong>
                         <div className="mt-2">
-                          {data.servicesOffered.map((service, idx) => (
+                          {initialData.servicesOffered.map((service, idx) => (
                             <CBadge key={idx} color="primary" className="me-1 mb-1">
                               {service}
                             </CBadge>
@@ -262,11 +579,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.services && data.services.length > 0 && (
+                    {initialData.services && initialData.services.length > 0 && (
                       <div className="mb-3">
                         <strong>Services:</strong>
                         <div className="mt-2">
-                          {data.services.map((service, idx) => (
+                          {initialData.services.map((service, idx) => (
                             <CBadge key={idx} color="primary" className="me-1 mb-1">
                               {service}
                             </CBadge>
@@ -274,11 +591,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.petTypesHandled && data.petTypesHandled.length > 0 && (
+                    {initialData.petTypesHandled && initialData.petTypesHandled.length > 0 && (
                       <div className="mb-2">
                         <strong>Pet Types Handled:</strong>
                         <div className="mt-1">
-                          {data.petTypesHandled.map((type, idx) => (
+                          {initialData.petTypesHandled.map((type, idx) => (
                             <CBadge key={idx} color="success" className="me-1">
                               {type}
                             </CBadge>
@@ -286,11 +603,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.petSizesHandled && data.petSizesHandled.length > 0 && (
+                    {initialData.petSizesHandled && initialData.petSizesHandled.length > 0 && (
                       <div className="mb-2">
                         <strong>Pet Sizes Handled:</strong>
                         <div className="mt-1">
-                          {data.petSizesHandled.map((size, idx) => (
+                          {initialData.petSizesHandled.map((size, idx) => (
                             <CBadge key={idx} color="info" className="me-1">
                               {size}
                             </CBadge>
@@ -298,42 +615,42 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.bookingCapacityPerDay && (
+                    {initialData.bookingCapacityPerDay && (
                       <div className="mb-2">
-                        <strong>Booking Capacity Per Day:</strong> {data.bookingCapacityPerDay}
+                        <strong>Booking Capacity Per Day:</strong> {initialData.bookingCapacityPerDay}
                       </div>
                     )}
-                    {data.serviceRadius && (
+                    {initialData.serviceRadius && (
                       <div className="mb-2">
-                        <strong>Service Radius:</strong> {data.serviceRadius} km
+                        <strong>Service Radius:</strong> {initialData.serviceRadius} km
                       </div>
                     )}
-                    {data.onSiteAvailable !== undefined && (
+                    {initialData.onSiteAvailable !== undefined && (
                       <div className="mb-2">
-                        <strong>On-Site Available:</strong> {data.onSiteAvailable ? "Yes" : "No"}
+                        <strong>On-Site Available:</strong> {initialData.onSiteAvailable ? "Yes" : "No"}
                       </div>
                     )}
-                    {data.vanDetails && (
+                    {initialData.vanDetails && (
                       <div className="mb-3">
                         <strong>Van Details:</strong>
                         <div className="mt-2">
-                          {data.vanDetails.vanType && (
-                            <div><strong>Type:</strong> {data.vanDetails.vanType}</div>
+                          {initialData.vanDetails.vanType && (
+                            <div><strong>Type:</strong> {initialData.vanDetails.vanType}</div>
                           )}
-                          {data.vanDetails.size && (
-                            <div><strong>Size:</strong> {data.vanDetails.size}</div>
+                          {initialData.vanDetails.size && (
+                            <div><strong>Size:</strong> {initialData.vanDetails.size}</div>
                           )}
-                          {data.vanDetails.amenities && (
-                            <div><strong>Amenities:</strong> {data.vanDetails.amenities}</div>
+                          {initialData.vanDetails.amenities && (
+                            <div><strong>Amenities:</strong> {initialData.vanDetails.amenities}</div>
                           )}
                         </div>
                       </div>
                     )}
-                    {data.equipmentList && data.equipmentList.length > 0 && (
+                    {initialData.equipmentList && initialData.equipmentList.length > 0 && (
                       <div className="mb-2">
                         <strong>Equipment List:</strong>
                         <div className="mt-1">
-                          {data.equipmentList.map((equipment, idx) => (
+                          {initialData.equipmentList.map((equipment, idx) => (
                             <CBadge key={idx} color="dark" className="me-1">
                               {equipment}
                             </CBadge>
@@ -341,30 +658,30 @@ const ServiceProviderDetailPage = ({ data }) => {
                         </div>
                       </div>
                     )}
-                    {data.govtLicenseType && (
+                    {initialData.govtLicenseType && (
                       <div className="mb-2">
-                        <strong>Government License Type:</strong> {data.govtLicenseType}
+                        <strong>Government License Type:</strong> {initialData.govtLicenseType}
                       </div>
                     )}
-                    {data.insuranceStatus !== undefined && (
+                    {initialData.insuranceStatus !== undefined && (
                       <div className="mb-2">
-                        <strong>Insurance Status:</strong> {data.insuranceStatus ? "✓ Insured" : "✗ Not Insured"}
+                        <strong>Insurance Status:</strong> {initialData.insuranceStatus ? "✓ Insured" : "✗ Not Insured"}
                       </div>
                     )}
-                    {data.backgroundCheckStatus !== undefined && (
+                    {initialData.backgroundCheckStatus !== undefined && (
                       <div className="mb-2">
-                        <strong>Background Check:</strong> {data.backgroundCheckStatus ? "✓ Passed" : "✗ Not Passed"}
+                        <strong>Background Check:</strong> {initialData.backgroundCheckStatus ? "✓ Passed" : "✗ Not Passed"}
                       </div>
                     )}
                   </>
                 )}
                 
                 {/* Common fields */}
-                {data.languagesSpoken && data.languagesSpoken.length > 0 && (
+                {initialData.languagesSpoken && initialData.languagesSpoken.length > 0 && (
                   <div className="mb-2">
                     <strong>Languages Spoken:</strong>
                     <div className="mt-1">
-                      {data.languagesSpoken.map((lang, idx) => (
+                      {initialData.languagesSpoken.map((lang, idx) => (
                         <CBadge key={idx} color="info" className="me-1">
                           {lang}
                         </CBadge>
@@ -372,11 +689,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </div>
                   </div>
                 )}
-                {data.certifications && data.certifications.length > 0 && (
+                {initialData.certifications && initialData.certifications.length > 0 && (
                   <div className="mb-2">
                     <strong>Certifications:</strong>
                     <ul className="mt-2">
-                      {data.certifications.map((cert, idx) => (
+                      {initialData.certifications.map((cert, idx) => (
                         <li key={idx}>
                           <a href={cert} target="_blank" rel="noopener noreferrer">
                             Certification {idx + 1}
@@ -386,11 +703,11 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </ul>
                   </div>
                 )}
-                {data.acceptedPayment && data.acceptedPayment.length > 0 && (
+                {initialData.acceptedPayment && initialData.acceptedPayment.length > 0 && (
                   <div className="mb-2">
                     <strong>Accepted Payment Methods:</strong>
                     <div className="mt-1">
-                      {data.acceptedPayment.map((payment, idx) => (
+                      {initialData.acceptedPayment.map((payment, idx) => (
                         <CBadge key={idx} color="primary" className="me-1">
                           {payment}
                         </CBadge>
@@ -398,9 +715,9 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </div>
                   </div>
                 )}
-                {data.providesHomeService !== undefined && (
+                {initialData.providesHomeService !== undefined && (
                   <div className="mb-2">
-                    <strong>Provides Home Service:</strong> {data.providesHomeService ? "Yes" : "No"}
+                    <strong>Provides Home Service:</strong> {initialData.providesHomeService ? "Yes" : "No"}
                   </div>
                 )}
               </CCardBody>
@@ -412,30 +729,30 @@ const ServiceProviderDetailPage = ({ data }) => {
             <CCard>
               <CCardHeader>Location Information</CCardHeader>
               <CCardBody>
-                {data.location ? (
+                {initialData.location ? (
                   <>
                     <div className="mb-2">
-                      <strong>Address:</strong> {data.location.address || "N/A"}
+                      <strong>Address:</strong> {initialData.location.address || "N/A"}
                     </div>
                     <div className="mb-2">
-                      <strong>City:</strong> {data.location.city || "N/A"}
+                      <strong>City:</strong> {initialData.location.city || "N/A"}
                     </div>
                     <div className="mb-2">
-                      <strong>State:</strong> {data.location.state || "N/A"}
+                      <strong>State:</strong> {initialData.location.state || "N/A"}
                     </div>
                     <div className="mb-2">
-                      <strong>Zip Code:</strong> {data.location.zip || "N/A"}
+                      <strong>Zip Code:</strong> {initialData.location.zip || "N/A"}
                     </div>
                     <div className="mb-2">
-                      <strong>Country:</strong> {data.location.country || "N/A"}
+                      <strong>Country:</strong> {initialData.location.country || "N/A"}
                     </div>
-                    {(data.location.latitude || data.location.lat) && (
+                    {(initialData.location.latitude || initialData.location.lat) && (
                       <>
                         <div className="mb-2">
-                          <strong>Latitude:</strong> {data.location.latitude || data.location.lat}
+                          <strong>Latitude:</strong> {initialData.location.latitude || initialData.location.lat}
                         </div>
                         <div className="mb-2">
-                          <strong>Longitude:</strong> {data.location.longitude || data.location.long}
+                          <strong>Longitude:</strong> {initialData.location.longitude || initialData.location.long}
                         </div>
                       </>
                     )}
@@ -443,9 +760,9 @@ const ServiceProviderDetailPage = ({ data }) => {
                 ) : (
                   <p>Location information not available</p>
                 )}
-                {data.timezone && (
+                {initialData.timezone && (
                   <div className="mb-2">
-                    <strong>Timezone:</strong> {data.timezone}
+                    <strong>Timezone:</strong> {initialData.timezone}
                   </div>
                 )}
               </CCardBody>
@@ -459,11 +776,11 @@ const ServiceProviderDetailPage = ({ data }) => {
             <CCard>
               <CCardHeader>Services & Operations</CCardHeader>
               <CCardBody>
-                {data.services && data.services.length > 0 && (
+                {initialData.services && initialData.services.length > 0 && (
                   <div className="mb-3">
                     <strong>Services Offered:</strong>
                     <div className="mt-2">
-                      {data.services.map((service, idx) => (
+                      {initialData.services.map((service, idx) => (
                         <CBadge key={idx} color="success" className="me-1 mb-1">
                           {service}
                         </CBadge>
@@ -471,12 +788,12 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </div>
                   </div>
                 )}
-                {(data.daysOfOperation || data.availableDays) && 
-                 (data.daysOfOperation?.length > 0 || data.availableDays?.length > 0) && (
+                {(initialData.daysOfOperation || initialData.availableDays) && 
+                 (initialData.daysOfOperation?.length > 0 || initialData.availableDays?.length > 0) && (
                   <div className="mb-3">
                     <strong>Days of Operation:</strong>
                     <div className="mt-2">
-                      {(data.daysOfOperation || data.availableDays).map((day, idx) => (
+                      {(initialData.daysOfOperation || initialData.availableDays).map((day, idx) => (
                         <CBadge key={idx} color="primary" className="me-1 mb-1">
                           {day}
                         </CBadge>
@@ -484,12 +801,12 @@ const ServiceProviderDetailPage = ({ data }) => {
                     </div>
                   </div>
                 )}
-                {(data.availableHours || data.availableTimeSlots) && 
-                 (data.availableHours?.length > 0 || data.availableTimeSlots?.length > 0) ? (
+                {(initialData.availableHours || initialData.availableTimeSlots) && 
+                 (initialData.availableHours?.length > 0 || initialData.availableTimeSlots?.length > 0) ? (
                   <div className="mb-2">
                     <strong>Available Hours/Time Slots:</strong>
                     <ul className="mt-2">
-                      {(data.availableHours || data.availableTimeSlots).map((hours, idx) => (
+                      {(initialData.availableHours || initialData.availableTimeSlots).map((hours, idx) => (
                         <li key={idx}>
                           {typeof hours === "string" 
                             ? hours 
@@ -514,27 +831,27 @@ const ServiceProviderDetailPage = ({ data }) => {
             <CCard>
               <CCardHeader>Summary & Statistics</CCardHeader>
               <CCardBody>
-                {data.summary ? (
+                {initialData.summary ? (
                   <>
                     <div className="mb-2">
-                      <strong>Total Reviews:</strong> {data.summary.totalReviews || 0}
+                      <strong>Total Reviews:</strong> {initialData.summary.totalReviews || 0}
                     </div>
                     <div className="mb-2">
-                      <strong>Total Ratings:</strong> {data.summary.totalRatings || 0}
+                      <strong>Total Ratings:</strong> {initialData.summary.totalRatings || 0}
                     </div>
                     <div className="mb-2">
-                      <strong>Average Rating:</strong> {data.summary.rating || 0}
+                      <strong>Average Rating:</strong> {initialData.summary.rating || 0}
                     </div>
                     <div className="mb-2">
-                      <strong>Total Favourites:</strong> {data.summary.totalFavourites || 0}
+                      <strong>Total Favourites:</strong> {initialData.summary.totalFavourites || 0}
                     </div>
                   </>
                 ) : (
                   <p>Summary information not available</p>
                 )}
-                {data.profileCompletionMask && (
+                {initialData.profileCompletionMask && (
                   <div className="mb-2 mt-3">
-                    <strong>Profile Completion Mask:</strong> {data.profileCompletionMask}
+                    <strong>Profile Completion Mask:</strong> {initialData.profileCompletionMask}
                   </div>
                 )}
               </CCardBody>
@@ -543,7 +860,7 @@ const ServiceProviderDetailPage = ({ data }) => {
         </CRow>
 
         {/* Bank Details */}
-        {(data.bankName || data.accountNumber || data.upiId) && (
+        {(initialData.bankName || initialData.accountNumber || initialData.upiId) && (
           <CRow className="mb-3">
             <CCol xs={12}>
               <CCard>
@@ -551,19 +868,19 @@ const ServiceProviderDetailPage = ({ data }) => {
                 <CCardBody>
                   <CRow>
                     <CCol xs={12} sm={6} md={4}>
-                      <strong>Bank Name:</strong> {data.bankName || "N/A"}
+                      <strong>Bank Name:</strong> {initialData.bankName || "N/A"}
                     </CCol>
                     <CCol xs={12} sm={6} md={4}>
-                      <strong>Account Holder Name:</strong> {data.accountHolderName || "N/A"}
+                      <strong>Account Holder Name:</strong> {initialData.accountHolderName || "N/A"}
                     </CCol>
                     <CCol xs={12} sm={6} md={4}>
-                      <strong>Account Number:</strong> {data.accountNumber || "N/A"}
+                      <strong>Account Number:</strong> {initialData.accountNumber || "N/A"}
                     </CCol>
                     <CCol xs={12} sm={6} md={4}>
-                      <strong>IFSC Code:</strong> {data.ifscCode || "N/A"}
+                      <strong>IFSC Code:</strong> {initialData.ifscCode || "N/A"}
                     </CCol>
                     <CCol xs={12} sm={6} md={4}>
-                      <strong>UPI ID:</strong> {data.upiId || "N/A"}
+                      <strong>UPI ID:</strong> {initialData.upiId || "N/A"}
                     </CCol>
                   </CRow>
                 </CCardBody>
@@ -573,35 +890,62 @@ const ServiceProviderDetailPage = ({ data }) => {
         )}
 
         {/* Photos Gallery */}
-        {data.photos && data.photos.length > 0 && (
+        {photos && photos.length > 0 && (
           <CRow className="mb-3">
             <CCol xs={12}>
               <CCard>
                 <CCardHeader>Photos Gallery</CCardHeader>
                 <CCardBody>
                   <CRow>
-                    {data.photos.map((photo, idx) => (
+                    {photos.map((photo, idx) => (
                       <CCol xs={12} sm={6} md={4} lg={3} key={idx} className="mb-3">
                         <div className="text-center">
-                          {photo.isIdProof && (
-                            <CBadge color="warning" className="mb-2">
-                              ID Proof
-                            </CBadge>
-                          )}
-                          {photo.isProfile && (
-                            <CBadge color="info" className="mb-2">
-                              Profile Photo
-                            </CBadge>
-                          )}
+                          <div className="mb-2">
+                            {photo.isIdProof && (
+                              <CBadge color="warning" className="me-1">
+                                ID Proof
+                              </CBadge>
+                            )}
+                            {photo.isProfile && (
+                              <CBadge color="info" className="me-1">
+                                Profile Photo
+                              </CBadge>
+                            )}
+                            {isEditMode && (
+                              <>
+                                {photo.verified === true && (
+                                  <CBadge color="success" className="me-1">
+                                    ✓ Accepted
+                                  </CBadge>
+                                )}
+                                {photo.verified === false && (
+                                  <CBadge color="danger" className="me-1">
+                                    ✗ Rejected
+                                  </CBadge>
+                                )}
+                                {photo.verified === undefined && (
+                                  <CBadge color="secondary" className="me-1">
+                                    Pending
+                                  </CBadge>
+                                )}
+                              </>
+                            )}
+                          </div>
                           <img
                             src={photo.url}
-                            alt={`Photo ${idx + 1}`}
+                            alt={`Gallery item ${idx + 1}`}
                             style={{
                               width: "100%",
                               height: "200px",
                               objectFit: "cover",
                               borderRadius: "8px",
-                              border: "2px solid #dee2e6",
+                              border: isEditMode 
+                                ? photo.verified === true 
+                                  ? "2px solid #28a745" 
+                                  : photo.verified === false 
+                                  ? "2px solid #dc3545" 
+                                  : "2px solid #dee2e6"
+                                : "2px solid #dee2e6",
                               cursor: "pointer",
                             }}
                             onClick={() => openImageModal(photo.url)}
@@ -609,6 +953,24 @@ const ServiceProviderDetailPage = ({ data }) => {
                               e.target.style.display = "none";
                             }}
                           />
+                          {isEditMode && (
+                            <div className="mt-2 d-flex gap-2 justify-content-center">
+                              <CButton
+                                size="sm"
+                                color="success"
+                                onClick={() => handlePhotoAccept(idx)}
+                              >
+                                Accept
+                              </CButton>
+                              <CButton
+                                size="sm"
+                                color="danger"
+                                onClick={() => handlePhotoReject(idx)}
+                              >
+                                Reject
+                              </CButton>
+                            </div>
+                          )}
                         </div>
                       </CCol>
                     ))}
@@ -627,13 +989,13 @@ const ServiceProviderDetailPage = ({ data }) => {
               <CCardBody>
                 <CRow>
                   <CCol xs={12} sm={6} md={4}>
-                    <strong>Created At:</strong> {formatDate(data.crdt)}
+                    <strong>Created At:</strong> {formatDate(initialData.crdt)}
                   </CCol>
                   <CCol xs={12} sm={6} md={4}>
-                    <strong>Updated At:</strong> {formatDate(data.upddt)}
+                    <strong>Updated At:</strong> {formatDate(initialData.upddt)}
                   </CCol>
                   <CCol xs={12} sm={6} md={4}>
-                    <strong>Time:</strong> {formatDate(data.time)}
+                    <strong>Time:</strong> {formatDate(initialData.time)}
                   </CCol>
                 </CRow>
               </CCardBody>

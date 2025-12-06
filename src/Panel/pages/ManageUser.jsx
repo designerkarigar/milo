@@ -9,7 +9,6 @@ import {
   CCardBody,
   CCardHeader,
   CButton,
-  CButtonGroup,
   CModal,
   CModalHeader,
   CModalBody,
@@ -40,7 +39,7 @@ const ManageUser = () => {
       setUserData(user);
       setLoading(false);
     })();
-  }, []);
+  }, [username]);
 
   const updateVerification = async (status) => {
     try {
@@ -491,7 +490,7 @@ const ManageUser = () => {
                             )}
                             <img
                               src={photo.url}
-                              alt={`Photo ${idx + 1}`}
+                              alt={`Gallery item ${idx + 1}`}
                               style={{
                                 width: "100%",
                                 height: "200px",

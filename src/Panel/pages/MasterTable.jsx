@@ -96,7 +96,7 @@ const MasterTable = (props) => {
       default:
         break;
     }
-  }, []);
+  }, [navigate, props.type]);
   const gridStyle = { minHeight: 450, minWidth: 700 };
 
   if (loading) {
