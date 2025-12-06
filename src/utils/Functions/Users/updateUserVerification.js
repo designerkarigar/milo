@@ -22,6 +22,14 @@ export const updateUserVerification = async (type, userName, status) => {
       case "user":
         url = `${BaseUrl}/admin/verify/user?userName=${userName}&verified=${status}`;
         break;
+      
+      case "serviceProviders":
+      url = `${BaseUrl}/admin/verify/services?uid=${userName}&verified=${status}`;
+      break;
+
+      case "ngo":
+      url = `${BaseUrl}/admin/verify/ngo?uid=${userName}&verified=${status}`;
+      break;
 
       default:
         break;
