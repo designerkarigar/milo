@@ -86,6 +86,67 @@ export const crecheFilter = [
   },
 ];
 
+export const ngoFilter = [
+  {
+    name: "name",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "mobile",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "verified",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "location",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "daysOfOperation",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "availableHours",
+    type: "string",
+    operator: "contains",
+  },
+];
+
+export const serviceProviderFilter = [
+  {
+    name: "name",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "serviceType",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "mobile",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "verified",
+    type: "string",
+    operator: "contains",
+  },
+  {
+    name: "location",
+    type: "string",
+    operator: "contains",
+  },
+];
+
 export const bookingFilter = [
   {
     name: "name",

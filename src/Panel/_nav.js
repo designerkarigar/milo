@@ -62,7 +62,7 @@ export const getNavConfig = (role) => {
     },
     {
       component: CNavItem,
-      name: "Service Provides",
+      name: "Service Providers",
       to: "/dashboard/all-serviceProviders",
       icon: <CIcon icon={cilBusAlt} customClassName="nav-icon" />,
     },

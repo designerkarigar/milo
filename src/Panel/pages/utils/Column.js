@@ -131,3 +131,64 @@ export const vetColumn = [
     defaultFlex: 4,
   },
 ];
+
+export const ngoColumn = [
+  {
+    header: "Name",
+    name: "name",
+    defaultFlex: 1,
+  },
+  {
+    header: "Mobile",
+    name: "mobile",
+    defaultFlex: 1,
+  },
+  {
+    header: "Location",
+    name: "location",
+    defaultFlex: 1,
+  },
+  {
+    header: "Timings",
+    name: "availableHours",
+    defaultFlex: 2,
+  },
+  {
+    header: "Verified",
+    name: "verified",
+    defaultFlex: 0.8,
+  },
+  {
+    header: "Days of Operation",
+    name: "daysOfOperation",
+    defaultFlex: 2,
+  },
+];
+
+export const serviceProviderColumn = [
+  {
+    header: "Name",
+    name: "name",
+    defaultFlex: 1.5,
+  },
+  {
+    header: "Service Type",
+    name: "serviceType",
+    defaultFlex: 1.5,
+  },
+  {
+    header: "Mobile",
+    name: "mobile",
+    defaultFlex: 1,
+  },
+  {
+    header: "Location",
+    name: "location",
+    defaultFlex: 1,
+  },
+  {
+    header: "Verified",
+    name: "verified",
+    defaultFlex: 0.8,
+  },
+];

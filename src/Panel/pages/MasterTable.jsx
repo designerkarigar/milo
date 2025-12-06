@@ -4,11 +4,13 @@ import "@inovua/reactdatagrid-community/index.css";
 import { CContainer } from "@coreui/react";
 import { FadeLoader } from "react-spinners";
 import { getVets } from "../../utils/Functions/Vets/getVets";
-import { vetColumn, chrecheColumn, usersColumn } from "./utils/Column.js";
-import { userFilter, vetFilter, crecheFilter } from "./utils/Filters";
+import { vetColumn, chrecheColumn, usersColumn, ngoColumn, serviceProviderColumn } from "./utils/Column.js";
+import { userFilter, vetFilter, crecheFilter, ngoFilter, serviceProviderFilter } from "./utils/Filters";
 import { getCreches } from "../../utils/Functions/creche/getCreches";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers } from "../../utils/Functions/Users/getAllUsers";
+import { getNGOs } from "../../utils/Functions/ngo/getNGOs";
+import { getServices } from "../../utils/Functions/services/getServices";
 
 const MasterTable = (props) => {
   const [data, setData] = useState([]);
@@ -37,8 +39,20 @@ const MasterTable = (props) => {
             setLoading(false);
             break;
           case "serviceProviders":
+            setLoading(true);
+            const services = await getServices();
+            setData(services);
+            setColumn(serviceProviderColumn);
+            setFilter(serviceProviderFilter);
+            setLoading(false);
             break;
           case "ngo":
+            setLoading(true);
+            const ngo = await getNGOs();
+            setData(ngo);
+            setColumn(ngoColumn);
+            setFilter(ngoFilter);
+            setLoading(false);
             break;
           case "users":
             setLoading(true);
@@ -69,6 +83,12 @@ const MasterTable = (props) => {
         break;
       case "creche":
         navigate(`/dashboard/DetailPage?type=creches&uid=${row.data.uid}`);
+        break;
+      case "ngo":
+        navigate(`/dashboard/DetailPage?type=ngo&uid=${row.data.uid}`);
+        break;
+      case "serviceProviders":
+        navigate(`/dashboard/DetailPage?type=serviceProviders&uid=${row.data.uid}`);
         break;
       case "users":
         navigate(`/dashboard/manage_user?username=${row.data.userName}`);
