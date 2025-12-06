@@ -15,24 +15,31 @@ export const getCreches = async () => {
     );
     const mapdata = userInfo.data.response.record.map((data) => {
       let name = "unknown";
-      if (data.name) {
-        name = data.name;
+      if (data.crecheName) {
+        name = data.crecheName;
       }
       if (data.firstName) {
         name = data.firstName;
       }
 
-      const daysOfOperation = data.daysofoperation.join(", ");
+      // Fix: Use camelCase daysOfOperation and check if it exists
+      let daysOfOperation = "Not Known";
+      if (data.daysOfOperation && data.daysOfOperation.length > 0) {
+        daysOfOperation = data.daysOfOperation.join(", ");
+      }
+
+      // Handle potential undefined location
+      const location = data.location?.city || "N/A";
 
       return {
         name: name,
-        mobile: data.mobile,
-        location: data.location.city,
+        mobile: data.mobile || "N/A",
+        location: location,
         uid: data.uid,
-        verified: data.verified.toString(),
+        verified: data.verified?.toString() || "false",
         daysOfOperation: daysOfOperation,
-        email: data.email,
-        userName: data.userName,
+        email: data.email || "N/A",
+        userName: data.userName || "N/A",
       };
     });
 

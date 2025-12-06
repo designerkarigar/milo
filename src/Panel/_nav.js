@@ -34,19 +34,7 @@ export const getNavConfig = (role) => {
       name: "Vet Bookings",
       to: "/dashboard/BookingTable?type=vets",
       icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-    },
-    {
-      component: CNavItem,
-      name: "Portal Events",
-      to: "/dashboard/portal_events?type=portal_events",
-      icon: <CIcon icon={cilCat} customClassName="nav-icon" />,
-    },
-    {
-      component: CNavItem,
-      name: "All Vets",
-      to: "/dashboard/all-vets?type=vets",
-      icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-    },
+    }
   ];
 
   const master_nav = [

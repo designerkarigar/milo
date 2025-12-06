@@ -68,20 +68,24 @@ export const usersColumn = [
     defaultFlex: 1,
   },
   {
-    header: "Location",
-    name: "location",
-    defaultFlex: 1,
+    header: "Email",
+    name: "email",
+    defaultFlex: 1.5,
   },
-
   {
     header: "Mobile",
     name: "mobile",
     defaultFlex: 1,
   },
   {
+    header: "Location",
+    name: "location",
+    defaultFlex: 1,
+  },
+  {
     header: "Verified",
     name: "verified",
-    defaultFlex: 1,
+    defaultFlex: 0.8,
   },
   {
     header: "Type",
