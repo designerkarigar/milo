@@ -21,3 +21,151 @@ body {
 a:focus {
   outline: none;
 }
+
+/* Animation for ALL SVG images - applies to all SVG files used as images */
+/* Target images that are likely SVGs (imported SVG files) */
+img[src$=".svg"],
+img[src*=".svg"],
+img[src*="svgfiles"],
+img[src*="svg"],
+/* Target images in components that use SVG images */
+.banner-img,
+.feature-image img,
+.content-img img,
+.market-banner-img img,
+.vet-big-img,
+.vet-small-img,
+.feature-bg-image,
+/* Target all inline SVG elements (except decorative ones) */
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]):not([class*="shape"]):not([class*="logo"]) {
+  animation: svgImageMove 3s ease-in-out infinite;
+}
+
+/* Exclude logos and icons that shouldn't animate */
+img.logo,
+img[class*="logo"],
+img[class*="icon"],
+img[class*="Icon"],
+img[class*="burger"],
+svg[class*="logo"],
+svg[class*="icon"],
+/* Exclude FontAwesome icons (dropdown arrows, etc.) */
+svg[data-icon],
+svg[data-prefix],
+.fa,
+.fas,
+.far,
+.fal,
+.fab,
+[class*="fa-"],
+/* Exclude Material-UI icons */
+.MuiSvgIcon-root,
+[class*="MuiSvgIcon"],
+/* Exclude dropdown arrows and navigation icons */
+.down svg,
+.down *,
+span.down svg,
+span.down * {
+  animation: none !important;
+}
+
+/* Exclude decorative SVG elements like waves and dividers */
+svg[data-name="Layer 1"],
+.banner-wave svg,
+.footer-wave svg,
+.vet-wave svg,
+.wave svg,
+.custom-shape-divider svg,
+.custom-shape-divider-bottom svg,
+svg[class*="wave"],
+svg[class*="Wave"],
+svg[class*="shape"],
+svg .shape-fill,
+svg path.shape-fill {
+  animation: none !important;
+}
+
+/* Animation for SVG paths inside animated SVGs */
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:not(.shape-fill):not([class*="shape-fill"]) {
+  animation: svgPathMove 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Staggered animation delays for multiple paths in the same SVG */
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(1) {
+  animation-delay: 0s;
+}
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(2) {
+  animation-delay: 0.1s;
+}
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(3) {
+  animation-delay: 0.2s;
+}
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(4) {
+  animation-delay: 0.3s;
+}
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(5) {
+  animation-delay: 0.4s;
+}
+svg:not(.no-animate):not([class*="wave"]):not([class*="Wave"]):not([data-name="Layer 1"]) path:nth-child(n+6) {
+  animation-delay: 0.5s;
+}
+
+/* Special animation for paw images (more pronounced) */
+img[src*="paw"],
+img[src*="Paw"],
+img[class*="paw"],
+img[class*="Paw"],
+img[class*="vet-paws"],
+svg[class*="paw"],
+svg[class*="Paw"],
+svg .paw-path,
+svg path[class*="paw"],
+svg path[class*="Paw"] {
+  animation: pawImageMove 3s ease-in-out infinite;
+}
+
+@keyframes svgImageMove {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(3px, -5px) rotate(1.5deg);
+  }
+  50% {
+    transform: translate(-2px, 4px) rotate(-1.5deg);
+  }
+  75% {
+    transform: translate(2px, -3px) rotate(0.5deg);
+  }
+}
+
+@keyframes svgPathMove {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(3px, -5px);
+  }
+  50% {
+    transform: translate(-2px, 4px);
+  }
+  75% {
+    transform: translate(2px, -3px);
+  }
+}
+
+@keyframes pawImageMove {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(4px, -6px) rotate(2deg);
+  }
+  50% {
+    transform: translate(-3px, 5px) rotate(-2deg);
+  }
+  75% {
+    transform: translate(3px, -4px) rotate(1deg);
+  }
+}

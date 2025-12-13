@@ -15,6 +15,7 @@ import { useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../Panel/store";
 import DashboardPage from "../Panel/pages/DashBoardPage";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const { Amplify, Auth } = require("aws-amplify");
 
@@ -47,9 +48,10 @@ function App() {
   return (
     <>
       <Provider store={store}>
-        <Router>
-          <ScrollToTop />
-          <Routes>
+        <AuthProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
             {routesConfig.map((route) => {
               const { path, Component } = route;
               return (
@@ -96,6 +98,7 @@ function App() {
             </Route>
           </Routes>
         </Router>
+        </AuthProvider>
       </Provider>
     </>
   );

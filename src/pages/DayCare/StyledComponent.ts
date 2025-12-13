@@ -77,7 +77,7 @@ export const StyledDayCare = styled.div`
 
   .daycare-content {
     position: relative;
-    padding: 50px 0px;
+    padding: 50px 20px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -92,6 +92,85 @@ export const StyledDayCare = styled.div`
     top: 0;
     left: 0;
     z-index: -1;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+  }
+
+  .creches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 50px 20px;
+    justify-items: center;
+
+    @media (max-width: 980px) {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 30px 20px;
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    font-family: Quicksand;
+
+    .pagination-btn {
+      background-color: #f06a8a;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: Quicksand;
+
+      &:hover:not(:disabled) {
+        background-color: #e05a7a;
+        transform: scale(1.05);
+      }
+
+      &:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    .page-indicator {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  .no-results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-family: Quicksand;
+    font-size: 1.2rem;
+    color: #666;
   }
   .daycare-heading {
     h3 {

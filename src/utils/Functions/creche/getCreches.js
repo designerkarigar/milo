@@ -1,49 +1,46 @@
 import axios from "axios";
 import { BaseUrl } from "../../Constants/Url";
-export const getCreches = async () => {
+import { auth } from "../../../firebase";
+
+// Helper function to get auth token (Firebase or localStorage)
+const getAuthToken = async () => {
+  // First try to get Firebase token
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    try {
+      const token = await currentUser.getIdToken();
+      return token;
+    } catch (error) {
+      console.error("Error getting Firebase token:", error);
+    }
+  }
+  
+  // Fallback to localStorage token
   const idToken = localStorage.getItem("idToken");
+  return idToken;
+};
+
+export const getCreches = async (pageNo = 0, pageSize = 20) => {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
   const config = {
     headers: {
-      token: idToken,
+      token: token,
     },
   };
 
   try {
     const userInfo = await axios.get(
-      BaseUrl + "/creches?useQueryFilter=true&pageSize=9999999",
+      BaseUrl + `/creches?useQueryFilter=true&pageNo=${pageNo}&pageSize=${pageSize}`,
       config
     );
-    const mapdata = userInfo.data.response.record.map((data) => {
-      let name = "unknown";
-      if (data.crecheName) {
-        name = data.crecheName;
-      }
-      if (data.firstName) {
-        name = data.firstName;
-      }
-
-      // Fix: Use camelCase daysOfOperation and check if it exists
-      let daysOfOperation = "Not Known";
-      if (data.daysOfOperation && data.daysOfOperation.length > 0) {
-        daysOfOperation = data.daysOfOperation.join(", ");
-      }
-
-      // Handle potential undefined location
-      const location = data.location?.city || "N/A";
-
-      return {
-        name: name,
-        mobile: data.mobile || "N/A",
-        location: location,
-        uid: data.uid,
-        verified: data.verified?.toString() || "false",
-        daysOfOperation: daysOfOperation,
-        email: data.email || "N/A",
-        userName: data.userName || "N/A",
-      };
-    });
-
-    return mapdata;
+    
+    // Return full record data for display
+    return userInfo.data.response.record || [];
   } catch (err) {
     throw new Error(err);
   }

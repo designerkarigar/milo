@@ -129,6 +129,21 @@ export const StyledNavbar = styled.div`
     }
   }
 
+  .login-btn {
+    font-size: 1.3rem;
+    color: white;
+    padding: 7px 10px;
+    background-color: #f06a8a;
+    border-radius: 15px;
+    margin-left: 15px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+      text-decoration: none;
+    }
+  }
+
   .burger-icon {
     height: 100%;
     width: 20px;

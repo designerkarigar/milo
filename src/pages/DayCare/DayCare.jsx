@@ -1,13 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyledDayCare } from "./StyledComponent";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
-import bg_day from "../../images/svgfiles/marketplace_bg.svg";
-import day_care_card_1 from "../../images/svgfiles/daycare-card.svg";
-import day_care_card_2 from "../../images/svgfiles/daycare-card-2.svg";
-import day_care_card_3 from "../../images/svgfiles/daycare-card-3.svg";
+import DayCareCard from "../../components/DayCareCard";
+import CrecheDetailModal from "../../components/CrecheDetailModal";
+import { getCreches } from "../../utils/Functions/creche/getCreches";
+import { FadeLoader } from "react-spinners";
 
 export const DayCare = () => {
+  const [creches, setCreches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedCreche, setSelectedCreche] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = 20;
+
+  useEffect(() => {
+    fetchCreches(currentPage);
+  }, [currentPage]);
+
+  const fetchCreches = async (pageNo) => {
+    try {
+      setLoading(true);
+      const data = await getCreches(pageNo, pageSize);
+      setCreches(data);
+      // If we got less than pageSize items, there are no more pages
+      setHasMore(data.length === pageSize);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching creches:", error);
+      alert("Error loading daycares. Please try again later.");
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (creche) => {
+    setSelectedCreche(creche);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCreche(null);
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <StyledDayCare>
@@ -39,52 +90,61 @@ export const DayCare = () => {
         </div>
 
         <div className="daycare-content">
-          <img src={bg_day} alt="" className="daycare-bg" />
           <div className="daycare-heading">
             <h1>Pet daycare services</h1>
             <h3>"Nurturing your furry loved one, the daycare way!"</h3>
           </div>
 
-          <div className="daycare-card-con">
-            <div className="daycare-card">
-              <img className="daycare-img" src={day_care_card_1} alt="" />
+          {loading ? (
+            <div className="loading-container">
+              <FadeLoader color="#0066BA" />
+            </div>
+          ) : creches.length > 0 ? (
+            <>
+              <div className="creches-grid">
+                {creches.map((creche, index) => (
+                  <DayCareCard
+                    key={creche.uid || index}
+                    creche={creche}
+                    onClick={() => handleCardClick(creche)}
+                  />
+                ))}
+              </div>
 
-              <div className="daycare-card-content">
-                <h1>Outdoor Playtime</h1>
-                <p>
-                  Let your pets romp and play in our spacious, secure outdoor
-                  yards
-                </p>
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0 || loading}
+                >
+                  Previous
+                </button>
+                <span className="page-indicator">
+                  Page {currentPage + 1}
+                </span>
+                <button
+                  className="pagination-btn"
+                  onClick={handleNextPage}
+                  disabled={!hasMore || loading}
+                >
+                  Next
+                </button>
               </div>
+            </>
+          ) : (
+            <div className="no-results">
+              <p>No daycares found.</p>
             </div>
-            <div className="daycare-card">
-              <img className="daycare-img" src={day_care_card_2} alt="" />
-              <div className="daycare-card-content">
-                <h1>Indoor Resting</h1>
-                <p>
-                  Provide your pets with the cozy, comfy indoor spaces they’ll
-                  love.
-                </p>
-              </div>
-            </div>
-            <div className="daycare-card">
-              <img className="daycare-img" src={day_care_card_3} alt="" />
-              <div className="daycare-card-content">
-                <h1>Online Booking</h1>
-                <p>Reserve daycare slots for your pets in just a few clicks.</p>
-              </div>
-            </div>
-          </div>
-          <div className="join">
-            <h1>JOIN US</h1>
-            <p>
-              Don't miss out on exclusive discounts and pet care tips! Subscribe
-              to our newsletter and stay ahead in pet pampering
-            </p>
-            <a className="join-btn">Launching Soon</a>
-          </div>
+          )}
         </div>
       </StyledDayCare>
+
+      <CrecheDetailModal
+        creche={selectedCreche}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
+
       <NewFooter />
     </>
   );

@@ -1,14 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyledNavbar } from "./styledComponent";
 import logo from "../../images/milo.logo.svg";
 import burger_icon from "../../images/svgfiles/burger-icon.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
+import { LoginModal } from "../LoginModal";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const Navbar = () => {
   const header = useRef(null);
   const res_navbar = useRef(null);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
     let lastScroll = window.scrollY;
@@ -29,6 +33,18 @@ export const Navbar = () => {
   };
   const floatNavRemove = () => {
     res_navbar.current.classList.remove("visible");
+  };
+
+  const handleLoginClick = () => {
+    setIsLoginModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -67,6 +83,23 @@ export const Navbar = () => {
               <a href="/blogs" className="list-item underline">
                 Blogs
               </a>
+              {currentUser ? (
+                <button
+                  onClick={handleLogout}
+                  className="list-item register-btn"
+                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  onClick={handleLoginClick}
+                  className="list-item login-btn"
+                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
+                >
+                  Login
+                </button>
+              )}
               <a href="/login" className="list-item register-btn">
                 Sign In
               </a>
@@ -106,11 +139,38 @@ export const Navbar = () => {
               MarketPlace
             </a>
           </ul>
-          <a href="/login" className="res-register-btn">
+          {currentUser ? (
+            <button
+              onClick={() => {
+                handleLogout();
+                floatNavRemove();
+              }}
+              className="res-register-btn"
+              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                handleLoginClick();
+                floatNavRemove();
+              }}
+              className="res-register-btn"
+              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
+            >
+              Login
+            </button>
+          )}
+          <a href="/login" className="res-register-btn" style={{ marginTop: "10px" }}>
             Sign In
           </a>
         </div>
       </StyledNavbar>
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </>
   );
 };

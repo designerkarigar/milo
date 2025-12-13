@@ -37,6 +37,101 @@ export const StyledFooter = styled.div`
     padding: 10px 0px;
   }
 
+  .footer-paws {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    opacity: 0.3;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .footer-paws .paw-path {
+    animation: pawMove 3s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  .footer-paws .paw-path:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .footer-paws .paw-path:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .footer-paws .paw-path:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .footer-paws .paw-path:nth-child(4) {
+    animation-delay: 0.45s;
+  }
+  .footer-paws .paw-path:nth-child(5) {
+    animation-delay: 0.6s;
+  }
+  .footer-paws .paw-path:nth-child(6) {
+    animation-delay: 0.75s;
+  }
+  .footer-paws .paw-path:nth-child(7) {
+    animation-delay: 0.9s;
+  }
+  .footer-paws .paw-path:nth-child(8) {
+    animation-delay: 1.05s;
+  }
+  .footer-paws .paw-path:nth-child(9) {
+    animation-delay: 1.2s;
+  }
+  .footer-paws .paw-path:nth-child(10) {
+    animation-delay: 1.35s;
+  }
+  .footer-paws .paw-path:nth-child(11) {
+    animation-delay: 1.5s;
+  }
+  .footer-paws .paw-path:nth-child(12) {
+    animation-delay: 1.65s;
+  }
+  .footer-paws .paw-path:nth-child(13) {
+    animation-delay: 1.8s;
+  }
+  .footer-paws .paw-path:nth-child(14) {
+    animation-delay: 1.95s;
+  }
+  .footer-paws .paw-path:nth-child(15) {
+    animation-delay: 2.1s;
+  }
+  .footer-paws .paw-path:nth-child(16) {
+    animation-delay: 2.25s;
+  }
+  .footer-paws .paw-path:nth-child(17) {
+    animation-delay: 2.4s;
+  }
+  .footer-paws .paw-path:nth-child(18) {
+    animation-delay: 2.55s;
+  }
+  .footer-paws .paw-path:nth-child(19) {
+    animation-delay: 2.7s;
+  }
+  .footer-paws .paw-path:nth-child(20) {
+    animation-delay: 2.85s;
+  }
+  .footer-paws .paw-path:nth-child(n+21) {
+    animation-delay: 3s;
+  }
+
+  @keyframes pawMove {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(4px, -6px);
+    }
+    50% {
+      transform: translate(-3px, 5px);
+    }
+    75% {
+      transform: translate(3px, -4px);
+    }
+  }
+
   .footer-content {
     width: 100%;
     display: flex;
@@ -45,6 +140,8 @@ export const StyledFooter = styled.div`
     row-gap: 10px;
     padding: 0px 40px;
     background-image: url();
+    position: relative;
+    z-index: 1;
   }
 
   .heading-con {
