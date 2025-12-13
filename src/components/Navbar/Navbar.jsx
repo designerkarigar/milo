@@ -17,7 +17,8 @@ export const Navbar = () => {
   useEffect(() => {
     let lastScroll = window.scrollY;
     const element = header.current;
-    window.addEventListener("scroll", () => {
+    
+    const handleScroll = () => {
       if (lastScroll < window.scrollY) {
         element.classList.add("hidden");
       } else {
@@ -25,7 +26,14 @@ export const Navbar = () => {
       }
 
       lastScroll = window.scrollY;
-    });
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const floatNavAdd = () => {
