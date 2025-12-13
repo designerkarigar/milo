@@ -2,6 +2,21 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// Validate required environment variables
+if (!process.env.REACT_APP_FIREBASE_API_KEY) {
+    throw new Error(
+        "Missing REACT_APP_FIREBASE_API_KEY environment variable. " +
+        "Please set it in AWS Amplify console under App Settings > Environment variables."
+    );
+}
+
+if (!process.env.REACT_APP_FIREBASE_APP_ID) {
+    throw new Error(
+        "Missing REACT_APP_FIREBASE_APP_ID environment variable. " +
+        "Please set it in AWS Amplify console under App Settings > Environment variables."
+    );
+}
+
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
