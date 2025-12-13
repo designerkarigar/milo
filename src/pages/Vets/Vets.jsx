@@ -1,15 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
-import line_3_pink from "../../images/svgfiles/3line-pink.png";
-import vet_paws_1 from "../../images/svgfiles/vet-paws-1.svg";
-import vet_paws_2 from "../../images/svgfiles/vet-paws-2.svg";
-import vetcare_1 from "../../images/svgfiles/vetcare-1.svg";
-import vetcare_2 from "../../images/svgfiles/vetcare-2.svg";
-import vetcare_3 from "../../images/svgfiles/vetcare-3.svg";
-
+import VetCard from "../../components/VetCard";
+import VetDetailModal from "../../components/VetDetailModal";
+import { getVets } from "../../utils/Functions/Vets/getVets";
+import { FadeLoader } from "react-spinners";
 import { VetStyledComponent } from "./styledComponent";
+
 export const VetsPage = () => {
+  const [vets, setVets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedVet, setSelectedVet] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = 20;
+
+  useEffect(() => {
+    fetchVets(currentPage);
+  }, [currentPage]);
+
+  const fetchVets = async (pageNo) => {
+    try {
+      setLoading(true);
+      const data = await getVets(pageNo, pageSize);
+      setVets(data);
+      // If we got less than pageSize items, there are no more pages
+      setHasMore(data.length === pageSize);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching vets:", error);
+      alert("Error loading vets. Please try again later.");
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (vet) => {
+    setSelectedVet(vet);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedVet(null);
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <VetStyledComponent>
@@ -20,16 +69,14 @@ export const VetsPage = () => {
         <div className="vet-banner">
           <div className="vet-banner-content">
             <h1>
-              <img className="vet-lines" src={line_3_pink} alt="" />
               Ready to find a vet?
               <br />
-              Don't wait!{" "}
+              Don't wait!
             </h1>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt,
-              animi sequi totam autem magni nobis ut at deleniti nemo cum?
+              Find the best veterinarians near you. Browse through verified vets
+              and book appointments easily.
             </p>
-            <div className="vet-join-btn">Launching Soon</div>
           </div>
           <div className="vet-wave">
             <svg
@@ -46,35 +93,55 @@ export const VetsPage = () => {
           </div>
         </div>
 
-        <div className="vet-card-con">
-          <div className="vet-big-card">
-            <img className="vet-paws-big-card" src={vet_paws_1} alt="" />
-            <img className="vet-big-img" src={vetcare_1} alt="" />
+        <div className="vet-content">
+          {loading ? (
+            <div className="loading-container">
+              <FadeLoader color="#0066BA" />
+            </div>
+          ) : vets.length > 0 ? (
+            <>
+              <div className="vets-grid">
+                {vets.map((vet, index) => (
+                  <VetCard
+                    key={vet.uid || index}
+                    vet={vet}
+                    onClick={() => handleCardClick(vet)}
+                  />
+                ))}
+              </div>
 
-            <div className="big-card-text">
-              <h1>BOOK</h1>
-              <h3>Schedule vet appointments easily</h3>
-            </div>
-          </div>
-          <div className="vet-small-card-con">
-            <img className="vet-paws-small-card" src={vet_paws_2} alt="" />
-            <div className="vet-small-card">
-              <img className="vet-small-img" src={vetcare_2} alt="" />
-              <div className="small-card-text">
-                <h1>Consult</h1>
-                <h3>Connect with vets online</h3>
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0 || loading}
+                >
+                  Previous
+                </button>
+                <span className="page-indicator">Page {currentPage + 1}</span>
+                <button
+                  className="pagination-btn"
+                  onClick={handleNextPage}
+                  disabled={!hasMore || loading}
+                >
+                  Next
+                </button>
               </div>
+            </>
+          ) : (
+            <div className="no-results">
+              <p>No vets found.</p>
             </div>
-            <div className="vet-small-card">
-              <img className="vet-small-img" src={vetcare_3} alt="" />
-              <div className="small-card-text">
-                <h1>App</h1>
-                <h3>Find vets on the go</h3>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </VetStyledComponent>
+
+      <VetDetailModal
+        vet={selectedVet}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
+
       <NewFooter />
     </>
   );

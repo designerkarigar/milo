@@ -1,55 +1,46 @@
 import axios from "axios";
 import { BaseUrl } from "../../Constants/Url";
+import { auth } from "../../../firebase";
 
-export const getVets = async () => {
+// Helper function to get auth token (Firebase or localStorage)
+const getAuthToken = async () => {
+  // First try to get Firebase token
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    try {
+      const token = await currentUser.getIdToken();
+      return token;
+    } catch (error) {
+      console.error("Error getting Firebase token:", error);
+    }
+  }
+  
+  // Fallback to localStorage token
   const idToken = localStorage.getItem("idToken");
+  return idToken;
+};
+
+export const getVets = async (pageNo = 0, pageSize = 20) => {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
   const config = {
     headers: {
-      token: idToken,
+      token: token,
     },
   };
 
   try {
     const userInfo = await axios.get(
-      BaseUrl + "/vets?useQueryFilter=true&pageSize=9999999",
+      BaseUrl + `/vets?useQueryFilter=true&pageNo=${pageNo}&pageSize=${pageSize}`,
       config
     );
-    const mapdata = userInfo.data.response.record.map((data) => {
-      // Use the name field directly from API response
-      const fullname = data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'N/A';
-      let availableHours = null;
-      let daysOfOperation = null;
-      
-      // Fix: Use camelCase availableHours instead of lowercase availablehours
-      if (data.availableHours && data.availableHours.length > 0) {
-        availableHours = data.availableHours
-          .map((timeSlot) => `${timeSlot.from} - ${timeSlot.to}`)
-          .join(", ");
-      } else {
-        availableHours = "Not Known";
-      }
-
-      // Fix: Use camelCase daysOfOperation instead of lowercase daysofoperation
-      if (data.daysOfOperation && data.daysOfOperation.length > 0) {
-        daysOfOperation = data.daysOfOperation.join(", ");
-      } else {
-        daysOfOperation = "Not Known";
-      }
-      
-      return {
-        name: fullname,
-        mobile: data.mobile,
-        location: data.location.city,
-        availableHours: availableHours,
-        uid: data.uid,
-        verified: data.verified.toString(),
-        daysOfOperation: daysOfOperation,
-        userName: data.userName,
-        clinicName: data.clinicName || "", // Add clinicName to the mapped data
-      };
-    });
-
-    return mapdata;
+    
+    // Return full record data for display
+    return userInfo.data.response.record || [];
   } catch (err) {
     throw new Error(err);
   }
