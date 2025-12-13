@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyCYlmxnQzbhZ9hFArTifCIUr4-vLEjqXx8",
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
     authDomain: "miloapp-d189a.firebaseapp.com",
     projectId: "miloapp-d189a",
     storageBucket: "miloapp-d189a.appspot.com",
     messagingSenderId: "618712475427",
-    appId: "1:618712475427:web:f1bc181eee2483ac744e96",
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
     measurementId: "G-S199WPTLLQ"
 };
 

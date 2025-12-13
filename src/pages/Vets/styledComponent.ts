@@ -15,7 +15,7 @@ export const VetStyledComponent = styled.div`
     position: relative;
     width: 100%;
     padding-top: 150px;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,7 +28,7 @@ export const VetStyledComponent = styled.div`
     width: 50%;
 
     margin-top: 0px;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     flex-direction: column;
     row-gap: 30px;
     position: relative;
@@ -108,7 +108,7 @@ export const VetStyledComponent = styled.div`
 
   .vet-content {
     width: 100%;
-    padding: 50px 20px;
+    padding: 20px 20px 50px 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -129,13 +129,13 @@ export const VetStyledComponent = styled.div`
     gap: 30px;
     width: 100%;
     max-width: 1200px;
-    padding: 50px 20px;
+    padding: 0px 20px;
     justify-items: center;
 
     @media (max-width: 980px) {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
-      padding: 30px 20px;
+      padding: 0px 20px;
     }
 
     @media (max-width: 600px) {
