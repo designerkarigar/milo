@@ -113,10 +113,31 @@ const LoginModal = ({ isOpen, onClose }) => {
       setConfirmationResult(confirmation);
       setShowPhoneVerification(true);
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      console.error("Phone authentication error:", error);
+      // Handle specific Firebase errors
+      const errorCode = error.code || error.message;
+      setError(getErrorMessage(errorCode));
+      
+      // Clear reCAPTCHA on error
       if (recaptchaVerifier) {
         recaptchaVerifier.clear();
         setRecaptchaVerifier(null);
+      }
+      
+      // If it's an app credential error, provide additional guidance
+      if (errorCode?.includes("app-credential") || errorCode?.includes("INVALID_APP_CREDENTIAL")) {
+        console.error("Firebase configuration issue detected. Please verify:");
+        console.error("1. API key matches your Firebase project");
+        console.error("2. Phone authentication is enabled in Firebase Console");
+        console.error("3. API key restrictions allow requests from this origin");
+      }
+      
+      // If it's a reCAPTCHA error, provide additional guidance
+      if (errorCode?.includes("captcha") || errorCode?.includes("CAPTCHA_CHECK_FAILED")) {
+        console.error("reCAPTCHA verification failed. Please verify:");
+        console.error("1. Domain is authorized in Firebase Console");
+        console.error("2. reCAPTCHA site key is configured for this domain");
+        console.error("3. Current origin:", window.location.origin);
       }
     } finally {
       setLoading(false);
@@ -185,6 +206,14 @@ const LoginModal = ({ isOpen, onClose }) => {
         return "Invalid phone number.";
       case "auth/invalid-verification-code":
         return "Invalid verification code.";
+      case "auth/invalid-app-credential":
+      case "auth/app-not-authorized":
+        return "Firebase configuration error. Please check your API key and ensure phone authentication is enabled in Firebase Console.";
+      case "auth/quota-exceeded":
+        return "Phone authentication quota exceeded. Please try again later.";
+      case "auth/captcha-check-failed":
+      case "CAPTCHA_CHECK_FAILED":
+        return "reCAPTCHA verification failed. The domain may not be authorized. Please contact support if this persists.";
       default:
         return "An error occurred. Please try again.";
     }
