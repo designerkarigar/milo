@@ -7,11 +7,15 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import { LoginModal } from "../LoginModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { loggedInUser } from "../../utils/Functions/Users/loggedInUser";
 
 export const Navbar = () => {
   const header = useRef(null);
   const res_navbar = useRef(null);
+  const avatarRef = useRef(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userData, setUserData] = useState(null);
   const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
@@ -36,6 +40,41 @@ export const Navbar = () => {
     };
   }, []);
 
+  // Fetch user data when logged in
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (currentUser) {
+        try {
+          const data = await loggedInUser();
+          setUserData(data);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else {
+        setUserData(null);
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (avatarRef.current && !avatarRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
+
   const floatNavAdd = () => {
     res_navbar.current.classList.add("visible");
   };
@@ -49,9 +88,24 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      setShowUserMenu(false);
       await signOut();
+      setUserData(null);
     } catch (error) {
       console.error("Error signing out:", error);
+    }
+  };
+
+  const handleMenuClick = (action) => {
+    setShowUserMenu(false);
+    if (action === "logout") {
+      handleLogout();
+    } else if (action === "my-pets") {
+      // Navigate to My Pets page
+      window.location.href = "/my-pets";
+    } else if (action === "settings") {
+      // Navigate to Settings page
+      window.location.href = "/settings";
     }
   };
 
@@ -92,13 +146,36 @@ export const Navbar = () => {
                 Blogs
               </a>
               {currentUser ? (
-                <button
-                  onClick={handleLogout}
-                  className="list-item register-btn"
-                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
-                >
-                  Logout
-                </button>
+                <div ref={avatarRef} className="user-avatar-container">
+                  <img
+                    src={userData?.profilePhoto || "https://via.placeholder.com/40"}
+                    alt="User Avatar"
+                    className="user-avatar"
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                  />
+                  {showUserMenu && (
+                    <div className="user-menu">
+                      <button
+                        className="user-menu-item"
+                        onClick={() => handleMenuClick("my-pets")}
+                      >
+                        My Pets
+                      </button>
+                      <button
+                        className="user-menu-item"
+                        onClick={() => handleMenuClick("settings")}
+                      >
+                        Settings
+                      </button>
+                      <button
+                        className="user-menu-item"
+                        onClick={() => handleMenuClick("logout")}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <button
                   onClick={handleLoginClick}
@@ -147,16 +224,25 @@ export const Navbar = () => {
             </a>
           </ul>
           {currentUser ? (
-            <button
-              onClick={() => {
-                handleLogout();
-                floatNavRemove();
-              }}
-              className="res-register-btn"
-              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
-            >
-              Logout
-            </button>
+            <div className="res-user-section">
+              {userData?.profilePhoto && (
+                <img
+                  src={userData.profilePhoto}
+                  alt="User Avatar"
+                  className="res-user-avatar"
+                />
+              )}
+              <button
+                onClick={() => {
+                  handleLogout();
+                  floatNavRemove();
+                }}
+                className="res-register-btn"
+                style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => {

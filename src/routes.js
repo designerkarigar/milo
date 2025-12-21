@@ -11,6 +11,7 @@ import Terms from "./pages/Terms/index";
 import Events from "./pages/Events/index";
 import PortalBlogs from "./pages/Portal/PortalBlogs";
 import PortalView from "./pages/PortalView/index";
+import MyPetsPage from "./pages/MyPets/index";
 import PanelLogin from "./Panel/pages/Login";
 import Register from "./Panel/pages/Register";
 import Dashboard from "./Panel/pages/Dashboard";
@@ -72,7 +73,10 @@ export const routesConfig = [
     path: "events",
     Component: Events,
   },
-
+  {
+    path: "/my-pets",
+    Component: MyPetsPage,
+  },
   {
     path: "register",
     Component: Register,

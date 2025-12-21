@@ -44,7 +44,7 @@ const getAuthToken = async () => {
   return idToken;
 };
 
-export const loggedInUser = async () => {
+export const getPets = async () => {
   const token = await getAuthToken();
   
   if (!token) {
@@ -56,11 +56,17 @@ export const loggedInUser = async () => {
       token: token,
     },
   };
-  
+
   try {
-    const user = await axios.get(BaseUrl + "/loggedInUser", config);
-    return user.data.response.record;
+    const response = await axios.get(
+      BaseUrl + `/pets?useQueryFilter=false`,
+      config
+    );
+    
+    // Return full record data for display
+    return response.data.response.record || [];
   } catch (err) {
-    throw new Error("Network Error");
+    throw new Error(err);
   }
 };
+
