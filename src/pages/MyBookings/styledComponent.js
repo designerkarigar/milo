@@ -160,44 +160,46 @@ export const StyledMyBookings = styled.div`
   }
 
   .booking-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 10px;
   }
 
   .detail-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 12px;
     font-family: "Quicksand", sans-serif;
-    padding: 8px 0;
+    padding: 12px 0;
+    min-height: 40px;
 
     svg {
       color: #f06a8a;
-      width: 16px;
+      width: 18px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
 
     .detail-label {
       font-weight: 600;
       color: #666;
-      min-width: 140px;
+      min-width: 150px;
+      flex-shrink: 0;
     }
 
     .detail-value {
       color: #333;
       flex: 1;
+      word-wrap: break-word;
+      line-height: 1.5;
     }
 
     &.amount-row {
-      grid-column: 1 / -1;
-      margin-top: 10px;
-      padding-top: 15px;
+      margin-top: 15px;
+      padding-top: 20px;
       border-top: 2px solid #f0f0f0;
+      align-items: center;
 
       .amount {
         font-size: 1.3rem;

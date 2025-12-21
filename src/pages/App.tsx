@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 
 import "../theme/css-variables.css";
 import "../theme/styles.css";
@@ -11,11 +11,11 @@ import {
 import ProtectedRoute from "../components/ProtectedRoutes";
 import { PageNotFound } from "./SinglePages/PageNotFound";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "../Panel/store";
 import DashboardPage from "../Panel/pages/DashBoardPage";
 import { AuthProvider } from "../contexts/AuthContext";
+import HeartBalloons from "../components/HeartBalloons/index";
 
 const { Amplify, Auth } = require("aws-amplify");
 
@@ -27,6 +27,15 @@ function ScrollToTop() {
   }, [location]);
 
   return null;
+}
+
+function HeartBalloonsWrapper() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/" || location.pathname === "/home";
+  
+  if (!isHomePage) return null;
+  
+  return <HeartBalloons />;
 }
 
 function App() {
@@ -51,6 +60,7 @@ function App() {
         <AuthProvider>
           <Router>
             <ScrollToTop />
+            <HeartBalloonsWrapper />
             <Routes>
             {routesConfig.map((route) => {
               const { path, Component } = route;

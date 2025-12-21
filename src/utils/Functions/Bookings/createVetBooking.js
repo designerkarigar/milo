@@ -40,7 +40,7 @@ const getAuthToken = async () => {
   return idToken;
 };
 
-export const getBookings = async (pageNo = 0, pageSize = 20) => {
+export const createVetBooking = async (bookingData) => {
   const token = await getAuthToken();
   
   if (!token) {
@@ -50,19 +50,21 @@ export const getBookings = async (pageNo = 0, pageSize = 20) => {
   const config = {
     headers: {
       token: token,
+      "Content-Type": "application/json",
     },
   };
 
   try {
-    const response = await axios.get(
-      BaseUrl + `/bookings?useQueryFilter=false&pageNo=${pageNo}&pageSize=${pageSize}`,
+    const response = await axios.post(
+      BaseUrl + `/bookings/vets`,
+      bookingData,
       config
     );
     
-    return response.data.response.record || [];
+    return response.data;
   } catch (err) {
-    console.error("Error fetching bookings:", err);
-    throw new Error(err.response?.data?.message || "Failed to fetch bookings");
+    console.error("Error creating vet booking:", err);
+    throw new Error(err.response?.data?.message || "Failed to create booking");
   }
 };
 

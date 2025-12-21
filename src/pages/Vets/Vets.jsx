@@ -3,6 +3,7 @@ import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import VetCard from "../../components/VetCard";
 import VetDetailModal from "../../components/VetDetailModal";
+import { LoginModal } from "../../components/LoginModal";
 import { getVets } from "../../utils/Functions/Vets/getVets";
 import { FadeLoader } from "react-spinners";
 import { VetStyledComponent } from "./styledComponent";
@@ -14,6 +15,7 @@ export const VetsPage = () => {
   const [selectedVet, setSelectedVet] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const pageSize = 20;
 
   useEffect(() => {
@@ -43,6 +45,10 @@ export const VetsPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedVet(null);
+  };
+
+  const handleLoginRequired = () => {
+    setIsLoginModalOpen(true);
   };
 
   const handleNextPage = () => {
@@ -106,6 +112,7 @@ export const VetsPage = () => {
                     key={vet.uid || index}
                     vet={vet}
                     onClick={() => handleCardClick(vet)}
+                    onLoginRequired={handleLoginRequired}
                   />
                 ))}
               </div>
@@ -140,6 +147,12 @@ export const VetsPage = () => {
         vet={selectedVet}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onLoginRequired={handleLoginRequired}
+      />
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
 
       <NewFooter />

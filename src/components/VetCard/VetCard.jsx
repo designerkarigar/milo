@@ -1,7 +1,25 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { StyledVetCard } from "./styledComponent";
 
-const VetCard = ({ vet, onClick }) => {
+const VetCard = ({ vet, onClick, onLoginRequired }) => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  const handleBookNow = (e) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (!currentUser) {
+      // User not logged in, trigger login modal
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    
+    navigate("/vet-booking-checkout", { state: { vet } });
+  };
   // Get the first photo that's not an ID proof, or use profile photo
   const getImageUrl = () => {
     if (vet.profilePhoto) {
@@ -67,6 +85,9 @@ const VetCard = ({ vet, onClick }) => {
             )}
           </div>
         )}
+        <button className="book-now-button" onClick={handleBookNow}>
+          Book Now
+        </button>
       </div>
     </StyledVetCard>
   );

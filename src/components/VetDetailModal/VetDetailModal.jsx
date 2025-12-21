@@ -1,8 +1,24 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { StyledVetDetailModal } from "./styledComponent";
 import CloseIcon from "@mui/icons-material/Close";
 
-const VetDetailModal = ({ vet, isOpen, onClose }) => {
+const VetDetailModal = ({ vet, isOpen, onClose, onLoginRequired }) => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  const handleBookNow = () => {
+    if (!currentUser) {
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      onClose();
+      return;
+    }
+    onClose();
+    navigate("/vet-booking-checkout", { state: { vet } });
+  };
   if (!isOpen || !vet) return null;
 
   const getImageUrl = () => {
@@ -198,6 +214,13 @@ const VetDetailModal = ({ vet, isOpen, onClose }) => {
                 </div>
               </div>
             )}
+
+            {/* Book Now Button */}
+            <div className="detail-section">
+              <button className="book-now-button" onClick={handleBookNow}>
+                Book Now
+              </button>
+            </div>
           </div>
         </div>
       </div>

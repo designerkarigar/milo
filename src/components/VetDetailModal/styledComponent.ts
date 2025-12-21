@@ -304,5 +304,30 @@ export const StyledVetDetailModal = styled.div`
       }
     }
   }
+
+  .book-now-button {
+    width: 100%;
+    padding: 15px 30px;
+    background-color: #f06a8a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: Quicksand;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+
+    &:hover {
+      background-color: #e05a7a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(240, 106, 138, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
 `;
 

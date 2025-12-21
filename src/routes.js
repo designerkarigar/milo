@@ -15,6 +15,7 @@ import MyPetsPage from "./pages/MyPets/index";
 import PetProfilePage from "./pages/PetProfile/index";
 import MyBookingsPage from "./pages/MyBookings/index";
 import BookingCheckoutPage from "./pages/BookingCheckout/index";
+import VetBookingCheckoutPage from "./pages/VetBookingCheckout/index";
 import PanelLogin from "./Panel/pages/Login";
 import Register from "./Panel/pages/Register";
 import Dashboard from "./Panel/pages/Dashboard";
@@ -91,6 +92,10 @@ export const routesConfig = [
   {
     path: "/booking-checkout",
     Component: BookingCheckoutPage,
+  },
+  {
+    path: "/vet-booking-checkout",
+    Component: VetBookingCheckoutPage,
   },
   {
     path: "register",
