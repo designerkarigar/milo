@@ -150,7 +150,7 @@ export const BookingCheckoutPage = () => {
         setError("From date cannot be in the past");
       }
     } else if (type === "to") {
-      // To date must be future relative to fromDate
+      // To date must be future relative to fromDate (no daysOfOperation validation)
       if (!fromDate) {
         setError("Please select from date first");
         return;
@@ -158,12 +158,8 @@ export const BookingCheckoutPage = () => {
       
       const from = new Date(fromDate);
       if (date > from) {
-        if (isDateAvailable(value)) {
-          setToDate(value);
-          setError("");
-        } else {
-          setError(`Selected date is not available. Available days: ${availableDays.join(", ")}`);
-        }
+        setToDate(value);
+        setError("");
       } else {
         setError("To date must be after from date");
       }
@@ -314,7 +310,7 @@ export const BookingCheckoutPage = () => {
                       className="date-input"
                     />
                     <small className="help-text">
-                      Select an end date after the from date
+                      Select an end date that is after the from date
                     </small>
                   </div>
 

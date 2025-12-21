@@ -71,6 +71,7 @@ export const StyledDayCareCard = styled.div`
     flex-direction: column;
     gap: 10px;
     flex-grow: 1;
+    min-height: 0; /* Allow flex item to shrink */
   }
 
   .card-title {
@@ -167,7 +168,7 @@ export const StyledDayCareCard = styled.div`
     font-family: Quicksand;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 15px;
+    margin-top: auto; /* Push button to bottom of card */
 
     &:hover {
       background-color: #e05a7a;
