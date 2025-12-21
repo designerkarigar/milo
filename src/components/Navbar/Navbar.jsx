@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { StyledNavbar } from "./styledComponent";
 import logo from "../../images/milo.logo.svg";
 import burger_icon from "../../images/svgfiles/burger-icon.svg";
@@ -13,6 +14,7 @@ export const Navbar = () => {
   const header = useRef(null);
   const res_navbar = useRef(null);
   const avatarRef = useRef(null);
+  const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -101,11 +103,11 @@ export const Navbar = () => {
     if (action === "logout") {
       handleLogout();
     } else if (action === "my-pets") {
-      // Navigate to My Pets page
-      window.location.href = "/my-pets";
+      navigate("/my-pets");
+      floatNavRemove();
     } else if (action === "settings") {
-      // Navigate to Settings page
-      window.location.href = "/settings";
+      navigate("/settings");
+      floatNavRemove();
     }
   };
 
@@ -113,38 +115,40 @@ export const Navbar = () => {
     <>
       <StyledNavbar>
         <header ref={header} className="header">
-          <img src={logo} alt="" className="logo" />
+          <Link to="/home">
+            <img src={logo} alt="" className="logo" />
+          </Link>
           <nav className="nav-bar-con">
             <ul className="nav-bar">
-              <a href="/home" className="list-item underline">
+              <Link to="/home" className="list-item underline">
                 Home
-              </a>
-              <a href="/events" className="list-item underline">
+              </Link>
+              <Link to="/events" className="list-item underline">
                 Events
-              </a>
+              </Link>
               <li className="list-item">
                 Services{" "}
                 <span className="down">
                   <FontAwesomeIcon icon={faCaretDown} />
                 </span>
                 <ul className="drop-down">
-                  <a href="marketplace" className="drop-list-item">
+                  <Link to="/marketplace" className="drop-list-item">
                     MarketsPlace
-                  </a>
-                  <a href="match-making" className="drop-list-item">
+                  </Link>
+                  <Link to="/match-making" className="drop-list-item">
                     MatchMaking
-                  </a>
-                  <a href="/vets" className="drop-list-item">
+                  </Link>
+                  <Link to="/vets" className="drop-list-item">
                     Vets
-                  </a>
-                  <a href="daycare" className="drop-list-item">
+                  </Link>
+                  <Link to="/daycare" className="drop-list-item">
                     DayCare
-                  </a>
+                  </Link>
                 </ul>
               </li>
-              <a href="/blogs" className="list-item underline">
+              <Link to="/blogs" className="list-item underline">
                 Blogs
-              </a>
+              </Link>
               {currentUser ? (
                 <div ref={avatarRef} className="user-avatar-container">
                   <img
@@ -200,28 +204,27 @@ export const Navbar = () => {
             <CloseIcon fontSize="inherit" color="inherit" />
           </div>
           <ul className="res-list">
-            <a className="res-list-item" href="/home">
+            <Link className="res-list-item" to="/home" onClick={floatNavRemove}>
               Home
-            </a>
-            <a className="res-list-item" href="/blogs">
+            </Link>
+            <Link className="res-list-item" to="/blogs" onClick={floatNavRemove}>
               Blogs
-            </a>
-
-            <a className="res-list-item" href="/events">
+            </Link>
+            <Link className="res-list-item" to="/events" onClick={floatNavRemove}>
               Events
-            </a>
-            <a className="res-list-item" href="vets">
+            </Link>
+            <Link className="res-list-item" to="/vets" onClick={floatNavRemove}>
               Vets
-            </a>
-            <a className="res-list-item" href="/match-making">
+            </Link>
+            <Link className="res-list-item" to="/match-making" onClick={floatNavRemove}>
               MatchMaking
-            </a>
-            <a className="res-list-item" href="/daycare">
+            </Link>
+            <Link className="res-list-item" to="/daycare" onClick={floatNavRemove}>
               DayCare
-            </a>
-            <a className="res-list-item" href="/marketplace">
+            </Link>
+            <Link className="res-list-item" to="/marketplace" onClick={floatNavRemove}>
               MarketPlace
-            </a>
+            </Link>
           </ul>
           {currentUser ? (
             <div className="res-user-section">

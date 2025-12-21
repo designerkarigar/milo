@@ -14,9 +14,17 @@ export const StyledNavbar = styled.div`
     border-bottom: none;
   }
 
+  a {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+  }
+
   .logo {
     width: 150px;
     margin-left: 40px;
+    cursor: pointer;
+    display: block;
     @media (max-width: 1280px) {
       width: 120px;
       margin-left: 20px;

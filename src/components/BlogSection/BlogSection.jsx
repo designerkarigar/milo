@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./styledComponent.js";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { BaseUrlS3 } from "../../utils/Constants/Url";
@@ -36,9 +37,9 @@ export const BlogSection = () => {
               your best lives, side by side.
             </p>
 
-            <a href="/blogs" className="blog-btn">
+            <Link to="/blogs" className="blog-btn">
               Read Now
-            </a>
+            </Link>
           </div>
           <div className="content-img">
             <img src={dog_blog} alt="" />
@@ -47,7 +48,7 @@ export const BlogSection = () => {
 
         <div className="card-con">
           {blogData.map((blog, index) => (
-            <a className="card" href={`/blogview?id=${blog.uid}`} key={index}>
+            <Link className="card" to={`/blogview?id=${blog.uid}`} key={index}>
               <div className="card-img">
                 <img
                   src={
@@ -63,7 +64,7 @@ export const BlogSection = () => {
               </div>
 
               <div className="card-text">{blog.title}</div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

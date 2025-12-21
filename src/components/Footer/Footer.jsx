@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { StyledFooter } from "./FooterStyledComponent";
 
 import FacebookIcon from "@mui/icons-material/Facebook";
@@ -315,11 +316,11 @@ export const Footer = () => {
 
             <div className="footer-nav">
               <ul className="footer-navbar">
-                <a href="/home">Home</a>
-                <a href="/events">Events</a>
-                <a href="/blogs">Blogs</a>
-                <a href="/privacy_policy">Privacy Policy</a>
-                <a href="/terms">Terms & Conditions</a>
+                <Link to="/home">Home</Link>
+                <Link to="/events">Events</Link>
+                <Link to="/blogs">Blogs</Link>
+                <Link to="/privacy_policy">Privacy Policy</Link>
+                <Link to="/terms">Terms & Conditions</Link>
               </ul>
 
               <ul className="app-link">

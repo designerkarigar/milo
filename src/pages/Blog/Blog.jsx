@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { StyledBlog } from "./styledComponent";
 import NewNavbar from "../../components/Navbar/index";
 import { useEffect } from "react";
@@ -61,8 +62,8 @@ export const Blog = () => {
           ) : (
             <div className="card-con">
               {blogdata.map((blog, index) => (
-                <a
-                  href={`/blogview?id=${blog.uid}`}
+                <Link
+                  to={`/blogview?id=${blog.uid}`}
                   className="blog-card"
                   key={index}
                 >
@@ -83,7 +84,7 @@ export const Blog = () => {
                     <p className="blog-card-date">{blog.time}</p>
                     <p className="blog-card-text">{blog.title}</p>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           )}
