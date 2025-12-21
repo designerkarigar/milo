@@ -130,17 +130,30 @@ export const StyledNavbar = styled.div`
   }
 
   .login-btn {
+    /* Apply Sign In button styles to Login button */
     font-size: 1.3rem;
-    color: white;
-    padding: 7px 10px;
-    background-color: #f06a8a;
+    font-weight: 600;
+    color: black;
+    padding: 10px 20px;
+    background-color: white;
+    border: none;
     border-radius: 15px;
     margin-left: 15px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    display: inline-block;
 
     &:hover {
-      transform: scale(1.1);
-      text-decoration: none;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      background-color: #f8f9fa;
+    }
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
   }
 

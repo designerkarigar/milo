@@ -23,7 +23,6 @@ const LoginModal = ({ isOpen, onClose }) => {
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
   const googleProvider = new GoogleAuthProvider();
@@ -55,22 +54,62 @@ const LoginModal = ({ isOpen, onClose }) => {
   };
 
   // Initialize reCAPTCHA when phone login is selected
+  // CRITICAL: Use global window.recaptchaVerifier as per Firebase best practices
+  // According to Firebase docs: https://firebase.google.com/docs/auth/web/phone-auth
   const initializeRecaptcha = () => {
-    if (!recaptchaVerifier) {
-      const verifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: () => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber
-          },
-        }
-      );
-      setRecaptchaVerifier(verifier);
-      return verifier;
+    // Clear any existing global verifier first
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (clearError) {
+        // Silently handle error
+      }
+      window.recaptchaVerifier = null;
     }
-    return recaptchaVerifier;
+
+    // CRITICAL: Container MUST exist in DOM before initializing
+    // The container is always rendered in JSX: <div id="recaptcha-container"></div>
+    const container = document.getElementById("recaptcha-container");
+    if (!container) {
+      throw new Error(
+        "reCAPTCHA container not found in DOM. " +
+        "Ensure <div id='recaptcha-container'></div> is always rendered in the component."
+      );
+    }
+
+    try {
+      // CRITICAL: Create global RecaptchaVerifier on window object
+      // This ensures reCAPTCHA persists across component re-renders
+      // Firebase v9+ pattern: new RecaptchaVerifier(auth, container, options)
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber
+            },
+            "expired-callback": () => {
+              // Response expired, reCAPTCHA needs to be re-verified
+              // Clear global verifier on expiration so it can be recreated
+              if (window.recaptchaVerifier) {
+                try {
+                  window.recaptchaVerifier.clear();
+                } catch (e) {
+                  // Silently handle error
+                }
+                window.recaptchaVerifier = null;
+              }
+            },
+          }
+        );
+      }
+      
+      return window.recaptchaVerifier;
+    } catch (error) {
+      throw new Error(`Failed to initialize reCAPTCHA: ${error.message}`);
+    }
   };
 
   const handleEmailAuth = async (e) => {
@@ -82,14 +121,10 @@ const LoginModal = ({ isOpen, onClose }) => {
       // Get reCAPTCHA Enterprise token for login/signup
       try {
         const action = isLogin ? "LOGIN" : "SIGNUP";
-        const recaptchaToken = await getRecaptchaToken(action);
-        console.log(`reCAPTCHA Enterprise token obtained for ${action}`);
+        await getRecaptchaToken(action);
         // Token is obtained and validated, proceed with authentication
-        // Note: You may want to send this token to your backend for verification
       } catch (recaptchaError) {
-        console.error("reCAPTCHA Enterprise error:", recaptchaError);
-        // For now, we'll continue with auth even if reCAPTCHA fails
-        // In production, you might want to block the request
+        // Continue with auth even if reCAPTCHA fails
       }
 
       if (isLogin) {
@@ -114,10 +149,9 @@ const LoginModal = ({ isOpen, onClose }) => {
     try {
       // Get reCAPTCHA Enterprise token for Google login
       try {
-        const recaptchaToken = await getRecaptchaToken("GOOGLE_LOGIN");
-        console.log("reCAPTCHA Enterprise token obtained for Google login");
+        await getRecaptchaToken("GOOGLE_LOGIN");
       } catch (recaptchaError) {
-        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+        // Continue with auth even if reCAPTCHA fails
       }
 
       await signInWithPopup(auth, googleProvider);
@@ -136,10 +170,9 @@ const LoginModal = ({ isOpen, onClose }) => {
     try {
       // Get reCAPTCHA Enterprise token for Facebook login
       try {
-        const recaptchaToken = await getRecaptchaToken("FACEBOOK_LOGIN");
-        console.log("reCAPTCHA Enterprise token obtained for Facebook login");
+        await getRecaptchaToken("FACEBOOK_LOGIN");
       } catch (recaptchaError) {
-        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+        // Continue with auth even if reCAPTCHA fails
       }
 
       await signInWithPopup(auth, facebookProvider);
@@ -157,22 +190,36 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      // Get reCAPTCHA Enterprise token first
-      let recaptchaToken;
-      try {
-        recaptchaToken = await getRecaptchaToken("PHONE_LOGIN");
-        console.log("reCAPTCHA Enterprise token obtained");
-      } catch (recaptchaError) {
-        console.error("reCAPTCHA Enterprise error:", recaptchaError);
-        // Fallback to Firebase's built-in reCAPTCHA if Enterprise fails
-        console.warn("Falling back to Firebase's built-in reCAPTCHA");
-      }
-
-      const verifier = initializeRecaptcha();
+      // Validate phone number before proceeding
       const phoneNumber = `+${countryCode}${phone}`;
       
-      // If we have an Enterprise token, we can pass it via the verifier
-      // Firebase will use the Enterprise token if available
+      // Verify phone number format
+      if (!phoneNumber || phoneNumber.length < 10) {
+        throw new Error("Please enter a valid phone number");
+      }
+      
+      if (!countryCode || !phone) {
+        throw new Error("Please enter both country code and phone number");
+      }
+      
+      // CRITICAL: Ensure reCAPTCHA container exists in DOM before proceeding
+      // Container must be mounted: <div id="recaptcha-container"></div>
+      const container = document.getElementById("recaptcha-container");
+      if (!container) {
+        throw new Error(
+          "reCAPTCHA container not found in DOM. " +
+          "The container must be rendered before calling signInWithPhoneNumber."
+        );
+      }
+      
+      // Initialize Firebase's RecaptchaVerifier (not Enterprise)
+      // Firebase phone auth uses its own reCAPTCHA system
+      const verifier = initializeRecaptcha();
+      
+      // Small delay to ensure reCAPTCHA is ready (especially on mobile)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Call signInWithPhoneNumber as per Firebase documentation
       const confirmation = await signInWithPhoneNumber(
         auth,
         phoneNumber,
@@ -181,54 +228,18 @@ const LoginModal = ({ isOpen, onClose }) => {
       setConfirmationResult(confirmation);
       setShowPhoneVerification(true);
     } catch (error) {
-      console.error("Phone authentication error:", error);
-      console.error("Error details:", {
-        code: error.code,
-        message: error.message,
-        customData: error.customData,
-        stack: error.stack
-      });
-      
       // Handle specific Firebase errors
       const errorCode = error.code || error.message;
       setError(getErrorMessage(errorCode));
       
       // Clear reCAPTCHA on error
-      if (recaptchaVerifier) {
-        recaptchaVerifier.clear();
-        setRecaptchaVerifier(null);
-      }
-      
-      // If it's an app credential error, provide additional guidance
-      if (errorCode?.includes("app-credential") || errorCode?.includes("INVALID_APP_CREDENTIAL")) {
-        console.error("❌ INVALID_APP_CREDENTIAL Error Detected!");
-        console.error("This error is almost always caused by API key restrictions in Google Cloud Console.");
-        console.error("");
-        console.error("🔧 IMMEDIATE FIX REQUIRED:");
-        console.error("1. Go to: https://console.cloud.google.com/apis/credentials");
-        console.error("2. Select project: miloapp-d189a");
-        console.error("3. Find API key: AIzaSyCYlmxnQzbhZ9hFArTifCIUr4-vLEjqXx8");
-        console.error("4. Click to edit");
-        console.error("5. Under 'Application restrictions':");
-        console.error("   - Set to 'None' (for testing) OR");
-        console.error("   - Add HTTP referrer: http://localhost:3000/*");
-        console.error("6. Under 'API restrictions':");
-        console.error("   - Set to 'Don't restrict key' (for testing) OR");
-        console.error("   - Ensure 'Identity Toolkit API' is enabled");
-        console.error("7. Save and wait 2-5 minutes");
-        console.error("8. Clear browser cache and try again");
-        console.error("");
-        console.error("📋 Also verify:");
-        console.error("- Phone authentication is enabled in Firebase Console");
-        console.error("- Domain 'localhost' is in authorized domains");
-      }
-      
-      // If it's a reCAPTCHA error, provide additional guidance
-      if (errorCode?.includes("captcha") || errorCode?.includes("CAPTCHA_CHECK_FAILED")) {
-        console.error("reCAPTCHA verification failed. Please verify:");
-        console.error("1. Domain is authorized in Firebase Console");
-        console.error("2. reCAPTCHA site key is configured for this domain");
-        console.error("3. Current origin:", window.location.origin);
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (clearError) {
+          // Silently handle error
+        }
+        window.recaptchaVerifier = null;
       }
     } finally {
       setLoading(false);
@@ -247,9 +258,9 @@ const LoginModal = ({ isOpen, onClose }) => {
       setCountryCode("");
       setVerificationCode("");
       setShowPhoneVerification(false);
-      if (recaptchaVerifier) {
-        recaptchaVerifier.clear();
-        setRecaptchaVerifier(null);
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
       }
     } catch (error) {
       setError("Invalid verification code. Please try again.");
@@ -319,9 +330,9 @@ const LoginModal = ({ isOpen, onClose }) => {
     setError("");
     setShowPhoneVerification(false);
     setConfirmationResult(null);
-    if (recaptchaVerifier) {
-      recaptchaVerifier.clear();
-      setRecaptchaVerifier(null);
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
     }
   };
 
@@ -558,6 +569,8 @@ const LoginModal = ({ isOpen, onClose }) => {
               </form>
             )}
 
+            {/* CRITICAL: reCAPTCHA container MUST always be in DOM */}
+            {/* Do not conditionally render - must be mounted before signInWithPhoneNumber */}
             <div id="recaptcha-container"></div>
           </div>
         </div>

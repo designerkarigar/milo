@@ -103,12 +103,11 @@ export const Navbar = () => {
                 <button
                   onClick={handleLoginClick}
                   className="list-item login-btn"
-                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
                 >
                   Login
                 </button>
               )}
-              <a href="/login" className="list-item register-btn">
+              <a href="/login" className="list-item register-btn" style={{ display: "none" }}>
                 Sign In
               </a>
             </ul>
@@ -170,7 +169,7 @@ export const Navbar = () => {
               Login
             </button>
           )}
-          <a href="/login" className="res-register-btn" style={{ marginTop: "10px" }}>
+          <a href="/login" className="res-register-btn" style={{ marginTop: "10px", display: "none" }}>
             Sign In
           </a>
         </div>

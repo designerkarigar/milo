@@ -29,7 +29,6 @@ const waitForAuth = () => {
 const getAuthToken = async () => {
   // Wait for auth to be ready first
   const currentUser = await waitForAuth();
-  console.log("currentUser222", currentUser);
   
   if (currentUser) {
     try {

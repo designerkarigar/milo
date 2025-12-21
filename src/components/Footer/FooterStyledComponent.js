@@ -48,87 +48,15 @@ export const StyledFooter = styled.div`
     pointer-events: none;
   }
 
-  .footer-paws .paw-path {
-    animation: pawMove 3s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  .footer-paws .paw-path:nth-child(1) {
-    animation-delay: 0s;
-  }
-  .footer-paws .paw-path:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .footer-paws .paw-path:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  .footer-paws .paw-path:nth-child(4) {
-    animation-delay: 0.45s;
-  }
-  .footer-paws .paw-path:nth-child(5) {
-    animation-delay: 0.6s;
-  }
-  .footer-paws .paw-path:nth-child(6) {
-    animation-delay: 0.75s;
-  }
-  .footer-paws .paw-path:nth-child(7) {
-    animation-delay: 0.9s;
-  }
-  .footer-paws .paw-path:nth-child(8) {
-    animation-delay: 1.05s;
-  }
-  .footer-paws .paw-path:nth-child(9) {
-    animation-delay: 1.2s;
-  }
-  .footer-paws .paw-path:nth-child(10) {
-    animation-delay: 1.35s;
-  }
-  .footer-paws .paw-path:nth-child(11) {
-    animation-delay: 1.5s;
-  }
-  .footer-paws .paw-path:nth-child(12) {
-    animation-delay: 1.65s;
-  }
-  .footer-paws .paw-path:nth-child(13) {
-    animation-delay: 1.8s;
-  }
-  .footer-paws .paw-path:nth-child(14) {
-    animation-delay: 1.95s;
-  }
-  .footer-paws .paw-path:nth-child(15) {
-    animation-delay: 2.1s;
-  }
-  .footer-paws .paw-path:nth-child(16) {
-    animation-delay: 2.25s;
-  }
-  .footer-paws .paw-path:nth-child(17) {
-    animation-delay: 2.4s;
-  }
-  .footer-paws .paw-path:nth-child(18) {
-    animation-delay: 2.55s;
-  }
-  .footer-paws .paw-path:nth-child(19) {
-    animation-delay: 2.7s;
-  }
-  .footer-paws .paw-path:nth-child(20) {
-    animation-delay: 2.85s;
-  }
-  .footer-paws .paw-path:nth-child(n+21) {
-    animation-delay: 3s;
-  }
-
-  @keyframes pawMove {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    25% {
-      transform: translate(4px, -6px);
-    }
-    50% {
-      transform: translate(-3px, 5px);
-    }
-    75% {
-      transform: translate(3px, -4px);
+  .footer-paws {
+    /* All animations disabled - keeping static */
+    animation: none !important;
+    
+    .paw-path {
+      /* Animation removed - keeping static */
+      animation: none !important;
+      transform: none !important;
+      transform-origin: center;
     }
   }
 
@@ -142,12 +70,23 @@ export const StyledFooter = styled.div`
     background-image: url();
     position: relative;
     z-index: 1;
+    /* Ensure no animations in footer content area */
+    animation: none !important;
+    
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 
   .heading-con {
+    animation: none !important;
+    
     h1 {
       color: white;
       font-size: 3rem;
+      animation: none !important;
+      transform: none !important;
     }
   }
 
@@ -158,14 +97,15 @@ export const StyledFooter = styled.div`
     flex-direction: row;
     align-items: center;
     width: 100%;
+    animation: none !important;
   }
 
   .contact-list {
     display: flex;
     flex-direction: column;
     justify-content: center;
-
     list-style: none;
+    animation: none !important;
 
     li,
     a {
@@ -174,11 +114,15 @@ export const StyledFooter = styled.div`
       padding: 5px 0px;
       font-size: 18px;
       cursor: pointer;
+      animation: none !important;
+      transform: none !important;
     }
   }
 
   .footer-icon {
     margin-right: 20px;
+    animation: none !important;
+    transform: none !important;
   }
 
   .footer-nav {
@@ -186,6 +130,7 @@ export const StyledFooter = styled.div`
     display: flex;
     justify-content: center;
     flex-direction: column;
+    animation: none !important;
   }
 
   .footer-navbar {
@@ -196,6 +141,7 @@ export const StyledFooter = styled.div`
     list-style: none;
     flex-wrap: wrap;
     row-gap: 10px;
+    animation: none !important;
 
     li,
     a {
@@ -209,6 +155,8 @@ export const StyledFooter = styled.div`
       padding: 0px 15px;
       color: white;
       font-size: 18px;
+      animation: none !important;
+      transform: none !important;
     }
   }
 
@@ -227,6 +175,9 @@ export const StyledFooter = styled.div`
     flex-direction: row;
     justify-content: space-between;
     padding-top: 20px;
+    /* Ensure no animations affect this section */
+    animation: none !important;
+    transform: none !important;
 
     ul {
       display: flex;
@@ -236,16 +187,25 @@ export const StyledFooter = styled.div`
       font-size: 30px;
       color: white;
       align-items: center;
+      /* Ensure no animations */
+      animation: none !important;
+      transform: none !important;
     }
 
     a {
       text-decoration: none;
       color: white;
+      /* Ensure no animations */
+      animation: none !important;
+      transform: none !important;
     }
     p {
       color: white;
       font-size: 20px;
       text-align: center;
+      /* Ensure no animations */
+      animation: none !important;
+      transform: none !important;
     }
   }
 
