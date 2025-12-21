@@ -155,6 +155,31 @@ export const StyledDayCareCard = styled.div`
     font-family: Quicksand;
   }
 
+  .book-now-button {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #f06a8a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: Quicksand;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+
+    &:hover {
+      background-color: #e05a7a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(240, 106, 138, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
   @media (max-width: 600px) {
     width: 100%;
     max-width: 350px;

@@ -1,8 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { StyledCrecheDetailModal } from "./styledComponent";
 import CloseIcon from "@mui/icons-material/Close";
 
 const CrecheDetailModal = ({ creche, isOpen, onClose }) => {
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    onClose();
+    navigate("/booking-checkout", { state: { creche } });
+  };
+
   if (!isOpen || !creche) return null;
 
   const getImageUrl = () => {
@@ -200,6 +208,13 @@ const CrecheDetailModal = ({ creche, isOpen, onClose }) => {
                 </div>
               </div>
             )}
+
+            {/* Book Now Button */}
+            <div className="detail-section">
+              <button className="book-now-button" onClick={handleBookNow}>
+                Book Now
+              </button>
+            </div>
           </div>
         </div>
       </div>

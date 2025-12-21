@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { StyledNavbar } from "./styledComponent";
 import logo from "../../images/milo.logo.svg";
 import burger_icon from "../../images/svgfiles/burger-icon.svg";
+import defaultAvatar from "../../images/Default_pfp.svg.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
@@ -105,6 +106,9 @@ export const Navbar = () => {
     } else if (action === "my-pets") {
       navigate("/my-pets");
       floatNavRemove();
+    } else if (action === "my-bookings") {
+      navigate("/my-bookings");
+      floatNavRemove();
     } else if (action === "settings") {
       navigate("/settings");
       floatNavRemove();
@@ -152,10 +156,13 @@ export const Navbar = () => {
               {currentUser ? (
                 <div ref={avatarRef} className="user-avatar-container">
                   <img
-                    src={userData?.profilePhoto || "https://via.placeholder.com/40"}
+                    src={userData?.profilePhoto || defaultAvatar}
                     alt="User Avatar"
                     className="user-avatar"
                     onClick={() => setShowUserMenu(!showUserMenu)}
+                    onError={(e) => {
+                      e.target.src = defaultAvatar;
+                    }}
                   />
                   {showUserMenu && (
                     <div className="user-menu">
@@ -164,6 +171,12 @@ export const Navbar = () => {
                         onClick={() => handleMenuClick("my-pets")}
                       >
                         My Pets
+                      </button>
+                      <button
+                        className="user-menu-item"
+                        onClick={() => handleMenuClick("my-bookings")}
+                      >
+                        My Bookings
                       </button>
                       <button
                         className="user-menu-item"
@@ -228,13 +241,14 @@ export const Navbar = () => {
           </ul>
           {currentUser ? (
             <div className="res-user-section">
-              {userData?.profilePhoto && (
-                <img
-                  src={userData.profilePhoto}
-                  alt="User Avatar"
-                  className="res-user-avatar"
-                />
-              )}
+              <img
+                src={userData?.profilePhoto || defaultAvatar}
+                alt="User Avatar"
+                className="res-user-avatar"
+                onError={(e) => {
+                  e.target.src = defaultAvatar;
+                }}
+              />
               <button
                 onClick={() => {
                   handleLogout();

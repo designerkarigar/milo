@@ -12,6 +12,9 @@ import Events from "./pages/Events/index";
 import PortalBlogs from "./pages/Portal/PortalBlogs";
 import PortalView from "./pages/PortalView/index";
 import MyPetsPage from "./pages/MyPets/index";
+import PetProfilePage from "./pages/PetProfile/index";
+import MyBookingsPage from "./pages/MyBookings/index";
+import BookingCheckoutPage from "./pages/BookingCheckout/index";
 import PanelLogin from "./Panel/pages/Login";
 import Register from "./Panel/pages/Register";
 import Dashboard from "./Panel/pages/Dashboard";
@@ -76,6 +79,18 @@ export const routesConfig = [
   {
     path: "/my-pets",
     Component: MyPetsPage,
+  },
+  {
+    path: "/my-bookings",
+    Component: MyBookingsPage,
+  },
+  {
+    path: "/pet/:petId",
+    Component: PetProfilePage,
+  },
+  {
+    path: "/booking-checkout",
+    Component: BookingCheckoutPage,
   },
   {
     path: "register",

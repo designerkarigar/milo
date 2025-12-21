@@ -267,11 +267,13 @@ export const StyledNavbar = styled.div`
     object-fit: cover;
     cursor: pointer;
     border: 2px solid white;
-    transition: all 0.3s ease;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
 
     &:hover {
-      transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transform: none !important;
+      box-shadow: none !important;
     }
   }
 

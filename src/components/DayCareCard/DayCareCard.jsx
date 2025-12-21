@@ -1,7 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { StyledDayCareCard } from "./styledComponent";
 
 const DayCareCard = ({ creche, onClick }) => {
+  const navigate = useNavigate();
+
+  const handleBookNow = (e) => {
+    e.stopPropagation(); // Prevent card click
+    navigate("/booking-checkout", { state: { creche } });
+  };
   // Get the first photo that's not an ID proof, or use profile photo
   const getImageUrl = () => {
     if (creche.profilePhoto) {
@@ -58,6 +65,9 @@ const DayCareCard = ({ creche, onClick }) => {
             )}
           </div>
         )}
+        <button className="book-now-button" onClick={handleBookNow}>
+          Book Now
+        </button>
       </div>
     </StyledDayCareCard>
   );
