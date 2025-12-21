@@ -1,11 +1,36 @@
 import axios from "axios";
 import { BaseUrl } from "../../Constants/Url";
 import { auth } from "../../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+
+// Helper function to wait for auth to be ready
+const waitForAuth = () => {
+  return new Promise((resolve) => {
+    if (auth.currentUser) {
+      resolve(auth.currentUser);
+      return;
+    }
+    
+    // Wait for auth state to be ready
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe(); // Unsubscribe after first change
+      resolve(user);
+    });
+    
+    // Timeout after 5 seconds
+    setTimeout(() => {
+      unsubscribe();
+      resolve(auth.currentUser);
+    }, 5000);
+  });
+};
 
 // Helper function to get auth token (Firebase or localStorage)
 const getAuthToken = async () => {
-  // First try to get Firebase token
-  const currentUser = auth.currentUser;
+  // Wait for auth to be ready first
+  const currentUser = await waitForAuth();
+  console.log("currentUser", currentUser);
+  
   if (currentUser) {
     try {
       const token = await currentUser.getIdToken();

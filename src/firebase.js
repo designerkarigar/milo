@@ -41,11 +41,28 @@ const firebaseConfig = {
     measurementId: "G-S199WPTLLQ"
 };
 
-// Debug: Log configuration (without exposing full API key in production)
+// Validate configuration before initialization
+if (!firebaseConfig.apiKey) {
+    throw new Error("Firebase API key is missing. Check REACT_APP_FIREBASE_API_KEY environment variable.");
+}
+
+if (!firebaseConfig.appId) {
+    throw new Error("Firebase App ID is missing. Check REACT_APP_FIREBASE_APP_ID environment variable.");
+}
+
+// Debug: Log configuration (without exposing full API key)
 if (process.env.NODE_ENV === "development") {
     console.log("Firebase Config:", {
-        ...firebaseConfig,
         apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : "missing",
+        authDomain: firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId,
+        appId: firebaseConfig.appId,
+        messagingSenderId: firebaseConfig.messagingSenderId,
+    });
+    console.log("Environment variables check:", {
+        hasApiKey: !!process.env.REACT_APP_FIREBASE_API_KEY,
+        hasAppId: !!process.env.REACT_APP_FIREBASE_APP_ID,
+        rawAppId: process.env.REACT_APP_FIREBASE_APP_ID,
     });
 }
 
@@ -57,5 +74,10 @@ export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+
+// Import diagnostics (runs automatically in development)
+if (process.env.NODE_ENV === "development") {
+    import("./utils/firebaseDiagnostics");
+}
 
 export default app;

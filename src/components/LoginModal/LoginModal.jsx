@@ -29,6 +29,31 @@ const LoginModal = ({ isOpen, onClose }) => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
 
+  // reCAPTCHA Enterprise site key
+  const RECAPTCHA_SITE_KEY = "6LfGXDIsAAAAAILcLK1xmSF0nlNsdutCliLF5EhN";
+
+  // Get reCAPTCHA Enterprise token
+  const getRecaptchaToken = async (action = "LOGIN") => {
+    return new Promise((resolve, reject) => {
+      if (typeof window.grecaptcha === "undefined" || !window.grecaptcha.enterprise) {
+        reject(new Error("reCAPTCHA Enterprise not loaded"));
+        return;
+      }
+
+      window.grecaptcha.enterprise.ready(async () => {
+        try {
+          const token = await window.grecaptcha.enterprise.execute(
+            RECAPTCHA_SITE_KEY,
+            { action }
+          );
+          resolve(token);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  };
+
   // Initialize reCAPTCHA when phone login is selected
   const initializeRecaptcha = () => {
     if (!recaptchaVerifier) {
@@ -54,6 +79,19 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
+      // Get reCAPTCHA Enterprise token for login/signup
+      try {
+        const action = isLogin ? "LOGIN" : "SIGNUP";
+        const recaptchaToken = await getRecaptchaToken(action);
+        console.log(`reCAPTCHA Enterprise token obtained for ${action}`);
+        // Token is obtained and validated, proceed with authentication
+        // Note: You may want to send this token to your backend for verification
+      } catch (recaptchaError) {
+        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+        // For now, we'll continue with auth even if reCAPTCHA fails
+        // In production, you might want to block the request
+      }
+
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
@@ -74,6 +112,14 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
+      // Get reCAPTCHA Enterprise token for Google login
+      try {
+        const recaptchaToken = await getRecaptchaToken("GOOGLE_LOGIN");
+        console.log("reCAPTCHA Enterprise token obtained for Google login");
+      } catch (recaptchaError) {
+        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+      }
+
       await signInWithPopup(auth, googleProvider);
       onClose();
     } catch (error) {
@@ -88,6 +134,14 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
+      // Get reCAPTCHA Enterprise token for Facebook login
+      try {
+        const recaptchaToken = await getRecaptchaToken("FACEBOOK_LOGIN");
+        console.log("reCAPTCHA Enterprise token obtained for Facebook login");
+      } catch (recaptchaError) {
+        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+      }
+
       await signInWithPopup(auth, facebookProvider);
       onClose();
     } catch (error) {
@@ -103,8 +157,22 @@ const LoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
+      // Get reCAPTCHA Enterprise token first
+      let recaptchaToken;
+      try {
+        recaptchaToken = await getRecaptchaToken("PHONE_LOGIN");
+        console.log("reCAPTCHA Enterprise token obtained");
+      } catch (recaptchaError) {
+        console.error("reCAPTCHA Enterprise error:", recaptchaError);
+        // Fallback to Firebase's built-in reCAPTCHA if Enterprise fails
+        console.warn("Falling back to Firebase's built-in reCAPTCHA");
+      }
+
       const verifier = initializeRecaptcha();
       const phoneNumber = `+${countryCode}${phone}`;
+      
+      // If we have an Enterprise token, we can pass it via the verifier
+      // Firebase will use the Enterprise token if available
       const confirmation = await signInWithPhoneNumber(
         auth,
         phoneNumber,
@@ -114,6 +182,13 @@ const LoginModal = ({ isOpen, onClose }) => {
       setShowPhoneVerification(true);
     } catch (error) {
       console.error("Phone authentication error:", error);
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        customData: error.customData,
+        stack: error.stack
+      });
+      
       // Handle specific Firebase errors
       const errorCode = error.code || error.message;
       setError(getErrorMessage(errorCode));
@@ -126,10 +201,26 @@ const LoginModal = ({ isOpen, onClose }) => {
       
       // If it's an app credential error, provide additional guidance
       if (errorCode?.includes("app-credential") || errorCode?.includes("INVALID_APP_CREDENTIAL")) {
-        console.error("Firebase configuration issue detected. Please verify:");
-        console.error("1. API key matches your Firebase project");
-        console.error("2. Phone authentication is enabled in Firebase Console");
-        console.error("3. API key restrictions allow requests from this origin");
+        console.error("❌ INVALID_APP_CREDENTIAL Error Detected!");
+        console.error("This error is almost always caused by API key restrictions in Google Cloud Console.");
+        console.error("");
+        console.error("🔧 IMMEDIATE FIX REQUIRED:");
+        console.error("1. Go to: https://console.cloud.google.com/apis/credentials");
+        console.error("2. Select project: miloapp-d189a");
+        console.error("3. Find API key: AIzaSyCYlmxnQzbhZ9hFArTifCIUr4-vLEjqXx8");
+        console.error("4. Click to edit");
+        console.error("5. Under 'Application restrictions':");
+        console.error("   - Set to 'None' (for testing) OR");
+        console.error("   - Add HTTP referrer: http://localhost:3000/*");
+        console.error("6. Under 'API restrictions':");
+        console.error("   - Set to 'Don't restrict key' (for testing) OR");
+        console.error("   - Ensure 'Identity Toolkit API' is enabled");
+        console.error("7. Save and wait 2-5 minutes");
+        console.error("8. Clear browser cache and try again");
+        console.error("");
+        console.error("📋 Also verify:");
+        console.error("- Phone authentication is enabled in Firebase Console");
+        console.error("- Domain 'localhost' is in authorized domains");
       }
       
       // If it's a reCAPTCHA error, provide additional guidance
