@@ -1,12 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { StyledCrecheDetailModal } from "./styledComponent";
 import CloseIcon from "@mui/icons-material/Close";
 
-const CrecheDetailModal = ({ creche, isOpen, onClose }) => {
+const CrecheDetailModal = ({ creche, isOpen, onClose, onLoginRequired }) => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const handleBookNow = () => {
+    if (!currentUser) {
+      // User not logged in, trigger login modal
+      onClose();
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    
     onClose();
     navigate("/booking-checkout", { state: { creche } });
   };

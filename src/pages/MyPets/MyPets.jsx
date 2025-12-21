@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { getPets } from "../../utils/Functions/Pets/getPets";
@@ -10,14 +11,20 @@ import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons
 
 export const MyPetsPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
 
   useEffect(() => {
+    // Redirect to home if not logged in
+    if (!currentUser) {
+      navigate("/home");
+      return;
+    }
     fetchPets();
-  }, []);
+  }, [currentUser, navigate]);
 
   const fetchPets = async () => {
     try {

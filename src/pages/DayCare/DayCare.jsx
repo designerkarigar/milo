@@ -4,6 +4,7 @@ import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import DayCareCard from "../../components/DayCareCard";
 import CrecheDetailModal from "../../components/CrecheDetailModal";
+import { LoginModal } from "../../components/LoginModal";
 import { getCreches } from "../../utils/Functions/creche/getCreches";
 import { FadeLoader } from "react-spinners";
 
@@ -13,6 +14,7 @@ export const DayCare = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedCreche, setSelectedCreche] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const pageSize = 20;
 
@@ -107,6 +109,7 @@ export const DayCare = () => {
                     key={creche.uid || index}
                     creche={creche}
                     onClick={() => handleCardClick(creche)}
+                    onLoginRequired={() => setIsLoginModalOpen(true)}
                   />
                 ))}
               </div>
@@ -143,6 +146,15 @@ export const DayCare = () => {
         creche={selectedCreche}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onLoginRequired={() => {
+          setIsModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
 
       <NewFooter />

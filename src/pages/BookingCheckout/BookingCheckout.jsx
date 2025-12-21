@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { createCrecheBooking } from "../../utils/Functions/Bookings/createCrecheBooking";
@@ -11,7 +12,20 @@ import { faCalendarAlt, faClock, faPaw, faCheckCircle } from "@fortawesome/free-
 export const BookingCheckoutPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const creche = location.state?.creche;
+
+  useEffect(() => {
+    // Redirect to daycare page if not logged in or no creche data
+    if (!currentUser) {
+      navigate("/daycare");
+      return;
+    }
+    if (!creche) {
+      navigate("/daycare");
+      return;
+    }
+  }, [currentUser, creche, navigate]);
   
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");

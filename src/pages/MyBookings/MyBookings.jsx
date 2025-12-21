@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { getBookings } from "../../utils/Functions/Bookings/getBookings";
@@ -10,6 +11,7 @@ import { faCalendarAlt, faClock, faPaw, faHospital, faHome, faHandHoldingHeart, 
 
 export const MyBookingsPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -17,8 +19,13 @@ export const MyBookingsPage = () => {
   const pageSize = 20;
 
   useEffect(() => {
+    // Redirect to home if not logged in
+    if (!currentUser) {
+      navigate("/home");
+      return;
+    }
     fetchBookings(currentPage);
-  }, [currentPage]);
+  }, [currentPage, currentUser, navigate]);
 
   const fetchBookings = async (pageNo) => {
     try {

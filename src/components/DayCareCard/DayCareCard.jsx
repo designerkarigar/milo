@@ -1,12 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { StyledDayCareCard } from "./styledComponent";
 
-const DayCareCard = ({ creche, onClick }) => {
+const DayCareCard = ({ creche, onClick, onLoginRequired }) => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const handleBookNow = (e) => {
     e.stopPropagation(); // Prevent card click
+    
+    if (!currentUser) {
+      // User not logged in, trigger login modal
+      if (onLoginRequired) {
+        onLoginRequired();
+      }
+      return;
+    }
+    
     navigate("/booking-checkout", { state: { creche } });
   };
   // Get the first photo that's not an ID proof, or use profile photo

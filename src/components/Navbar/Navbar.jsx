@@ -104,12 +104,24 @@ export const Navbar = () => {
     if (action === "logout") {
       handleLogout();
     } else if (action === "my-pets") {
+      if (!currentUser) {
+        setIsLoginModalOpen(true);
+        return;
+      }
       navigate("/my-pets");
       floatNavRemove();
     } else if (action === "my-bookings") {
+      if (!currentUser) {
+        setIsLoginModalOpen(true);
+        return;
+      }
       navigate("/my-bookings");
       floatNavRemove();
     } else if (action === "settings") {
+      if (!currentUser) {
+        setIsLoginModalOpen(true);
+        return;
+      }
       navigate("/settings");
       floatNavRemove();
     }

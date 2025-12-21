@@ -47,15 +47,15 @@ const getAuthToken = async () => {
 export const getVets = async (pageNo = 0, pageSize = 20) => {
   const token = await getAuthToken();
   
-  if (!token) {
-    throw new Error("No authentication token available");
-  }
-
+  // Token is optional - API works without authentication
   const config = {
-    headers: {
-      token: token,
-    },
+    headers: {},
   };
+
+  // Only add token header if available
+  if (token) {
+    config.headers.token = token;
+  }
 
   try {
     const userInfo = await axios.get(
