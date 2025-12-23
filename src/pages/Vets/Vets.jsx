@@ -9,6 +9,9 @@ import { getVets } from "../../utils/Functions/Vets/getVets";
 import { FadeLoader } from "react-spinners";
 import { VetStyledComponent } from "./styledComponent";
 import { SEO } from "../../components/SEO";
+import { useLocation } from "../../utils/hooks/useLocation";
+import { SearchBox } from "../../components/SearchBox";
+import { INDIAN_CITIES } from "../../utils/Constants/IndianCities";
 
 export const VetsPage = () => {
   const structuredData = {
@@ -29,24 +32,113 @@ export const VetsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [hasTriedFallback, setHasTriedFallback] = useState(false);
+  const [useLocationFilter, setUseLocationFilter] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cityFilter, setCityFilter] = useState(null);
   const pageSize = 20;
+  
+  // Get user location
+  const { location, locationError, isLocationLoading } = useLocation();
 
   useEffect(() => {
-    fetchVets(currentPage);
-  }, [currentPage]);
+    // Wait for location to be determined (either loaded or failed) before fetching
+    if (!isLocationLoading) {
+      fetchVets(currentPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, isLocationLoading, searchQuery, cityFilter]);
+
+  // Reset fallback flag only when location changes (not on every page 0 visit)
+  useEffect(() => {
+    // Reset when location becomes available (first time)
+    if (!isLocationLoading && location.lat !== null && location.long !== null) {
+      setHasTriedFallback(false);
+      setUseLocationFilter(true);
+    }
+  }, [isLocationLoading, location.lat, location.long]);
+
+  // Reset to page 0 when search changes
+  useEffect(() => {
+    setCurrentPage(0);
+    setHasTriedFallback(false);
+  }, [searchQuery, cityFilter]);
 
   const fetchVets = async (pageNo) => {
     try {
       setLoading(true);
-      const data = await getVets(pageNo, pageSize);
-      setVets(data);
-      // If we got less than pageSize items, there are no more pages
-      setHasMore(data.length === pageSize);
+      // Determine if we should use location (only if no city filter is active)
+      const shouldUseLocation = useLocationFilter && location.lat !== null && location.long !== null && !cityFilter;
+      
+      // Check if search query matches a city name (case-insensitive)
+      const isCitySearch = searchQuery && INDIAN_CITIES.some(
+        city => city.toLowerCase() === searchQuery.toLowerCase()
+      );
+      
+      // Determine city and search query
+      const city = cityFilter || (isCitySearch ? searchQuery : null);
+      const generalSearch = isCitySearch ? null : searchQuery;
+      
+      // Pass lat and long if available and we want to use location
+      const data = await getVets(
+        pageNo, 
+        pageSize, 
+        shouldUseLocation ? location.lat : null, 
+        shouldUseLocation ? location.long : null,
+        generalSearch,
+        city
+      );
+      
+      // Fallback logic: if no results found on first page with location, try without location
+      if (data.length === 0 && pageNo === 0 && shouldUseLocation && !hasTriedFallback && !cityFilter && !searchQuery) {
+        setHasTriedFallback(true);
+        setUseLocationFilter(false);
+        // Retry without location filter
+        const fallbackData = await getVets(pageNo, pageSize, null, null, null, null);
+        setVets(fallbackData);
+        setHasMore(fallbackData.length === pageSize);
+      } else {
+        setVets(data);
+        setHasMore(data.length === pageSize);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error("Error fetching vets:", error);
-      alert("Error loading vets. Please try again later.");
-      setLoading(false);
+      // If error occurs with location, try fallback
+      if (useLocationFilter && location.lat !== null && location.long !== null && !hasTriedFallback && currentPage === 0 && !cityFilter && !searchQuery) {
+        setHasTriedFallback(true);
+        setUseLocationFilter(false);
+        try {
+          const fallbackData = await getVets(pageNo, pageSize, null, null, null, null);
+          setVets(fallbackData);
+          setHasMore(fallbackData.length === pageSize);
+          setLoading(false);
+        } catch (fallbackError) {
+          console.error("Error fetching vets (fallback):", fallbackError);
+          alert("Error loading vets. Please try again later.");
+          setLoading(false);
+        }
+      } else {
+        alert("Error loading vets. Please try again later.");
+        setLoading(false);
+      }
+    }
+  };
+
+  // Handle search
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    
+    // Check if query matches a city
+    const matchedCity = INDIAN_CITIES.find(
+      city => city.toLowerCase() === query.toLowerCase()
+    );
+    
+    if (matchedCity) {
+      setCityFilter(matchedCity);
+    } else {
+      setCityFilter(null);
     }
   };
 
@@ -123,6 +215,11 @@ export const VetsPage = () => {
         </div>
 
         <div className="vet-content">
+          <SearchBox 
+            onSearch={handleSearch}
+            placeholder="Search vets by name, city (e.g., Noida, Mumbai), or services..."
+          />
+          
           {loading ? (
             <div className="loading-container">
               <FadeLoader color="#0066BA" />

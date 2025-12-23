@@ -1,0 +1,30 @@
+// Common Indian cities for autocomplete suggestions
+export const INDIAN_CITIES = [
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai",
+  "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur",
+  "Indore", "Thane", "Bhopal", "Visakhapatnam", "Patna", "Vadodara",
+  "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad", "Meerut",
+  "Rajkot", "Varanasi", "Srinagar", "Amritsar", "Noida", "Ranchi",
+  "Chandigarh", "Raipur", "Gwalior", "Jodhpur", "Coimbatore", "Madurai",
+  "Guwahati", "Solapur", "Tiruchirappalli", "Hubli", "Jalandhar", "Bhubaneswar",
+  "Salem", "Warangal", "Mira-Bhayandar", "Thiruvananthapuram", "Bhiwandi",
+  "Saharanpur", "Guntur", "Amravati", "Bikaner", "Noida", "Jamshedpur",
+  "Bhilai", "Cuttack", "Firozabad", "Kochi", "Nellore", "Bhavnagar",
+  "Dehradun", "Durgapur", "Asansol", "Rourkela", "Nanded", "Kolhapur",
+  "Ajmer", "Akola", "Gulbarga", "Jamnagar", "Ujjain", "Loni", "Siliguri",
+  "Jhansi", "Ulhasnagar", "Jammu", "Sangli-Miraj", "Mangalore", "Erode",
+  "Belgaum", "Ambattur", "Tirunelveli", "Malegaon", "Gaya", "Udaipur",
+  "Korba", "Bokaro", "Rajahmundry", "Bellary", "Patiala", "Agartala",
+  "Muzaffarpur", "Bhatpara", "Panihati", "Latur", "Dhule", "Rohtak",
+  "Koratla", "Karimnagar", "Bhagalpur", "Muzaffarnagar", "Bardhaman",
+  "Kollam", "Tumkur", "Shimoga", "Alwar", "Barddhaman", "Kadapa",
+  "Kamarhati", "Bilaspur", "Shahjahanpur", "Bijapur", "Rampur",
+  "Shivamogga", "Chandrapur", "Junagadh", "Thrissur", "Aligarh",
+  "Bharatpur", "Haldia", "Habra", "Ratlam", "Dibrugarh", "Baranagar",
+  "Purnia", "Bhiwani", "Naihati", "Yamunanagar", "Bidhannagar",
+  "Parbhani", "Panchkula", "Baidyabati", "Munger", "Baharampur",
+  "Port Blair", "Panaji", "Itanagar", "Dispur", "Shillong", "Aizawl",
+  "Kohima", "Imphal", "Agartala", "Gangtok", "Kavaratti", "Daman",
+  "Silvassa", "Pondicherry", "Karaikal", "Mahe", "Yanam"
+].sort(); // Sort alphabetically for easier searching
+
