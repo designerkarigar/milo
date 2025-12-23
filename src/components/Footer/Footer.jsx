@@ -317,8 +317,12 @@ export const Footer = () => {
             <div className="footer-nav">
               <ul className="footer-navbar">
                 <Link to="/home">Home</Link>
+                <Link to="/vets">Find Vets</Link>
+                <Link to="/daycare">Pet Daycare Creches</Link>
+                <Link to="/match-making">Pet Breeding & Matching</Link>
                 <Link to="/events">Events</Link>
-                <Link to="/blogs">Blogs</Link>
+                <Link to="/blogs">Pet Care Blog</Link>
+                <Link to="/marketplace">Marketplace</Link>
                 <Link to="/privacy_policy">Privacy Policy</Link>
                 <Link to="/terms">Terms & Conditions</Link>
               </ul>

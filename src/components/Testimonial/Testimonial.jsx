@@ -11,7 +11,7 @@ export const Testimonial = () => {
           <div className="test-heading">
             <h1>
               {" "}
-              <span className="yellow">LARGEST</span> PROVIDES OF DOG
+              <span className="yellow">LARGEST</span> PROVIDER OF DOG
               <br />
               SERVICES IN INDIA
             </h1>
@@ -55,7 +55,9 @@ export const Testimonial = () => {
               veterinary care, and early socialization to ensure the well-being
               and happiness of puppies and kittens. Our team is dedicated to
               their holistic development, setting them on a path to a lifetime
-              of happiness."
+              of happiness. We connect pet owners with trusted vets, premium pet creches, 
+              responsible breeding services, and partner with pet NGOs to ensure 
+              the best care for all dogs, cats, and pets."
             </p>
           </div>
 

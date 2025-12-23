@@ -34,7 +34,11 @@ export const BlogSection = () => {
               are crafted with love, dedicated to honouring them for the
               happiness they bring to us. Our expert tips and heartwarming
               content are designed to assist you and your beloved pet in leading
-              your best lives, side by side.
+              your best lives, side by side. Discover comprehensive guides on pet care, 
+              veterinary advice for dogs and cats, pet breeding best practices, and connect 
+              with pet NGOs through our platform. Explore our <Link to="/vets" style={{color: '#0066BA', textDecoration: 'underline'}}>vet services</Link>, 
+              <Link to="/daycare" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet creches</Link>, and 
+              <Link to="/match-making" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>breeding services</Link> for all your pet needs.
             </p>
 
             <Link to="/blogs" className="blog-btn">
@@ -42,7 +46,7 @@ export const BlogSection = () => {
             </Link>
           </div>
           <div className="content-img">
-            <img src={dog_blog} alt="" />
+            <img src={dog_blog} alt="Pet blog about dogs and cats" />
           </div>
         </div>
 
@@ -59,7 +63,7 @@ export const BlogSection = () => {
                       ) || {}
                     ).url
                   }
-                  alt=""
+                  alt={blog.title || "Pet care blog article"}
                 />
               </div>
 

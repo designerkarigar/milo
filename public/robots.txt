@@ -1,0 +1,28 @@
+# robots.txt for Milo Pet Care Platform
+# https://milo.social
+
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /booking-checkout
+Disallow: /vet-booking-checkout
+Disallow: /my-pets
+Disallow: /my-bookings
+
+# Allow important pages for SEO
+Allow: /home
+Allow: /vets
+Allow: /daycare
+Allow: /match-making
+Allow: /blogs
+Allow: /events
+Allow: /marketplace
+
+# Sitemap location (update with your actual sitemap URL when available)
+Sitemap: https://milo.social/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { StyledDayCare } from "./StyledComponent";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
@@ -7,8 +8,20 @@ import CrecheDetailModal from "../../components/CrecheDetailModal";
 import { LoginModal } from "../../components/LoginModal";
 import { getCreches } from "../../utils/Functions/creche/getCreches";
 import { FadeLoader } from "react-spinners";
+import { SEO } from "../../components/SEO";
 
 export const DayCare = () => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "serviceType": "Pet Daycare Services",
+    "provider": {
+      "@type": "Organization",
+      "name": "Milo"
+    },
+    "description": "Find premium pet daycare creches for your dogs and cats. Safe, comfortable pet boarding with personalized care and dedicated staff.",
+    "areaServed": "India"
+  };
   const [creches, setCreches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -63,6 +76,13 @@ export const DayCare = () => {
 
   return (
     <>
+      <SEO
+        title="Pet Daycare Creches for Dogs & Cats | Find Premium Pet Boarding | Milo"
+        description="Discover the perfect pet daycare creches for your furry friends. Find safe, comfortable pet boarding facilities with personalized care, spacious accommodations, and dedicated staff for dogs and cats."
+        keywords="creches, pet creches, pet daycare, dog daycare, cat daycare, pet boarding, pet creche, pet creches near me, dog creche, cat creche, pet daycare services, pet boarding services"
+        url="https://milo.social/daycare"
+        structuredData={structuredData}
+      />
       <StyledDayCare>
         <div className="nav-bar">
           <NewNavbar />
@@ -93,8 +113,15 @@ export const DayCare = () => {
 
         <div className="daycare-content">
           <div className="daycare-heading">
-            <h1>Pet daycare services</h1>
+            <h1>Pet Daycare Creches for Dogs & Cats</h1>
             <h3>"Nurturing your furry loved one, the daycare way!"</h3>
+            <p style={{marginTop: '20px', fontSize: '1.1rem', maxWidth: '800px', margin: '20px auto', textAlign: 'center', color: '#666'}}>
+              Discover premium pet creches offering safe and comfortable boarding for your dogs and cats. 
+              Our verified pet daycare facilities provide personalized care, spacious accommodations, and dedicated staff. 
+              Whether you need short-term pet boarding or long-term daycare services, find the perfect creche for your beloved pets. 
+              Explore our <Link to="/vets" style={{color: '#0066BA', textDecoration: 'underline'}}>veterinary services</Link> and 
+              <Link to="/match-making" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet breeding services</Link> for complete pet care solutions.
+            </p>
           </div>
 
           {loading ? (

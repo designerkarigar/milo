@@ -149,7 +149,7 @@ export const Navbar = () => {
                 </span>
                 <ul className="drop-down">
                   <Link to="/marketplace" className="drop-list-item">
-                    MarketsPlace
+                    Marketplace
                   </Link>
                   <Link to="/match-making" className="drop-list-item">
                     MatchMaking

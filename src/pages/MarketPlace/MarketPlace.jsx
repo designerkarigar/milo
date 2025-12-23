@@ -1,7 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { StyledMarketPlace } from "./StyledComponent";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
+import { SEO } from "../../components/SEO";
 import market_bg from "../../images/svgfiles/marketplace_bg.svg";
 import marketplace_1 from "../../images/svgfiles/marketplace_1.svg";
 import marketplace_2 from "../../images/svgfiles/marketplace_2.svg";
@@ -12,6 +14,12 @@ import pink_thread from "../../images/svgfiles/thread-pink.svg";
 export const MarketPlace = () => {
   return (
     <>
+      <SEO
+        title="Pet Marketplace | Shop for Dogs, Cats & All Pets | Milo"
+        description="Shop for premium pet products, food, and treats for your dogs, cats, and all pets. Discover high-quality pet supplies and accessories at Milo's marketplace."
+        keywords="pet marketplace, pet products, pet food, dog food, cat food, pet supplies, pet accessories, pet treats, pet shop"
+        url="https://milo.social/marketplace"
+      />
       <StyledMarketPlace>
         <div className="market-nav-con">
           <NewNavbar />
@@ -50,37 +58,41 @@ export const MarketPlace = () => {
           </div>
 
           <div className="market-card-con">
-            <img className="market-bg" src={market_bg} alt="" />
+            <img className="market-bg" src={market_bg} alt="Pet marketplace background" />
             <div className="market-card">
               <div className="market-card-text">
                 <h1>Endless Variety of Pet Food and Treats</h1>
                 <p>
                   Select from an outstanding collection of high-quality pet
-                  food. You'll find top brands like Pawsitively Gourmet and
-                  Happy Tails Kitchen.
+                  food for your dogs and cats. You'll find top brands like Pawsitively Gourmet and
+                  Happy Tails Kitchen. Complete your pet care journey by exploring our 
+                  <Link to="/vets" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>veterinary services</Link>, 
+                  <Link to="/daycare" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet creches</Link>, and 
+                  <Link to="/match-making" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>breeding services</Link>.
                 </p>
               </div>
               <div className="market-card-img">
-                <img src={marketplace_2} alt="" />
+                <img src={marketplace_2} alt="Premium pet food and treats for dogs and cats" />
               </div>
             </div>
             <div className="market-card">
               <div className="market-card-text">
-                <h1>Endless Variety of Pet Food and Treats</h1>
+                <h1>Premium Pet Supplies and Accessories</h1>
                 <p>
-                  Select from an outstanding collection of high-quality pet
-                  food. You'll find top brands like Pawsitively Gourmet and
-                  Happy Tails Kitchen.
+                  Discover essential pet supplies and accessories for your beloved dogs, cats, and all pets. 
+                  From toys to grooming essentials, find everything you need for comprehensive pet care. 
+                  Pair your shopping with our <Link to="/vets" style={{color: '#0066BA', textDecoration: 'underline'}}>vet services</Link> and 
+                  <Link to="/daycare" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet daycare creches</Link> for complete pet wellness.
                 </p>
               </div>
               <div className="market-card-img">
-                <img src={marketplace_3} alt="" />
+                <img src={marketplace_3} alt="Pet supplies and accessories for dogs and cats" />
               </div>
             </div>
           </div>
 
           <div className="market-join">
-            <h1>VISIT OUT STORE !</h1>
+            <h1>VISIT OUR STORE !</h1>
             <p>
               Discover a world of extraordinary pet products at our store.
               Experience the best and most enticing selection. Visit us today !

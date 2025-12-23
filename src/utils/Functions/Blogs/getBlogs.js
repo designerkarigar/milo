@@ -2,17 +2,9 @@ import axios from "axios";
 import { BaseUrl } from "../../Constants/Url";
 
 export const getBlogs = async () => {
-  const idToken = localStorage.getItem("idToken");
-  const config = {
-    headers: {
-      token: idToken,
-    },
-  };
-
   try {
     const blogs = await axios.get(
-      BaseUrl + `/blogs?userQueryFilter=true&pageSize=999999`,
-      config
+      BaseUrl + `/web/blogs?userQueryFilter=true&pageSize=999999`
     );
 
     console.log(blogs);

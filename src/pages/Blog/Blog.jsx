@@ -7,6 +7,7 @@ import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { BaseUrlS3 } from "../../utils/Constants/Url";
 import NewFooter from "../../components/Footer";
 import { FadeLoader } from "react-spinners";
+import { SEO } from "../../components/SEO";
 
 export const Blog = () => {
   const [blogdata, setBlogData] = useState([]);
@@ -37,6 +38,12 @@ export const Blog = () => {
 
   return (
     <>
+      <SEO
+        title="Pet Care Blog | Expert Tips for Dogs, Cats & All Pets | Milo"
+        description="Read expert pet care tips, heartwarming stories, and comprehensive guides for dogs, cats, and all pets. Learn about pet health, training, nutrition, and more from Milo's pet care blog."
+        keywords="pet blog, dog blog, cat blog, pet care tips, pet health, pet training, pet nutrition, dog care, cat care, pet advice, pet information"
+        url="https://milo.social/blogs"
+      />
       <StyledBlog>
         <div className="blog-nav-con">
           <NewNavbar />
@@ -77,7 +84,7 @@ export const Blog = () => {
                           ) || {}
                         ).url
                       }
-                      alt=""
+                      alt={blog.title || "Pet care blog article"}
                     />
                   </div>
                   <div className="blog-card-text-con">

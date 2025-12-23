@@ -18,8 +18,8 @@ export const Banner = () => {
             Life.”
           </p>
         </div>
-        <img className="banner-img second-image" src={second_dog} alt="" />
-        <img className="banner-img first-image" src={dog_svg} alt="" />
+        <img className="banner-img second-image" src={second_dog} alt="Happy dog playing" />
+        <img className="banner-img first-image" src={dog_svg} alt="Pet dog illustration" />
       </div>
       <div className="banner-wave">
         <svg

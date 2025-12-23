@@ -102,11 +102,11 @@ export const Events = () => {
             <h6>Time</h6>
             <p className="text-success">{modalData.time}</p>
             <h6>Contact Details</h6>
-            <p class="text-danger">{modalData.contactDetails}</p>
+            <p className="text-danger">{modalData.contactDetails}</p>
             <h6>Ticket Price</h6>
             <p className="text-success">{modalData.ticketPrice}</p>
             <h6>Date</h6>
-            <p class="text-primary">{modalData.date}</p>
+            <p className="text-primary">{modalData.date}</p>
             <h6>Contact Person</h6>
             <p className="text-success">{modalData.contactPerson}</p>
             <h5>Description </h5>

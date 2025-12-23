@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import VetCard from "../../components/VetCard";
@@ -7,8 +8,20 @@ import { LoginModal } from "../../components/LoginModal";
 import { getVets } from "../../utils/Functions/Vets/getVets";
 import { FadeLoader } from "react-spinners";
 import { VetStyledComponent } from "./styledComponent";
+import { SEO } from "../../components/SEO";
 
 export const VetsPage = () => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "serviceType": "Veterinary Services",
+    "provider": {
+      "@type": "Organization",
+      "name": "Milo"
+    },
+    "description": "Find trusted veterinarians and veterinary clinics for your pets. Book appointments with verified vets specializing in dog and cat care.",
+    "areaServed": "India"
+  };
   const [vets, setVets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -67,6 +80,13 @@ export const VetsPage = () => {
 
   return (
     <>
+      <SEO
+        title="Find Trusted Veterinarians & Vets for Your Pets | Milo Vet Services"
+        description="Browse and book appointments with verified veterinarians and veterinary clinics. Find the best vets for your dogs, cats, and all pets. Expert pet healthcare services across India."
+        keywords="vet, veterinarian, vets, pet vet, dog vet, cat vet, veterinary services, pet healthcare, animal doctor, pet clinic, veterinary clinic, pet medical care"
+        url="https://milo.social/vets"
+        structuredData={structuredData}
+      />
       <VetStyledComponent>
         <div className="vet-navbar">
           <NewNavbar />
@@ -81,7 +101,10 @@ export const VetsPage = () => {
             </h1>
             <p>
               Find the best veterinarians near you. Browse through verified vets
-              and book appointments easily.
+              and book appointments easily. Whether you need a vet for your dogs, cats, or any other pet, 
+              our platform connects you with trusted veterinary professionals across India. 
+              Explore our <Link to="/daycare" style={{color: '#0066BA', textDecoration: 'underline'}}>pet daycare creches</Link> and 
+              <Link to="/match-making" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet breeding services</Link> for comprehensive pet care.
             </p>
           </div>
           <div className="vet-wave">
