@@ -23,29 +23,31 @@ export const VetStyledComponent = styled.div`
 
   .vet-banner-content {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50%;
+    justify-content: flex-start;
+    align-items: flex-start;
+    max-width: 1200px;
+    width: 90%;
 
     margin-top: 0px;
     margin-bottom: 20px;
     flex-direction: column;
     row-gap: 30px;
     position: relative;
+    padding: 0 20px;
     h1 {
-      width: fit-content;
+      width: 100%;
       position: relative;
       color: #f1c21b;
       font-size: 3.5rem;
       font-family: Quicksand;
-      text-align: center;
+      text-align: left;
     }
     p {
       font-size: 1.3rem;
       font-family: Quicksand;
-      text-align: center;
-      line-height: 1.5;
-      width: 70%;
+      text-align: left;
+      line-height: 1.6;
+      width: 100%;
     }
   }
 
@@ -288,15 +290,18 @@ export const VetStyledComponent = styled.div`
       text-align: center;
     }
     .vet-banner-content {
-      width: 90%;
+      width: 95%;
+      padding: 0 10px;
 
       p {
         width: 100%;
         font-size: 1.2rem;
+        text-align: left;
       }
       h1 {
         width: 100%;
         font-size: 2rem;
+        text-align: left;
       }
     }
 

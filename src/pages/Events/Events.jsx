@@ -29,26 +29,26 @@ export const Events = () => {
   useEffect(() => {
     (async () => {
       try {
-        const events = await getEvents();
+        const events = await getEvents(0, pageSize);
         setEvents(events);
         setLoading(false);
       } catch (err) {
         alert("Network error, please try again later");
+        setLoading(false);
       }
     })();
   }, []);
 
   const loadMore = async () => {
     try {
-      setPageNo((prev) => {
-        return prev + 1;
-      });
-      const newEvents = await getEvents(pageSize, pageNo);
+      const nextPage = pageNo + 1;
+      const newEvents = await getEvents(nextPage, pageSize);
       if (newEvents.length === 0) {
         alert("No more events");
         return;
       }
       setEvents([...events, ...newEvents]);
+      setPageNo(nextPage);
     } catch (error) {
       alert("Network error");
       console.log(error);

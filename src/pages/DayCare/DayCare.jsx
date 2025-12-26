@@ -207,7 +207,7 @@ export const DayCare = () => {
           <div className="daycare-heading">
             <h1>Pet Daycare Creches for Dogs & Cats</h1>
             <h3>"Nurturing your furry loved one, the daycare way!"</h3>
-            <p style={{marginTop: '20px', fontSize: '1.1rem', maxWidth: '800px', margin: '20px auto', textAlign: 'center', color: '#666'}}>
+            <p style={{marginTop: '20px', fontSize: '1.1rem', maxWidth: '1200px', margin: '20px auto', textAlign: 'left', color: '#666', width: '90%', padding: '0 20px', lineHeight: '1.6'}}>
               Discover premium pet creches offering safe and comfortable boarding for your dogs and cats. 
               Our verified pet daycare facilities provide personalized care, spacious accommodations, and dedicated staff. 
               Whether you need short-term pet boarding or long-term daycare services, find the perfect creche for your beloved pets. 

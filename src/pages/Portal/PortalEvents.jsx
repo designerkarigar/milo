@@ -23,7 +23,7 @@ export const PortalEvents = () => {
     (async () => {
       try {
         setLoading(true);
-        const events = await getEvents(99999, 0);
+        const events = await getEvents(0, 99999);
         setData(events);
         setLoading(false);
       } catch (error) {

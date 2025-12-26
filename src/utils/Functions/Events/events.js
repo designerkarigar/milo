@@ -8,18 +8,29 @@ const config = {
   },
 };
 
-export const getEvents = async () => {
+// Public API - no authentication required
+export const getEvents = async (pageNo = 0, pageSize = 20) => {
   try {
     const events = await axios.get(
-      BaseUrl + `/events?pageSize=999999&useQueryFilter=true`,
-      config
+      BaseUrl + `/web/events?useQueryFilter=true&pageNo=${pageNo}&pageSize=${pageSize}`
     );
-    return events.data.response.record;
+    return events.data.response.record || [];
   } catch (err) {
     throw new Error(err);
   }
 };
 
+// Public API - no authentication required
+export const getEventByUID = async (eventUID) => {
+  try {
+    const events = await axios.get(BaseUrl + `/web/events/${eventUID}`);
+    return events.data.response.record || null;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+// Admin API - requires authentication
 export const getEventById = async (eventId) => {
   try {
     const events = await axios.get(BaseUrl + `/events/${eventId}`, config);

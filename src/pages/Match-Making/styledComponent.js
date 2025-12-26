@@ -83,23 +83,29 @@ export const MatchMakingStyledComponent = styled.div`
 
   .match-content {
     margin-top: 50px;
-    max-width: 400px;
+    max-width: 1200px;
     width: 90%;
-    text-align: center;
+    text-align: left;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     row-gap: 20px;
     flex-direction: column;
+    padding: 0 20px;
 
     h1 {
       color: #f1c21b;
       font-family: Quicksand;
       font-size: 3.5rem;
+      text-align: left;
+      width: 100%;
     }
     p {
       font-size: 1.3rem;
       font-family: Quicksand;
+      text-align: left;
+      line-height: 1.6;
+      width: 100%;
     }
   }
 
@@ -256,11 +262,15 @@ export const MatchMakingStyledComponent = styled.div`
     }
 
     .match-content {
+      width: 95%;
+      padding: 0 10px;
       h1 {
         font-size: 2rem;
+        text-align: left;
       }
       p {
         font-size: 1.2rem;
+        text-align: left;
       }
     }
   }
