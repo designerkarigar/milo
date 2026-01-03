@@ -1,7 +1,7 @@
 import React from "react";
 // import "./TestimonialStyle.css";
 import { StyledTestimonial } from "./styledTestimonial";
-import test_bg_image from "../../images/test-bg-image.jpg";
+import test_bg_image from "../../images/test-bg-image.png";
 
 export const Testimonial = () => {
   return (
@@ -59,6 +59,18 @@ export const Testimonial = () => {
               responsible breeding services, and partner with pet NGOs to ensure 
               the best care for all dogs, cats, and pets."
             </p>
+          </div>
+
+          <div className="test-quotes-con">
+            <div className="test-quote">
+              <p className="test-quote-text">"Found a bird-friendly vet nearby — so helpful!"</p>
+            </div>
+            <div className="test-quote">
+              <p className="test-quote-text">"Best horse care services in the region!"</p>
+            </div>
+            <div className="test-quote">
+              <p className="test-quote-text">"My fish tank setup expert knew exactly what my aquarium needed!"</p>
+            </div>
           </div>
 
           <img className="test-bg-img" src={test_bg_image} alt="" />

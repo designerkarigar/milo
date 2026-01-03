@@ -16,24 +16,18 @@ export const Features = () => {
             <img src={F_1} alt="Pet boarding services for dogs and cats" />
           </div>
           <div className="feature-text">
-            <h1>Pet Boarding</h1>
+            <h1>Vet Care</h1>
             <p>
-              Find your pet's happiest home at Milo: safe, comfortable boarding
-              houses with personalized care, spacious accommodations, and
-              dedicated staff. Whether you need <Link to="/daycare">pet daycare creches</Link> for your dogs and cats, 
-              or temporary boarding for your beloved pets, we connect you with the best facilities.
+              Find vets for dogs, cats, birds, reptiles, horses, and more
             </p>
           </div>
         </div>
 
         <div className="feature">
           <div className="feature-text">
-            <h1>Pet Breeding</h1>
+            <h1>Daycare & Boarding</h1>
             <p>
-              Milo promotes responsible pet breeding practices. Our platform
-              connects you with reputable breeders who prioritize animal welfare
-              and follow the best breeding standards. Explore our <Link to="/match-making">pet breeding and matching services</Link> 
-              to find the perfect partner for your dogs and cats, ensuring healthy and ethical breeding practices.
+              Safe, loving spaces for every pet — from puppies to parrots
             </p>
           </div>
           <div className="feature-image">
@@ -46,12 +40,9 @@ export const Features = () => {
             <img src={F_3} alt="Pet grooming services for dogs and cats" />
           </div>
           <div className="feature-text">
-            <h1>Pet Grooming</h1>
+            <h1>Grooming & Spa</h1>
             <p>
-              Milo partners with leading grooming houses, providing personalized
-              services to help your pets look and feel their best. Trust us for
-              top-notch care and pampering experiences. From professional grooming for dogs and cats 
-              to comprehensive pet care services, we ensure your pets receive the best treatment.
+              Professional grooming for coats, feathers, and scales
             </p>
           </div>
         </div>

@@ -95,3 +95,4 @@ const VetCard = ({ vet, onClick, onLoginRequired }) => {
 
 export default VetCard;
 
+

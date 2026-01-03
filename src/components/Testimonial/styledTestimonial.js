@@ -53,14 +53,6 @@ export const StyledTestimonial = styled.div`
     margin: 40px 0px;
     z-index: 2;
   }
-  .test-bg-img {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
   .test-shade {
     position: absolute;
     top: 0;
@@ -115,6 +107,39 @@ export const StyledTestimonial = styled.div`
     font-style: italic;
   }
 
+  .test-quotes-con {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 90%;
+    margin-top: 40px;
+    gap: 30px;
+    z-index: 3;
+    flex-wrap: wrap;
+  }
+
+  .test-quote {
+    flex: 1;
+    min-width: 250px;
+    max-width: 350px;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px 20px;
+    text-align: center;
+    z-index: 3;
+  }
+
+  .test-quote-text {
+    color: white;
+    font-style: italic;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin: 0;
+    font-family: Quicksand;
+  }
+
   .by {
     color: #00acc6;
     font-size: 20px;
@@ -130,9 +155,10 @@ export const StyledTestimonial = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 0;
     width: 100%;
     height: 100%;
+    min-height: 100%;
     object-fit: cover;
   }
 
@@ -163,6 +189,17 @@ export const StyledTestimonial = styled.div`
     .test-heading {
       width: 90%;
     }
+
+    .test-quotes-con {
+      flex-direction: column;
+      width: 85%;
+      gap: 20px;
+    }
+
+    .test-quote {
+      max-width: 100%;
+      width: 100%;
+    }
   }
 
   @media (max-width: 600px) {
@@ -178,6 +215,23 @@ export const StyledTestimonial = styled.div`
     .test-text-con {
       width: 90%;
       row-gap: 70px;
+    }
+
+    .test-quotes-con {
+      flex-direction: column;
+      width: 90%;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .test-quote {
+      max-width: 100%;
+      width: 100%;
+      padding: 20px 15px;
+    }
+
+    .test-quote-text {
+      font-size: 1rem;
     }
 
     .test-logo img {

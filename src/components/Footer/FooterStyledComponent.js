@@ -88,6 +88,16 @@ export const StyledFooter = styled.div`
       animation: none !important;
       transform: none !important;
     }
+
+    .site-description {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-family: Quicksand, sans-serif;
+      line-height: 1.6;
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
   .foot-link-con {
@@ -254,6 +264,11 @@ export const StyledFooter = styled.div`
     .heading-con {
       h1 {
         font-size: 2rem;
+      }
+
+      .site-description {
+        font-size: 1rem;
+        margin-top: 15px;
       }
     }
 

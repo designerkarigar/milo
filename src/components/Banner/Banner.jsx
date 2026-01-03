@@ -1,7 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { StyledBanner } from "./styledComponent";
-import dog_svg from "../../images/svgfiles/First-Dog-Image.svg";
-import second_dog from "../../images/svgfiles/second-dog-image.svg";
+import allpetsVideo from "../../videos/allpets.mp4";
+// import dog_svg from "../../images/svgfiles/First-Dog-Image.svg";
+// import second_dog from "../../images/svgfiles/second-dog-image.svg";
 
 export const Banner = () => {
   return (
@@ -9,17 +11,22 @@ export const Banner = () => {
       <div className="banner-con">
         <div className="banner-content">
           <div className="heading">
-            <h2>MAKING DOGS</h2>
-            <h1>HAPPY</h1>
+            <h1>Connect With Pet Care for Every Companion</h1>
+            <h1 className="heading-second-line">From Dogs & Cats to Birds, Fish & Farm Friends</h1>
           </div>
           <p>
-            “If You Don’t Own a Dog, at least one , there is not necessarily
-            anything wrong with you , but there may be something wrong with your
-            Life.”
+            Find trusted vets, sitters, grooming and services for all pets — whether furry, feathered, or scaled.
           </p>
+          <Link to="/vets" className="banner-cta-button">
+            Explore All Pet Care
+          </Link>
         </div>
-        <img className="banner-img second-image" src={second_dog} alt="Happy dog playing" />
-        <img className="banner-img first-image" src={dog_svg} alt="Pet dog illustration" />
+        {/* <img className="banner-img second-image" src={second_dog} alt="Happy dog playing" />
+        <img className="banner-img first-image" src={dog_svg} alt="Pet dog illustration" /> */}
+        <video className="banner-img banner-video" autoPlay muted loop playsInline>
+          <source src={allpetsVideo} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
       <div className="banner-wave">
         <svg

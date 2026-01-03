@@ -290,6 +290,9 @@ export const Footer = () => {
               <br />
               Contact us anytime.
             </h1>
+            <p className="site-description">
+              Milo.social — Your community for caring, sharing and supporting pet parents of all kinds.
+            </p>
           </div>
 
           <div className="foot-link-con">

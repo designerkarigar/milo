@@ -1,31 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { StyledNavbar } from "./styledComponent";
 import logo from "../../images/milo.logo.svg";
 import burger_icon from "../../images/svgfiles/burger-icon.svg";
-import defaultAvatar from "../../images/Default_pfp.svg.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import { LoginModal } from "../LoginModal";
 import { useAuth } from "../../contexts/AuthContext";
-import { loggedInUser } from "../../utils/Functions/Users/loggedInUser";
 
 export const Navbar = () => {
   const header = useRef(null);
   const res_navbar = useRef(null);
-  const avatarRef = useRef(null);
-  const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userData, setUserData] = useState(null);
   const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
     let lastScroll = window.scrollY;
     const element = header.current;
-    
-    const handleScroll = () => {
+    window.addEventListener("scroll", () => {
       if (lastScroll < window.scrollY) {
         element.classList.add("hidden");
       } else {
@@ -33,50 +25,8 @@ export const Navbar = () => {
       }
 
       lastScroll = window.scrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    // Cleanup function to remove event listener
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    });
   }, []);
-
-  // Fetch user data when logged in
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (currentUser) {
-        try {
-          const data = await loggedInUser();
-          setUserData(data);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else {
-        setUserData(null);
-      }
-    };
-
-    fetchUserData();
-  }, [currentUser]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (avatarRef.current && !avatarRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showUserMenu]);
 
   const floatNavAdd = () => {
     res_navbar.current.classList.add("visible");
@@ -91,39 +41,9 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      setShowUserMenu(false);
       await signOut();
-      setUserData(null);
     } catch (error) {
       console.error("Error signing out:", error);
-    }
-  };
-
-  const handleMenuClick = (action) => {
-    setShowUserMenu(false);
-    if (action === "logout") {
-      handleLogout();
-    } else if (action === "my-pets") {
-      if (!currentUser) {
-        setIsLoginModalOpen(true);
-        return;
-      }
-      navigate("/my-pets");
-      floatNavRemove();
-    } else if (action === "my-bookings") {
-      if (!currentUser) {
-        setIsLoginModalOpen(true);
-        return;
-      }
-      navigate("/my-bookings");
-      floatNavRemove();
-    } else if (action === "settings") {
-      if (!currentUser) {
-        setIsLoginModalOpen(true);
-        return;
-      }
-      navigate("/settings");
-      floatNavRemove();
     }
   };
 
@@ -131,89 +51,56 @@ export const Navbar = () => {
     <>
       <StyledNavbar>
         <header ref={header} className="header">
-          <Link to="/home">
-            <img src={logo} alt="" className="logo" />
-          </Link>
+          <img src={logo} alt="" className="logo" />
           <nav className="nav-bar-con">
             <ul className="nav-bar">
-              <Link to="/home" className="list-item underline">
+              <a href="/home" className="list-item underline">
                 Home
-              </Link>
-              <Link to="/events" className="list-item underline">
+              </a>
+              <a href="/events" className="list-item underline">
                 Events
-              </Link>
+              </a>
               <li className="list-item">
                 Services{" "}
                 <span className="down">
                   <FontAwesomeIcon icon={faCaretDown} />
                 </span>
                 <ul className="drop-down">
-                  <Link to="/marketplace" className="drop-list-item">
-                    Marketplace
-                  </Link>
-                  <Link to="/match-making" className="drop-list-item">
+                  <a href="marketplace" className="drop-list-item">
+                    MarketsPlace
+                  </a>
+                  <a href="match-making" className="drop-list-item">
                     MatchMaking
-                  </Link>
-                  <Link to="/vets" className="drop-list-item">
+                  </a>
+                  <a href="/vets" className="drop-list-item">
                     Vets
-                  </Link>
-                  <Link to="/daycare" className="drop-list-item">
+                  </a>
+                  <a href="daycare" className="drop-list-item">
                     DayCare
-                  </Link>
+                  </a>
                 </ul>
               </li>
-              <Link to="/blogs" className="list-item underline">
+              <a href="/blogs" className="list-item underline">
                 Blogs
-              </Link>
+              </a>
               {currentUser ? (
-                <div ref={avatarRef} className="user-avatar-container">
-                  <img
-                    src={userData?.profilePhoto || defaultAvatar}
-                    alt="User Avatar"
-                    className="user-avatar"
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    onError={(e) => {
-                      e.target.src = defaultAvatar;
-                    }}
-                  />
-                  {showUserMenu && (
-                    <div className="user-menu">
-                      <button
-                        className="user-menu-item"
-                        onClick={() => handleMenuClick("my-pets")}
-                      >
-                        My Pets
-                      </button>
-                      <button
-                        className="user-menu-item"
-                        onClick={() => handleMenuClick("my-bookings")}
-                      >
-                        My Bookings
-                      </button>
-                      <button
-                        className="user-menu-item"
-                        onClick={() => handleMenuClick("settings")}
-                      >
-                        Settings
-                      </button>
-                      <button
-                        className="user-menu-item"
-                        onClick={() => handleMenuClick("logout")}
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={handleLogout}
+                  className="list-item register-btn"
+                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
+                >
+                  Logout
+                </button>
               ) : (
                 <button
                   onClick={handleLoginClick}
                   className="list-item login-btn"
+                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
                 >
                   Login
                 </button>
               )}
-              <a href="/login" className="list-item register-btn" style={{ display: "none" }}>
+              <a href="/login" className="list-item register-btn">
                 Sign In
               </a>
             </ul>
@@ -229,49 +116,40 @@ export const Navbar = () => {
             <CloseIcon fontSize="inherit" color="inherit" />
           </div>
           <ul className="res-list">
-            <Link className="res-list-item" to="/home" onClick={floatNavRemove}>
+            <a className="res-list-item" href="/home">
               Home
-            </Link>
-            <Link className="res-list-item" to="/blogs" onClick={floatNavRemove}>
+            </a>
+            <a className="res-list-item" href="/blogs">
               Blogs
-            </Link>
-            <Link className="res-list-item" to="/events" onClick={floatNavRemove}>
+            </a>
+
+            <a className="res-list-item" href="/events">
               Events
-            </Link>
-            <Link className="res-list-item" to="/vets" onClick={floatNavRemove}>
+            </a>
+            <a className="res-list-item" href="vets">
               Vets
-            </Link>
-            <Link className="res-list-item" to="/match-making" onClick={floatNavRemove}>
+            </a>
+            <a className="res-list-item" href="/match-making">
               MatchMaking
-            </Link>
-            <Link className="res-list-item" to="/daycare" onClick={floatNavRemove}>
+            </a>
+            <a className="res-list-item" href="/daycare">
               DayCare
-            </Link>
-            <Link className="res-list-item" to="/marketplace" onClick={floatNavRemove}>
+            </a>
+            <a className="res-list-item" href="/marketplace">
               MarketPlace
-            </Link>
+            </a>
           </ul>
           {currentUser ? (
-            <div className="res-user-section">
-              <img
-                src={userData?.profilePhoto || defaultAvatar}
-                alt="User Avatar"
-                className="res-user-avatar"
-                onError={(e) => {
-                  e.target.src = defaultAvatar;
-                }}
-              />
-              <button
-                onClick={() => {
-                  handleLogout();
-                  floatNavRemove();
-                }}
-                className="res-register-btn"
-                style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                handleLogout();
+                floatNavRemove();
+              }}
+              className="res-register-btn"
+              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
+            >
+              Logout
+            </button>
           ) : (
             <button
               onClick={() => {
@@ -284,7 +162,7 @@ export const Navbar = () => {
               Login
             </button>
           )}
-          <a href="/login" className="res-register-btn" style={{ marginTop: "10px", display: "none" }}>
+          <a href="/login" className="res-register-btn" style={{ marginTop: "10px" }}>
             Sign In
           </a>
         </div>

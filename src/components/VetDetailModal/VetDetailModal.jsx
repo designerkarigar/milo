@@ -230,3 +230,4 @@ const VetDetailModal = ({ vet, isOpen, onClose, onLoginRequired }) => {
 
 export default VetDetailModal;
 
+
