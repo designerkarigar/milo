@@ -13,7 +13,7 @@ export const HomePage = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Milo",
-    "description": "India's leading pet care platform offering comprehensive services for dogs, cats, and all pets including veterinarians, pet daycare creches, pet breeding, and NGO connections.",
+    "description": "India's leading pet care platform offering comprehensive services for all pets - dogs, cats, birds, fish, horses, cows, goats, and more. Find veterinarians, pet daycare creches, pet breeding, and NGO connections for every pet type.",
     "url": "https://milo.social",
     "logo": "https://milo.social/favicon.png",
     "sameAs": [
@@ -38,9 +38,9 @@ export const HomePage = () => {
   return (
     <>
       <SEO
-        title="Milo - Pet Care Platform | Find Vets, Pet Daycare Creches, Pet Breeding & More for Dogs & Cats"
-        description="Milo is India's #1 pet care platform. Find trusted veterinarians for your dogs and cats, premium pet daycare creches, responsible pet breeding services, and connect with pet NGOs. Complete pet care solutions for all your furry friends."
-        keywords="pet, vet, creches, dogs, cats, NGO, breeding, matching, pet care, veterinarian, pet daycare, pet services, dog care, cat care, pet boarding, pet grooming, pet breeding, dog breeding, cat breeding"
+        title="Milo - Pet Care Platform | Find Vets, Pet Daycare, Grooming & Services for All Pets - Dogs, Cats, Birds, Fish, Horses & More"
+        description="Milo is India's #1 pet care platform for all pets. Find trusted veterinarians for dogs, cats, birds, fish, horses, cows, goats, and more. Premium pet daycare, grooming services, breeding, and connect with pet NGOs. Complete pet care solutions for furry, feathered, and scaled companions."
+        keywords="pet care, vet, veterinarians, pet daycare, creches, dogs, cats, birds, fish, horses, cows, goats, reptiles, farm animals, NGO, breeding, matching, pet services, pet boarding, pet grooming, animal care, pet breeding, all pets"
         url="https://milo.social"
         structuredData={structuredData}
       />

@@ -28,14 +28,14 @@ export const BlogSection = () => {
         <div className="content-con">
           <div className="text-con">
             <h3 className="small-heading">FROM THE</h3>
-            <h1 className="big-heading">DOG BLOG</h1>
+            <h1 className="big-heading">PET BLOG</h1>
             <p className="paragraph">
               At Milo, our passion for pets drives everything we do. Our blogs
-              are crafted with love, dedicated to honouring them for the
+              are crafted with love, dedicated to honouring all pets for the
               happiness they bring to us. Our expert tips and heartwarming
-              content are designed to assist you and your beloved pet in leading
-              your best lives, side by side. Discover comprehensive guides on pet care, 
-              veterinary advice for dogs and cats, pet breeding best practices, and connect 
+              content are designed to assist you and your beloved pets in leading
+              your best lives, side by side. Discover comprehensive guides on pet care for dogs, cats, birds, fish, horses, and farm animals, 
+              veterinary advice for all pet types, pet breeding best practices, and connect 
               with pet NGOs through our platform. Explore our <Link to="/vets" style={{color: '#0066BA', textDecoration: 'underline'}}>vet services</Link>, 
               <Link to="/daycare" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>pet creches</Link>, and 
               <Link to="/match-making" style={{color: '#0066BA', textDecoration: 'underline', marginLeft: '5px'}}>breeding services</Link> for all your pet needs.
@@ -46,7 +46,7 @@ export const BlogSection = () => {
             </Link>
           </div>
           <div className="content-img">
-            <img src={dog_blog} alt="Pet blog about dogs and cats" />
+            <img src={dog_blog} alt="Pet care blog covering all pets - dogs, cats, birds, fish, horses, and farm animals" />
           </div>
         </div>
 

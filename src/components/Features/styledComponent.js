@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
 export const StyledFeatures = styled.div`
+  width: 100%;
+  
   .feature-main-con {
     position: relative;
     width: 100%;
@@ -9,6 +11,7 @@ export const StyledFeatures = styled.div`
     flex-direction: column;
     align-items: center;
     row-gap: -100px;
+    padding: 0;
   }
 
   .feature-bg-image {
@@ -23,9 +26,12 @@ export const StyledFeatures = styled.div`
   .feature {
     display: flex;
     flex-direction: row;
-    width: 90%;
+    width: 100%;
+    max-width: 100%;
     justify-content: space-between;
     align-items: center;
+    padding: 0 5%;
+    box-sizing: border-box;
   }
 
   .feature:nth-child(3) {
@@ -52,6 +58,18 @@ export const StyledFeatures = styled.div`
     p {
       padding: 30px 0px;
       font-size: 1.5rem;
+      
+      a {
+        color: #f1c21b;
+        text-decoration: underline;
+        font-weight: 600;
+        transition: color 0.3s ease;
+        
+        &:hover {
+          color: #d4a817;
+          text-decoration: none;
+        }
+      }
     }
   }
 

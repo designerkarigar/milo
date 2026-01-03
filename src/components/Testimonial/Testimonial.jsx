@@ -11,9 +11,9 @@ export const Testimonial = () => {
           <div className="test-heading">
             <h1>
               {" "}
-              <span className="yellow">LARGEST</span> PROVIDER OF DOG
+              <span className="yellow">LARGEST</span> PROVIDER OF PET
               <br />
-              SERVICES IN INDIA
+              CARE SERVICES IN INDIA
             </h1>
           </div>
 
@@ -35,7 +35,7 @@ export const Testimonial = () => {
                 className="img-logo"
               />
               <h1 className="logo-heading-numeric">100%</h1>
-              <h1 className="logo-heading">Happy Dogs Every Day</h1>
+              <h1 className="logo-heading">Happy Pets Every Day</h1>
             </div>
 
             <div className="test-logo">
@@ -53,11 +53,11 @@ export const Testimonial = () => {
             <p className="test-text">
               "At Milo, we provide a nurturing environment, comprehensive
               veterinary care, and early socialization to ensure the well-being
-              and happiness of puppies and kittens. Our team is dedicated to
+              and happiness of all pets - from puppies and kittens to birds, fish, horses, and farm animals. Our team is dedicated to
               their holistic development, setting them on a path to a lifetime
               of happiness. We connect pet owners with trusted vets, premium pet creches, 
               responsible breeding services, and partner with pet NGOs to ensure 
-              the best care for all dogs, cats, and pets."
+              the best care for all pets - whether furry, feathered, or scaled."
             </p>
           </div>
 
