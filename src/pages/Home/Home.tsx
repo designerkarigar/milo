@@ -6,7 +6,6 @@ import Navbar from "../../components/Navbar/index";
 import Banner from "../../components/Banner/index";
 import Features from "../../components/Features/index";
 import { SEO } from "../../components/SEO";
-import allpetsVideo from "../../videos/allpets.mp4";
 
 export const HomePage = () => {
   const structuredData = {

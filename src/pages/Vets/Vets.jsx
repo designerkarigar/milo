@@ -39,7 +39,7 @@ export const VetsPage = () => {
   const pageSize = 20;
   
   // Get user location
-  const { location, locationError, isLocationLoading } = useLocation();
+  const { location, isLocationLoading } = useLocation();
 
   useEffect(() => {
     // Wait for location to be determined (either loaded or failed) before fetching

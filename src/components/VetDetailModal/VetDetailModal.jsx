@@ -206,9 +206,9 @@ const VetDetailModal = ({ vet, isOpen, onClose, onLoginRequired }) => {
                 <div className="photos-grid">
                   {vet.photos
                     .filter((p) => !p.isIdProof)
-                    .map((photo, idx) => (
+                    .map((item, idx) => (
                       <div key={idx} className="photo-item">
-                        <img src={photo.url} alt={`${vet.name} photo ${idx + 1}`} />
+                        <img src={item.url} alt={`${vet.name} (${idx + 1})`} />
                       </div>
                     ))}
                 </div>

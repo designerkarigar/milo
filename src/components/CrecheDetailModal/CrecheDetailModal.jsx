@@ -211,9 +211,9 @@ const CrecheDetailModal = ({ creche, isOpen, onClose, onLoginRequired }) => {
                 <div className="photos-grid">
                   {creche.photos
                     .filter((p) => !p.isIdProof)
-                    .map((photo, idx) => (
+                    .map((item, idx) => (
                       <div key={idx} className="photo-item">
-                        <img src={photo.url} alt={`${creche.crecheName} photo ${idx + 1}`} />
+                        <img src={item.url} alt={`${creche.crecheName} (${idx + 1})`} />
                       </div>
                     ))}
                 </div>
