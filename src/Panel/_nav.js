@@ -22,7 +22,7 @@ export const getNavConfig = (role) => {
     {
       component: CNavTitle,
       name: "Bookings",
-    }
+    },
   ];
 
   const master_nav = [
@@ -85,18 +85,18 @@ export const getNavConfig = (role) => {
         },
       ],
     },
-    // {
-    //   component: CNavItem,
-    //   name: "Creche Bookings",
-    //   to: "/dashboard/BookingTable?type=creche",
-    //   icon: <CIcon icon={cilCat} customClassName="nav-icon" />,
-    // },
-    // {
-    //   component: CNavItem,
-    //   name: "Vet Bookings",
-    //   to: "/dashboard/BookingTable?type=vets",
-    //   icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-    // }
+    {
+      component: CNavItem,
+      name: "Creche Bookings",
+      to: "/dashboard/BookingTable?type=creche",
+      icon: <CIcon icon={cilCat} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: "Vet Bookings",
+      to: "/dashboard/BookingTable?type=vets",
+      icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
+    }
   ];
   if (role === "admin") {
     return master_nav;
