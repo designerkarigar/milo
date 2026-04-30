@@ -2,6 +2,7 @@ import { FadeLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
+import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
 
 import {
   CContainer,
@@ -70,7 +71,7 @@ const PortalBlogs = () => {
                 <CCardImage
                   src={
                     data.photos && data.photos.length > 0
-                      ? data.photos[0].url
+                      ? resolveS3Url(data.photos[0].url)
                       : "https://via.placeholder.com/300x200?text=No+Image"
                   }
                   orientation="top"

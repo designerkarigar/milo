@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./styledComponent.js";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
-import { BaseUrlS3 } from "../../utils/Constants/Url";
+import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
 import dog_blog from "../../images/svgfiles/dog-blog.svg";
 import { StyledBlogSection } from "./styledComponent.js";
 
@@ -55,14 +55,15 @@ export const BlogSection = () => {
             <Link className="card" to={`/blogview?id=${blog.uid}`} key={index}>
               <div className="card-img">
                 <img
-                  src={
-                    BaseUrlS3 +
+                  src={resolveS3Url(
                     (
                       blog.photos.find(
-                        (photoData) => photoData.type === "banner"
+                        (photoData) =>
+                          photoData.type === "banner" ||
+                          photoData.type === "content"
                       ) || {}
                     ).url
-                  }
+                  )}
                   alt={blog.title || "Pet care blog article"}
                 />
               </div>
