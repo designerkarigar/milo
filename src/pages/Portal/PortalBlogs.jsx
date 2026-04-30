@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
+import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
 
 import {
   CContainer,
@@ -18,17 +19,51 @@ const PortalBlogs = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [blogData, setBlogData] = useState([]);
+  const defaultThumbnail = "https://via.placeholder.com/300x200?text=No+Image";
+
+  const firstImageFromHtml = (html) => {
+    if (!html || typeof html !== "string") return "";
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      return doc.querySelector("img")?.getAttribute("src") || "";
+    } catch {
+      return "";
+    }
+  };
 
   useEffect(() => {
     const getData = async () => {
       try {
         setLoading(true);
         const BlogData = await getBlogs();
-        setBlogData(BlogData || []);
-        setLoading(false);
+        const withThumbnails = await Promise.all(
+          (BlogData || []).map(async (item) => {
+            const contentPhoto =
+              item?.photos?.find((photoData) => photoData?.type === "content") ||
+              item?.photos?.[0];
+
+            if (!contentPhoto?.url) {
+              return { ...item, thumbnailUrl: defaultThumbnail };
+            }
+
+            try {
+              const html = await fetchContent(contentPhoto.url);
+              return {
+                ...item,
+                thumbnailUrl: firstImageFromHtml(html) || defaultThumbnail,
+              };
+            } catch {
+              return { ...item, thumbnailUrl: defaultThumbnail };
+            }
+          })
+        );
+        setBlogData(withThumbnails);
       } catch (error) {
         alert(error);
         navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
     getData();
@@ -69,16 +104,12 @@ const PortalBlogs = () => {
                 onClick={() => handleClick(data.uid)}
               >
                 <CCardImage
-                  src={
-                    data.photos && data.photos.length > 0
-                      ? resolveS3Url(data.photos[0].url)
-                      : "https://via.placeholder.com/300x200?text=No+Image"
-                  }
+                  src={resolveS3Url(data.thumbnailUrl || defaultThumbnail)}
                   orientation="top"
                   className="mb-0"
                   style={{ height: "200px", objectFit: "cover" }}
                   onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                    e.target.src = defaultThumbnail;
                   }}
                 />
                 <CCardBody>

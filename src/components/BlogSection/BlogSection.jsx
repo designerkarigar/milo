@@ -3,8 +3,22 @@ import { Link } from "react-router-dom";
 import "./styledComponent.js";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
+import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
 import dog_blog from "../../images/svgfiles/dog-blog.svg";
 import { StyledBlogSection } from "./styledComponent.js";
+
+const DEFAULT_THUMBNAIL = "https://via.placeholder.com/600x400?text=No+Image";
+
+function firstImageFromHtml(html) {
+  if (!html || typeof html !== "string") return "";
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    return doc.querySelector("img")?.getAttribute("src") || "";
+  } catch {
+    return "";
+  }
+}
 
 export const BlogSection = () => {
   const [blogData, setBlogData] = useState([]);
@@ -14,7 +28,29 @@ export const BlogSection = () => {
     (async () => {
       try {
         const blog = await getBlogs();
-        setBlogData(blog.slice(0, 4));
+        const subset = (blog || []).slice(0, 4);
+        const withThumbnails = await Promise.all(
+          subset.map(async (item) => {
+            const contentPhoto =
+              item?.photos?.find((photoData) => photoData?.type === "content") ||
+              item?.photos?.[0];
+
+            if (!contentPhoto?.url) {
+              return { ...item, thumbnailUrl: DEFAULT_THUMBNAIL };
+            }
+
+            try {
+              const html = await fetchContent(contentPhoto.url);
+              return {
+                ...item,
+                thumbnailUrl: firstImageFromHtml(html) || DEFAULT_THUMBNAIL,
+              };
+            } catch {
+              return { ...item, thumbnailUrl: DEFAULT_THUMBNAIL };
+            }
+          })
+        );
+        setBlogData(withThumbnails);
       } catch (error) {
         alert("error while fetching blogs");
         console.log(error);
@@ -55,16 +91,11 @@ export const BlogSection = () => {
             <Link className="card" to={`/blogview?id=${blog.uid}`} key={index}>
               <div className="card-img">
                 <img
-                  src={resolveS3Url(
-                    (
-                      blog.photos.find(
-                        (photoData) =>
-                          photoData.type === "banner" ||
-                          photoData.type === "content"
-                      ) || {}
-                    ).url
-                  )}
+                  src={resolveS3Url(blog.thumbnailUrl || DEFAULT_THUMBNAIL)}
                   alt={blog.title || "Pet care blog article"}
+                  onError={(e) => {
+                    e.target.src = DEFAULT_THUMBNAIL;
+                  }}
                 />
               </div>
 
