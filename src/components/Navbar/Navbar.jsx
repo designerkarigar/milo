@@ -85,24 +85,21 @@ export const Navbar = () => {
               </a>
               {currentUser ? (
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="list-item register-btn"
-                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
                 >
                   Logout
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={handleLoginClick}
-                  className="list-item login-btn"
-                  style={{ border: "none", background: "transparent", cursor: "pointer" }}
+                  className="list-item register-btn"
                 >
                   Login
                 </button>
               )}
-              <a href="/login" className="list-item register-btn">
-                Sign In
-              </a>
             </ul>
           </nav>
 
@@ -162,9 +159,6 @@ export const Navbar = () => {
               Login
             </button>
           )}
-          <a href="/login" className="res-register-btn" style={{ marginTop: "10px" }}>
-            Sign In
-          </a>
         </div>
       </StyledNavbar>
       <LoginModal

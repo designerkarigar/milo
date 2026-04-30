@@ -69,6 +69,28 @@ span.down * {
   animation: none !important;
 }
 
+/* Quill rich text editor — toolbar/editor SVG icons must stay static */
+.ql-snow svg,
+.ql-snow svg path,
+.ql-toolbar svg,
+.ql-toolbar svg path,
+.ql-picker svg,
+.ql-picker svg path,
+.ql-tooltip svg,
+.ql-tooltip svg path {
+  animation: none !important;
+}
+
+/* Quill editor body — inserted <img> must never use global img/SVG animations
+   (e.g. img[src*="svg"] can match inside base64, or CDN paths containing "svg") */
+.ql-editor img,
+.ql-container .ql-editor img,
+.ql-snow .ql-editor img,
+.ql-editor svg,
+.ql-editor svg path {
+  animation: none !important;
+}
+
 /* Exclude decorative SVG elements like waves and dividers */
 svg[data-name="Layer 1"],
 .banner-wave svg,

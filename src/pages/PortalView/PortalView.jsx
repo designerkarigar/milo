@@ -8,7 +8,6 @@ import { updateBlog } from "../../utils/Functions/Blogs/updateBlog";
 import { ToolBarFormats } from "../../utils/Constants/QuillFormats/ToolBarFormats";
 import { convertTo64 } from "../../utils/Functions/Others/Convert";
 import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
-import { ImageExtract } from "../../utils/Functions/Blogs/ImageExtracter";
 import { getHeading } from "../../utils/Functions/Blogs/getHeading";
 import { toolbar } from "../../utils/Constants/QuillFormats/toolBarOptions";
 
@@ -80,33 +79,30 @@ export const PortalView = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const htmlContent = quillRef.current.firstChild.innerHTML;
+    const htmlContent =
+      quillRef.current?.querySelector(".ql-editor")?.innerHTML ?? "";
 
-    console.log(htmlContent);
-    // const base64image = await ImageExtract(value);
-    // const content = await convertTo64(value);
+    try {
+      const content = await convertTo64(htmlContent);
+      const data = {
+        heading: getHeading(htmlContent),
+        content,
+      };
 
-    // const data = {
-    //   heading: getHeading(value),
-    //   base64image: base64image,
-    //   content: content,
-    // };
-
-    // if (id === "0") {
-    //   try {
-    //     await uploadBlog(data);
-    //     navigate("/dashboard/portal");
-    //   } catch (error) {
-    //     alert("Error Uploading :- " + error);
-    //   }
-    // } else {
-    //   try {
-    //     await updateBlog(data, id);
-    //     navigate("/dashboard/portal");
-    //   } catch (error) {
-    //     alert("Error Updating" + error);
-    //   }
-    // }
+      if (id === "0") {
+        await uploadBlog(data);
+      } else {
+        await updateBlog(data, id);
+      }
+      navigate("/dashboard/portal_blogs");
+    } catch (error) {
+      console.error(error);
+      const message =
+        error?.response?.data?.message ??
+        error?.message ??
+        String(error);
+      alert(`Error saving blog: ${message}`);
+    }
   };
 
   const handleDelete = async (event) => {
@@ -125,8 +121,12 @@ export const PortalView = () => {
       <StyledPortal>
         <div ref={quillRef} className="editor"></div>
         <div className="Buttons">
-          <button onClick={handleDelete}>Delete</button>
-          <button onClick={handleSubmit}>Submit</button>
+          <button type="button" onClick={handleDelete}>
+            Delete
+          </button>
+          <button type="button" onClick={handleSubmit}>
+            Submit
+          </button>
         </div>
       </StyledPortal>
     </>

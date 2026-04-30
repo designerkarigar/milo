@@ -127,8 +127,10 @@ export const StyledNavbar = styled.div`
     color: black;
     padding: 7px 10px;
     background-color: white;
+    border: none;
     border-radius: 15px;
     margin-left: 15px;
+    cursor: pointer;
     transition: all 0.3s ease;
 
     &:hover {
