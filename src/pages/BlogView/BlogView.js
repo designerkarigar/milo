@@ -8,6 +8,7 @@ import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
 import { FadeLoader } from "react-spinners";
 import Footer from "../../components/Footer/index";
 import NewNavbar from "../../components/Navbar";
+import { getPastelColorForKey } from "../../utils/Functions/Others/getPastelColorForKey";
 
 function decodeBase64Html(base64Text) {
   if (!base64Text || typeof base64Text !== "string") return "";
@@ -25,6 +26,8 @@ function decodeBase64Html(base64Text) {
 export const BlogView = () => {
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState("");
+  const [blogTitle, setBlogTitle] = useState("");
+  const [titleColor, setTitleColor] = useState(getPastelColorForKey(""));
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
@@ -40,6 +43,8 @@ export const BlogView = () => {
         try {
           setLoading(true);
           const data = await getBlogByID(id);
+          setBlogTitle(data?.title || "Blog");
+          setTitleColor(getPastelColorForKey(data?.uid || data?.title || id));
           const photo =
             data?.photos?.find((item) => item?.type === "content") ||
             data?.photos?.[0];
@@ -80,17 +85,22 @@ export const BlogView = () => {
             <FadeLoader />
           </div>
         ) : (
-          <ReactQuill
-            id="editor"
-            theme="snow"
-            value={value}
-            defaultValue={value}
-            className="editor"
-            onChange={setValue}
-            placeholder="loading..."
-            readOnly="true"
-            modules={modules}
-          ></ReactQuill>
+          <>
+            <h1 className="blog-title" style={{ color: titleColor }}>
+              {blogTitle}
+            </h1>
+            <ReactQuill
+              id="editor"
+              theme="snow"
+              value={value}
+              defaultValue={value}
+              className="editor"
+              onChange={setValue}
+              placeholder="loading..."
+              readOnly="true"
+              modules={modules}
+            ></ReactQuill>
+          </>
         )}
       </StyledBlogView>
       <Footer />

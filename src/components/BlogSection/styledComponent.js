@@ -103,7 +103,6 @@ export const StyledBlogSection = styled.div`
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.25);
-    transition: all 0.3s ease;
     font-style: normal;
     text-decoration: none;
     position: relative;
@@ -123,23 +122,19 @@ export const StyledBlogSection = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: all 0.3s ease;
     overflow: hidden;
     border-radius: 40px;
-  }
-
-  .card-img img:hover {
-    transform: scale(1.1);
   }
 
   .card-text {
     position: absolute;
     bottom: 0;
     left: 0;
+    right: 0;
     display: block;
-    width: 90%;
+    width: 100%;
     height: fit-content;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.78);
     font-size: 1.3rem;
     line-height: 1.2;
     padding: 20px 10px;
@@ -148,11 +143,6 @@ export const StyledBlogSection = styled.div`
     color: #5b6770;
     font-weight: 500;
     font-family: brandon-grotesque, Helvetica Neue, Arial, sans-serif;
-    transition: all 0.2s ease-in;
-
-    /* &:hover {
-    display: none;
-  } */
   }
 
   @media (max-width: 1250px) {

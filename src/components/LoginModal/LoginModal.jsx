@@ -228,6 +228,11 @@ const LoginModal = ({ isOpen, onClose }) => {
       setConfirmationResult(confirmation);
       setShowPhoneVerification(true);
     } catch (error) {
+      console.error("Phone auth error:", {
+        code: error?.code,
+        message: error?.message,
+        fullError: error,
+      });
       // Handle specific Firebase errors
       const errorCode = error.code || error.message;
       setError(getErrorMessage(errorCode));
@@ -309,8 +314,9 @@ const LoginModal = ({ isOpen, onClose }) => {
       case "auth/invalid-verification-code":
         return "Invalid verification code.";
       case "auth/invalid-app-credential":
+        return "Firebase app credentials are invalid. Verify REACT_APP_FIREBASE_API_KEY and REACT_APP_FIREBASE_APP_ID match the exact values from Firebase Console > Project settings > Your apps (Web app).";
       case "auth/app-not-authorized":
-        return "Firebase configuration error. Please check your API key and ensure phone authentication is enabled in Firebase Console.";
+        return "This domain is not authorized for Firebase Authentication. Add the current domain in Firebase Console > Authentication > Settings > Authorized domains.";
       case "auth/quota-exceeded":
         return "Phone authentication quota exceeded. Please try again later.";
       case "auth/captcha-check-failed":

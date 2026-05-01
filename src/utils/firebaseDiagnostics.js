@@ -24,8 +24,8 @@ export const diagnoseFirebaseConfig = () => {
     );
   } else {
     diagnostics.apiKey = `${apiKey.substring(0, 10)}...`;
-    if (apiKey !== "AIzaSyCYlmxnQzbhZ9hFArTifCIUr4-vLEjqXx8") {
-      diagnostics.issues.push("API key doesn't match expected value");
+    if (!apiKey.startsWith("AIza")) {
+      diagnostics.issues.push("API key format looks invalid");
       diagnostics.recommendations.push(
         "Verify API key matches Firebase Console → Project Settings → General → Your apps"
       );
@@ -39,10 +39,10 @@ export const diagnoseFirebaseConfig = () => {
     );
   } else {
     diagnostics.appId = appId;
-    if (!appId.includes("f1bc181eee2483ac744e96")) {
-      diagnostics.issues.push("App ID doesn't contain expected value");
+    if (!/^\d+:\d+:web:[a-zA-Z0-9]+$/.test(appId)) {
+      diagnostics.issues.push("App ID format looks invalid");
       diagnostics.recommendations.push(
-        "Verify App ID matches Firebase Console → Project Settings → General → Your apps"
+        "Use full web App ID format: 1:<sender-id>:web:<hash>"
       );
     }
   }

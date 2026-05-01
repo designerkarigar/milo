@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
-import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
+import { getBlogThumbnailUrl } from "../../utils/Functions/Blogs/getBlogThumbnailUrl";
 
 import {
   CContainer,
@@ -21,17 +21,6 @@ const PortalBlogs = () => {
   const [blogData, setBlogData] = useState([]);
   const defaultThumbnail = "https://via.placeholder.com/300x200?text=No+Image";
 
-  const firstImageFromHtml = (html) => {
-    if (!html || typeof html !== "string") return "";
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      return doc.querySelector("img")?.getAttribute("src") || "";
-    } catch {
-      return "";
-    }
-  };
-
   useEffect(() => {
     const getData = async () => {
       try {
@@ -39,23 +28,11 @@ const PortalBlogs = () => {
         const BlogData = await getBlogs();
         const withThumbnails = await Promise.all(
           (BlogData || []).map(async (item) => {
-            const contentPhoto =
-              item?.photos?.find((photoData) => photoData?.type === "content") ||
-              item?.photos?.[0];
-
-            if (!contentPhoto?.url) {
-              return { ...item, thumbnailUrl: defaultThumbnail };
-            }
-
-            try {
-              const html = await fetchContent(contentPhoto.url);
-              return {
-                ...item,
-                thumbnailUrl: firstImageFromHtml(html) || defaultThumbnail,
-              };
-            } catch {
-              return { ...item, thumbnailUrl: defaultThumbnail };
-            }
+            const thumbnailUrl = await getBlogThumbnailUrl(
+              item,
+              defaultThumbnail
+            );
+            return { ...item, thumbnailUrl };
           })
         );
         setBlogData(withThumbnails);

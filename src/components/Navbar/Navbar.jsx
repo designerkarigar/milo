@@ -11,7 +11,10 @@ import { useAuth } from "../../contexts/AuthContext";
 export const Navbar = () => {
   const header = useRef(null);
   const res_navbar = useRef(null);
+  const userMenuRef = useRef(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isResUserMenuOpen, setIsResUserMenuOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
@@ -33,6 +36,7 @@ export const Navbar = () => {
   };
   const floatNavRemove = () => {
     res_navbar.current.classList.remove("visible");
+    setIsResUserMenuOpen(false);
   };
 
   const handleLoginClick = () => {
@@ -42,10 +46,35 @@ export const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut();
+      setIsUserMenuOpen(false);
+      setIsResUserMenuOpen(false);
+      floatNavRemove();
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
+
+  const profileName =
+    localStorage.getItem("username") ||
+    currentUser?.displayName ||
+    currentUser?.email ||
+    "User";
+
+  const avatarInitial = String(profileName).trim().charAt(0).toUpperCase() || "U";
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (!userMenuRef.current) return;
+      if (!userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+    };
+  }, []);
 
   return (
     <>
@@ -84,13 +113,33 @@ export const Navbar = () => {
                 Blogs
               </a>
               {currentUser ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="list-item register-btn"
-                >
-                  Logout
-                </button>
+                <div className="user-avatar-container" ref={userMenuRef}>
+                  <button
+                    type="button"
+                    className="user-avatar"
+                    onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                    aria-label="Open profile menu"
+                  >
+                    {avatarInitial}
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className="user-menu">
+                      <a href="/my-pets" className="user-menu-item">
+                        My Pets
+                      </a>
+                      <a href="/my-bookings" className="user-menu-item">
+                        My Bookings
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="user-menu-item"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <button
                   type="button"
@@ -137,16 +186,46 @@ export const Navbar = () => {
             </a>
           </ul>
           {currentUser ? (
-            <button
-              onClick={() => {
-                handleLogout();
-                floatNavRemove();
-              }}
-              className="res-register-btn"
-              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
-            >
-              Logout
-            </button>
+            <div className="res-user-section">
+              <button
+                type="button"
+                className="res-user-avatar"
+                onClick={() => setIsResUserMenuOpen((prev) => !prev)}
+                aria-label="Open profile menu"
+              >
+                {avatarInitial}
+              </button>
+              {isResUserMenuOpen && (
+                <div className="res-user-menu">
+                  <a
+                    href="/my-pets"
+                    className="res-register-btn"
+                    onClick={floatNavRemove}
+                  >
+                    My Pets
+                  </a>
+                  <a
+                    href="/my-bookings"
+                    className="res-register-btn"
+                    onClick={floatNavRemove}
+                  >
+                    My Bookings
+                  </a>
+                  <button
+                    onClick={handleLogout}
+                    className="res-register-btn"
+                    style={{
+                      border: "none",
+                      background: "#f06a8a",
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <button
               onClick={() => {

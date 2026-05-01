@@ -266,9 +266,17 @@ export const StyledNavbar = styled.div`
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover;
     cursor: pointer;
     border: 2px solid white;
+    background: white;
+    color: #0066ba;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    border-style: solid;
     animation: none !important;
     transition: none !important;
     transform: none !important;
@@ -293,6 +301,7 @@ export const StyledNavbar = styled.div`
   }
 
   .user-menu-item {
+    display: block;
     width: 100%;
     padding: 12px 20px;
     border: none;
@@ -301,6 +310,7 @@ export const StyledNavbar = styled.div`
     cursor: pointer;
     font-size: 1rem;
     color: #333;
+    text-decoration: none;
     transition: background-color 0.2s ease;
     font-family: inherit;
 
@@ -335,7 +345,21 @@ export const StyledNavbar = styled.div`
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: none;
+    background: white;
+    color: #0066ba;
     border: 2px solid #f06a8a;
+  }
+
+  .res-user-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
   }
 `;

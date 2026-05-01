@@ -2,10 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { StyledBanner } from "./styledComponent";
 import allpetsVideo from "../../videos/allpets.mp4";
+import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
 // import dog_svg from "../../images/svgfiles/First-Dog-Image.svg";
 // import second_dog from "../../images/svgfiles/second-dog-image.svg";
 
 export const Banner = () => {
+  const cloudfrontVideoUrl = resolveS3Url("allpets.mp4");
+
   return (
     <StyledBanner>
       <div className="banner-con">
@@ -24,6 +27,7 @@ export const Banner = () => {
         {/* <img className="banner-img second-image" src={second_dog} alt="Happy dog playing" />
         <img className="banner-img first-image" src={dog_svg} alt="Pet dog illustration" /> */}
         <video className="banner-img banner-video" autoPlay muted loop playsInline>
+          <source src={cloudfrontVideoUrl} type="video/mp4" />
           <source src={allpetsVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </video>

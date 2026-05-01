@@ -5,23 +5,12 @@ import NewNavbar from "../../components/Navbar/index";
 import { useEffect } from "react";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
-import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
+import { getBlogThumbnailUrl } from "../../utils/Functions/Blogs/getBlogThumbnailUrl";
 import NewFooter from "../../components/Footer";
 import { FadeLoader } from "react-spinners";
 import { SEO } from "../../components/SEO";
 
 const DEFAULT_THUMBNAIL = "https://via.placeholder.com/600x400?text=No+Image";
-
-function firstImageFromHtml(html) {
-  if (!html || typeof html !== "string") return "";
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    return doc.querySelector("img")?.getAttribute("src") || "";
-  } catch {
-    return "";
-  }
-}
 
 export const Blog = () => {
   const [blogdata, setBlogData] = useState([]);
@@ -34,24 +23,11 @@ export const Blog = () => {
         const blogs = await getBlogs();
         const blogsWithThumbnail = await Promise.all(
           (blogs || []).map(async (blog) => {
-            const contentPhoto =
-              blog?.photos?.find((photoData) => photoData?.type === "content") ||
-              blog?.photos?.[0];
-
-            if (!contentPhoto?.url) {
-              return { ...blog, thumbnailUrl: DEFAULT_THUMBNAIL };
-            }
-
-            try {
-              const html = await fetchContent(contentPhoto.url);
-              const firstImage = firstImageFromHtml(html);
-              return {
-                ...blog,
-                thumbnailUrl: firstImage || DEFAULT_THUMBNAIL,
-              };
-            } catch {
-              return { ...blog, thumbnailUrl: DEFAULT_THUMBNAIL };
-            }
+            const thumbnailUrl = await getBlogThumbnailUrl(
+              blog,
+              DEFAULT_THUMBNAIL
+            );
+            return { ...blog, thumbnailUrl };
           })
         );
         setBlogData(blogsWithThumbnail);

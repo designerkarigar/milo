@@ -18,6 +18,16 @@ export const StyledBlogView = styled.div`
     justify-content: center;
     align-items: center;
   }
+  .blog-title {
+    width: 100%;
+    max-width: 900px;
+    margin: 24px 0 0;
+    padding: 0 12px;
+    text-align: left;
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 800;
+  }
   .editor {
     width: 100%;
     min-height: 100vh;

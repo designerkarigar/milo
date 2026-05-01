@@ -3,26 +3,15 @@ import { Link } from "react-router-dom";
 import "./styledComponent.js";
 import { getBlogs } from "../../utils/Functions/Blogs/getBlogs";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
-import { fetchContent } from "../../utils/Functions/Blogs/fetchContent";
+import { getBlogThumbnailUrl } from "../../utils/Functions/Blogs/getBlogThumbnailUrl";
+import { getPastelColorForKey } from "../../utils/Functions/Others/getPastelColorForKey";
 import dog_blog from "../../images/svgfiles/dog-blog.svg";
 import { StyledBlogSection } from "./styledComponent.js";
 
 const DEFAULT_THUMBNAIL = "https://via.placeholder.com/600x400?text=No+Image";
 
-function firstImageFromHtml(html) {
-  if (!html || typeof html !== "string") return "";
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    return doc.querySelector("img")?.getAttribute("src") || "";
-  } catch {
-    return "";
-  }
-}
-
 export const BlogSection = () => {
   const [blogData, setBlogData] = useState([]);
-  const Divs = [];
 
   useEffect(() => {
     (async () => {
@@ -31,23 +20,15 @@ export const BlogSection = () => {
         const subset = (blog || []).slice(0, 4);
         const withThumbnails = await Promise.all(
           subset.map(async (item) => {
-            const contentPhoto =
-              item?.photos?.find((photoData) => photoData?.type === "content") ||
-              item?.photos?.[0];
-
-            if (!contentPhoto?.url) {
-              return { ...item, thumbnailUrl: DEFAULT_THUMBNAIL };
-            }
-
-            try {
-              const html = await fetchContent(contentPhoto.url);
-              return {
-                ...item,
-                thumbnailUrl: firstImageFromHtml(html) || DEFAULT_THUMBNAIL,
-              };
-            } catch {
-              return { ...item, thumbnailUrl: DEFAULT_THUMBNAIL };
-            }
+            const thumbnailUrl = await getBlogThumbnailUrl(
+              item,
+              DEFAULT_THUMBNAIL
+            );
+            return {
+              ...item,
+              thumbnailUrl,
+              titleColor: getPastelColorForKey(item?.uid || item?.title || ""),
+            };
           })
         );
         setBlogData(withThumbnails);
@@ -99,7 +80,9 @@ export const BlogSection = () => {
                 />
               </div>
 
-              <div className="card-text">{blog.title}</div>
+              <div className="card-text" style={{ color: blog.titleColor }}>
+                {blog.title}
+              </div>
             </Link>
           ))}
         </div>
