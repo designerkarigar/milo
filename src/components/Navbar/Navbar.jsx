@@ -80,7 +80,9 @@ export const Navbar = () => {
     <>
       <StyledNavbar>
         <header ref={header} className="header">
-          <img src={logo} alt="" className="logo" />
+          <a href="/home" className="logo-link" aria-label="Go to home page">
+            <img src={logo} alt="Milo" className="logo" />
+          </a>
           <nav className="nav-bar-con">
             <ul className="nav-bar">
               <a href="/home" className="list-item underline">

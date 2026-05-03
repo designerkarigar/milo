@@ -1,19 +1,66 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import NewNavbar from "../../components/Navbar";
-import NewFooter from "../../components/Footer";
+import axios from "axios";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import { getPetById } from "../../utils/Functions/Pets/getPetById";
+import { getAuthToken } from "../../utils/Functions/Pets/getAuthToken";
+import { BaseUrl } from "../../utils/Constants/Url";
 import { FadeLoader } from "react-spinners";
 import { StyledPetProfile } from "./styledComponent";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt, faPaw, faHeart, faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import defaultAvatar from "../../images/Default_pfp.svg.png";
+
+const DETAIL_FIELDS = [
+  { key: "petType", label: "Pet Type" },
+  { key: "breed", label: "Breed" },
+  { key: "breedCategory", label: "Category" },
+  { key: "origin", label: "Origin" },
+  { key: "avgMass", label: "Average Mass" },
+  { key: "lifespan", label: "Lifespan" },
+];
+
+const DetailRow = ({
+  label,
+  value,
+  isEditing,
+  onStartEdit,
+  onChange,
+}) => (
+  <div className="detail-row">
+    <span>{label}</span>
+    <div className="detail-row-right">
+      {isEditing ? (
+        <input value={value || ""} onChange={onChange} className="detail-input" />
+      ) : (
+        <strong>{value || "—"}</strong>
+      )}
+      {!isEditing ? (
+        <button type="button" className="edit-btn" onClick={onStartEdit}>
+          ✎
+        </button>
+      ) : null}
+    </div>
+  </div>
+);
 
 export const PetProfilePage = () => {
   const { petId } = useParams();
   const navigate = useNavigate();
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [editableFields, setEditableFields] = useState({});
+  const [manualValues, setManualValues] = useState({
+    name: "",
+    petType: "",
+    breed: "",
+    breedCategory: "",
+    origin: "",
+    avgMass: "",
+    lifespan: "",
+    description: "",
+  });
 
   useEffect(() => {
     fetchPetDetails();
@@ -24,6 +71,16 @@ export const PetProfilePage = () => {
       setLoading(true);
       const data = await getPetById(petId);
       setPet(data);
+      setManualValues({
+        name: data?.name || "",
+        petType: data?.petType || "",
+        breed: data?.breed || "",
+        breedCategory: data?.breedCategory || "",
+        origin: data?.origin || "",
+        avgMass: data?.avgMass || "",
+        lifespan: data?.lifespan || "",
+        description: data?.description || data?.info || "",
+      });
       setLoading(false);
     } catch (error) {
       console.error("Error fetching pet details:", error);
@@ -31,16 +88,71 @@ export const PetProfilePage = () => {
     }
   };
 
+  const profileImage = useMemo(() => {
+    if (!pet) return defaultAvatar;
+    if (pet.profilePhoto) return pet.profilePhoto;
+    if (Array.isArray(pet.photos) && pet.photos.length > 0) {
+      const firstPhoto = pet.photos[0];
+      return typeof firstPhoto === "string" ? firstPhoto : firstPhoto?.url || defaultAvatar;
+    }
+    return defaultAvatar;
+  }, [pet]);
+
+  const handleSave = async () => {
+    if (!petId || !pet) return;
+    setSaving(true);
+    setSaveError("");
+
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
+      const payload = {
+        ...pet,
+        name: manualValues.name,
+        petType: manualValues.petType,
+        breed: manualValues.breed,
+        breedCategory: manualValues.breedCategory,
+        origin: manualValues.origin,
+        avgMass: manualValues.avgMass,
+        lifespan: manualValues.lifespan,
+        description: manualValues.description,
+        info: manualValues.description,
+      };
+
+      await axios.put(`${BaseUrl}/pets/${petId}`, payload, {
+        headers: {
+          token,
+        },
+      });
+
+      setPet((prev) => ({
+        ...prev,
+        ...payload,
+      }));
+      setEditableFields({});
+      navigate("/my-pets");
+    } catch (error) {
+      setSaveError(String(error?.response?.data?.message || error?.message || error));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <>
-        <NewNavbar />
+        <div style={{ backgroundColor: "#0066ba" }}>
+          <Navbar />
+        </div>
         <StyledPetProfile>
           <div className="loading-container">
             <FadeLoader color="#f06a8a" />
           </div>
         </StyledPetProfile>
-        <NewFooter />
+        <Footer />
       </>
     );
   }
@@ -48,7 +160,9 @@ export const PetProfilePage = () => {
   if (!pet) {
     return (
       <>
-        <NewNavbar />
+        <div style={{ backgroundColor: "#0066ba" }}>
+          <Navbar />
+        </div>
         <StyledPetProfile>
           <div className="error-container">
             <h2>Pet not found</h2>
@@ -57,208 +171,128 @@ export const PetProfilePage = () => {
             </button>
           </div>
         </StyledPetProfile>
-        <NewFooter />
+        <Footer />
       </>
     );
   }
 
   return (
     <>
+      <div style={{ backgroundColor: "#0066ba" }}>
+        <Navbar />
+      </div>
       <StyledPetProfile>
-        <div className="pet-profile-nav-con">
-          <NewNavbar />
-        </div>
-        <div className="pet-profile-main-con">
-          <div className="pet-profile-wave">
-            <svg
-              data-name="Layer 1"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 1200 120"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
-                className="shape-fill"
-              ></path>
-            </svg>
+        <div className="container">
+          <div className="header-row">
+            <div className="name-row">
+              {editableFields.name ? (
+                <input
+                  className="name-input"
+                  value={manualValues.name}
+                  onChange={(event) =>
+                    setManualValues((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                />
+              ) : (
+                <h1>{manualValues.name || "Your Pet"}</h1>
+              )}
+              {!editableFields.name ? (
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={() => setEditableFields((prev) => ({ ...prev, name: true }))}
+                >
+                  ✎
+                </button>
+              ) : null}
+            </div>
+            <p>Pet details ready</p>
           </div>
 
-          <div className="pet-profile-container">
-            {/* Header Section with Pet Name */}
-            <div className="pet-profile-header">
-              <button onClick={() => navigate("/my-pets")} className="back-button">
-                ← Back to My Pets
-              </button>
-              <h1 className="pet-name-title">{pet.name || "Unnamed Pet"}</h1>
+          <div className="profile-grid">
+            <div className="photo-card">
+              <img
+                src={profileImage}
+                alt={manualValues.name || "Pet"}
+                onError={(event) => {
+                  event.target.src = defaultAvatar;
+                }}
+              />
             </div>
 
-            {/* Main Content */}
-            <div className="pet-profile-content">
-              {/* Left Column - Pet Image */}
-              <div className="pet-image-section">
-                <div className="pet-main-image">
-                  <img
-                    src={pet.profilePhoto || defaultAvatar}
-                    alt={pet.name || "Pet"}
-                    onError={(e) => {
-                      e.target.src = defaultAvatar;
-                    }}
-                  />
-                </div>
-                {pet.photos && Array.isArray(pet.photos) && pet.photos.length > 0 && (
-                  <div className="pet-photos-grid">
-                    {pet.photos.map((photo, index) => {
-                      const photoUrl = typeof photo === 'string' ? photo : (photo.url || photo);
-                      return (
-                        <div key={index} className="pet-photo-item">
-                          <img
-                            src={photoUrl}
-                            alt={`${pet.name} photo ${index + 1}`}
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column - Pet Details */}
-              <div className="pet-details-section">
-                {/* Status Badges */}
-                <div className="pet-badges">
-                  {pet.verified && (
-                    <div className="badge verified-badge">
-                      <FontAwesomeIcon icon={faCheckCircle} />
-                      <span>Verified</span>
-                    </div>
-                  )}
-                  {pet.availableForAdoption && (
-                    <div className="badge adoption-badge">
-                      <FontAwesomeIcon icon={faHeart} />
-                      <span>Available for Adoption</span>
-                    </div>
-                  )}
-                  {pet.matchingDiscoveryEnabled && (
-                    <div className="badge matching-badge">
-                      <FontAwesomeIcon icon={faPaw} />
-                      <span>Matching Enabled</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Basic Information */}
-                <div className="info-card">
-                  <h2 className="info-card-title">
-                    <FontAwesomeIcon icon={faPaw} />
-                    Basic Information
-                  </h2>
-                  <div className="info-grid">
-                    <div className="info-item">
-                      <span className="info-label">Name</span>
-                      <span className="info-value">{pet.name || "Not specified"}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Breed</span>
-                      <span className="info-value">{pet.breed || "Not specified"}</span>
-                    </div>
-                    {pet.location && (
-                      <>
-                        {pet.location.city && (
-                          <div className="info-item">
-                            <span className="info-label">
-                              <FontAwesomeIcon icon={faMapMarkerAlt} />
-                              Location
-                            </span>
-                            <span className="info-value">
-                              {pet.location.city}
-                              {pet.location.state && `, ${pet.location.state}`}
-                              {pet.location.country && pet.location.country !== "null" && `, ${pet.location.country}`}
-                            </span>
-                          </div>
-                        )}
-                        {pet.location.address && pet.location.address !== "null" && (
-                          <div className="info-item full-width">
-                            <span className="info-label">Address</span>
-                            <span className="info-value">{pet.location.address}</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Additional Information */}
-                {pet.info && pet.info !== "null" && (
-                  <div className="info-card">
-                    <h2 className="info-card-title">About</h2>
-                    <p className="about-text">{pet.info}</p>
-                  </div>
-                )}
-
-                {/* Status Information */}
-                <div className="info-card">
-                  <h2 className="info-card-title">Status</h2>
-                  <div className="status-grid">
-                    <div className="status-item">
-                      <span className="status-label">Available for Adoption</span>
-                      <span className={`status-value ${pet.availableForAdoption ? "yes" : "no"}`}>
-                        {pet.availableForAdoption ? (
-                          <>
-                            <FontAwesomeIcon icon={faCheckCircle} />
-                            Yes
-                          </>
-                        ) : (
-                          <>
-                            <FontAwesomeIcon icon={faTimesCircle} />
-                            No
-                          </>
-                        )}
-                      </span>
-                    </div>
-                    <div className="status-item">
-                      <span className="status-label">Matching Discovery</span>
-                      <span className={`status-value ${pet.matchingDiscoveryEnabled ? "yes" : "no"}`}>
-                        {pet.matchingDiscoveryEnabled ? (
-                          <>
-                            <FontAwesomeIcon icon={faCheckCircle} />
-                            Enabled
-                          </>
-                        ) : (
-                          <>
-                            <FontAwesomeIcon icon={faTimesCircle} />
-                            Disabled
-                          </>
-                        )}
-                      </span>
-                    </div>
-                    <div className="status-item">
-                      <span className="status-label">Verified</span>
-                      <span className={`status-value ${pet.verified ? "yes" : "no"}`}>
-                        {pet.verified ? (
-                          <>
-                            <FontAwesomeIcon icon={faCheckCircle} />
-                            Verified
-                          </>
-                        ) : (
-                          <>
-                            <FontAwesomeIcon icon={faTimesCircle} />
-                            Not Verified
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="details-card">
+              {DETAIL_FIELDS.map((field) => (
+                <DetailRow
+                  key={field.key}
+                  label={field.label}
+                  value={manualValues[field.key]}
+                  isEditing={!!editableFields[field.key]}
+                  onStartEdit={() =>
+                    setEditableFields((prev) => ({ ...prev, [field.key]: true }))
+                  }
+                  onChange={(event) =>
+                    setManualValues((prev) => ({ ...prev, [field.key]: event.target.value }))
+                  }
+                />
+              ))}
             </div>
+          </div>
+
+          <div className="info-card">
+            <h2>About {manualValues.name || "your pet"}</h2>
+            <div className="about-editor">
+              {!editableFields.description ? (
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={() =>
+                    setEditableFields((prev) => ({ ...prev, description: true }))
+                  }
+                >
+                  ✎
+                </button>
+              ) : null}
+              {editableFields.description ? (
+                <textarea
+                  value={manualValues.description}
+                  onChange={(event) =>
+                    setManualValues((prev) => ({
+                      ...prev,
+                      description: event.target.value,
+                    }))
+                  }
+                  placeholder={`Write about ${manualValues.name || "your pet"}`}
+                />
+              ) : (
+                <p>{manualValues.description || "Tap pencil icon to add details."}</p>
+              )}
+            </div>
+          </div>
+
+          {saveError ? <p className="error-line">{saveError}</p> : null}
+          <div className="actions-row">
+            <button
+              type="button"
+              className="save-btn"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+            <button
+              type="button"
+              className="back-button"
+              onClick={() => navigate("/my-pets")}
+            >
+              Back
+            </button>
           </div>
         </div>
       </StyledPetProfile>
-      <NewFooter />
+      <Footer />
     </>
   );
 };
+
+export default PetProfilePage;
 

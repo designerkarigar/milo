@@ -1,20 +1,9 @@
 import styled from "styled-components";
 
-export const StyledPetProfile = styled.div`
+export const StyledAddPetProfile = styled.main`
   min-height: 75vh;
   padding: 32px 16px 56px;
   background: #f7f7fb;
-  width: 100%;
-
-  .loading-container,
-  .error-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 45vh;
-    gap: 20px;
-  }
 
   .container {
     max-width: 980px;
@@ -25,30 +14,30 @@ export const StyledPetProfile = styled.div`
     margin-bottom: 16px;
   }
 
-  .name-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
   .header-row h1 {
     margin: 0 0 6px;
     color: #4c5d72;
     font-size: 2rem;
   }
 
-  .name-input {
-    border: 1px solid #cfd8e6;
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #4c5d72;
-  }
-
   .header-row p {
     margin: 0;
     color: #69788e;
+    font-weight: 600;
+  }
+
+  .success-tick {
+    margin-top: 6px !important;
+    font-size: 1.3rem;
+    color: #17a34a !important;
+    font-weight: 800 !important;
+    width: fit-content;
+  }
+
+  .error-line {
+    margin-top: 6px !important;
+    color: #cc2d5a !important;
+    font-size: 0.92rem;
     font-weight: 600;
   }
 
@@ -61,7 +50,8 @@ export const StyledPetProfile = styled.div`
 
   .photo-card,
   .details-card,
-  .info-card {
+  .info-card,
+  .error-box {
     background: white;
     border-radius: 16px;
     border: 1px solid #ebedf4;
@@ -77,6 +67,14 @@ export const StyledPetProfile = styled.div`
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  .placeholder {
+    min-height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #8a8a8a;
   }
 
   .details-card {
@@ -135,6 +133,12 @@ export const StyledPetProfile = styled.div`
     font-size: 1.2rem;
   }
 
+  .info-card p {
+    margin: 0;
+    color: #5a6572;
+    line-height: 1.55;
+  }
+
   .about-editor textarea {
     width: 100%;
     min-height: 110px;
@@ -148,21 +152,16 @@ export const StyledPetProfile = styled.div`
     margin-top: 12px;
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
   }
 
-  .save-btn,
-  .back-button {
+  .save-btn {
     border: none;
+    background: #0066ba;
+    color: white;
     border-radius: 10px;
     padding: 10px 18px;
     font-weight: 700;
     cursor: pointer;
-  }
-
-  .save-btn {
-    background: #0066ba;
-    color: white;
   }
 
   .save-btn:disabled {
@@ -170,16 +169,35 @@ export const StyledPetProfile = styled.div`
     cursor: not-allowed;
   }
 
-  .back-button {
-    background: #f0f1f5;
-    color: #435262;
+  .blink {
+    animation: blinkPulse 1s ease-in-out infinite;
   }
 
-  .error-line {
-    margin-top: 6px;
-    color: #cc2d5a;
-    font-size: 0.92rem;
-    font-weight: 600;
+  @keyframes blinkPulse {
+    0% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  .error-box {
+    padding: 24px;
+    text-align: center;
+  }
+
+  .error-box button {
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #0066ba;
+    color: white;
+    cursor: pointer;
   }
 
   @media (max-width: 820px) {

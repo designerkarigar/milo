@@ -31,6 +31,10 @@ export const StyledNavbar = styled.div`
     }
   }
 
+  .logo-link {
+    display: inline-block;
+  }
+
   .nav-bar-con {
     display: flex;
     align-items: center;

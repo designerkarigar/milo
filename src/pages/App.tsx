@@ -16,6 +16,7 @@ import store from "../Panel/store";
 import DashboardPage from "../Panel/pages/DashBoardPage";
 import { AuthProvider } from "../contexts/AuthContext";
 import HeartBalloons from "../components/HeartBalloons/index";
+import FloatingQuickActions from "../components/FloatingQuickActions/FloatingQuickActions";
 
 const { Amplify, Auth } = require("aws-amplify");
 
@@ -61,6 +62,7 @@ function App() {
           <Router>
             <ScrollToTop />
             <HeartBalloonsWrapper />
+            <FloatingQuickActions />
             <Routes>
             {routesConfig.map((route) => {
               const { path, Component } = route;

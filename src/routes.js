@@ -13,6 +13,9 @@ import PortalBlogs from "./pages/Portal/PortalBlogs";
 import PortalView from "./pages/PortalView/index";
 import MyPetsPage from "./pages/MyPets/index";
 import PetProfilePage from "./pages/PetProfile/index";
+import AddPetCapture from "./pages/AddPetCapture/index";
+import AddPetName from "./pages/AddPetName/index";
+import AddPetProfile from "./pages/AddPetProfile/index";
 import MyBookingsPage from "./pages/MyBookings/index";
 import BookingCheckoutPage from "./pages/BookingCheckout/index";
 import VetBookingCheckoutPage from "./pages/VetBookingCheckout/index";
@@ -88,6 +91,18 @@ export const routesConfig = [
   {
     path: "/pet/:petId",
     Component: PetProfilePage,
+  },
+  {
+    path: "/add-pet/capture",
+    Component: AddPetCapture,
+  },
+  {
+    path: "/add-pet/name",
+    Component: AddPetName,
+  },
+  {
+    path: "/add-pet/profile",
+    Component: AddPetProfile,
   },
   {
     path: "/booking-checkout",

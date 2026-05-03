@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Validate required environment variables
 if (!process.env.REACT_APP_FIREBASE_API_KEY) {
@@ -63,6 +64,7 @@ export const auth = getAuth(app);
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Import diagnostics (runs automatically in development)
 if (process.env.NODE_ENV === "development") {
