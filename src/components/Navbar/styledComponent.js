@@ -40,6 +40,9 @@ export const StyledNavbar = styled.div`
     align-items: center;
     flex-direction: row;
     margin-right: 40px;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
 
     @media (max-width: 1280px) {
       margin-right: 20px;
@@ -175,6 +178,15 @@ export const StyledNavbar = styled.div`
     height: 100%;
     width: 20px;
     display: none;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+
+    img {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
   .res-navbar {
@@ -209,6 +221,16 @@ export const StyledNavbar = styled.div`
       text-decoration: none;
       color: #0066ba;
     }
+
+    .res-list-item-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1.4rem;
+      color: #0066ba;
+      padding: 0;
+      font-family: inherit;
+    }
   }
 
   .close {
@@ -217,6 +239,15 @@ export const StyledNavbar = styled.div`
     position: absolute;
     top: 15px;
     right: 15px;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+
+    svg {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
   .res-register-btn {
@@ -365,5 +396,49 @@ export const StyledNavbar = styled.div`
     flex-direction: column;
     align-items: center;
     gap: 12px;
+  }
+
+  .res-profile-switch {
+    margin-top: 35px;
+    margin-bottom: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: none;
+    background: transparent;
+    color: #0066ba;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .res-profile-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid #f06a8a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: white;
+  }
+
+  .res-profile-view {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .res-back-btn {
+    margin-top: 55px;
+    margin-bottom: 20px;
+    border: none;
+    background: transparent;
+    color: #0066ba;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
   }
 `;

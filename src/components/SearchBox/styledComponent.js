@@ -55,14 +55,25 @@ export const StyledSearchBox = styled.div`
       justify-content: center;
       color: #999;
       margin-right: 5px;
-      transition: color 0.2s;
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
 
       &:hover {
-        color: #333;
+        color: #999;
       }
 
       svg {
         font-size: 18px;
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+      }
+
+      * {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
       }
     }
 

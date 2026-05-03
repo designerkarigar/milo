@@ -73,7 +73,7 @@ export const StyledFloatingQuickActions = styled.div`
   @media (max-width: 768px) {
     .floating-actions {
       right: 16px;
-      bottom: 16px;
+      bottom: 40px;
     }
   }
 `;

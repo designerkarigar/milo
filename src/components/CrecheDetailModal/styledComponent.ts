@@ -47,14 +47,26 @@ export const StyledCrecheDetailModal = styled.div`
     justify-content: center;
     border-radius: 50%;
     z-index: 10;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
 
     &:hover {
-      background-color: #f0f0f0;
-      color: #000;
+      background-color: transparent;
+      color: #666;
     }
 
     svg {
       font-size: 24px;
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+    }
+
+    * {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
     }
   }
 

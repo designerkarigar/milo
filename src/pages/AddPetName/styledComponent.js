@@ -113,7 +113,7 @@ export const StyledAddPetName = styled.main`
 
   .next-btn {
     margin-top: auto;
-    align-self: flex-end;
+    align-self: center;
     border: none;
     border-radius: 10px;
     padding: 10px 16px;

@@ -24,6 +24,9 @@ export const StyledBanner = styled.div`
     border-radius: 50%;
     margin-left: auto;
     margin-right: 0;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
   .second-image {
     display: none;

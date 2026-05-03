@@ -14,7 +14,7 @@ export const Navbar = () => {
   const userMenuRef = useRef(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isResUserMenuOpen, setIsResUserMenuOpen] = useState(false);
+  const [isResProfileMenuOpen, setIsResProfileMenuOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const Navbar = () => {
   };
   const floatNavRemove = () => {
     res_navbar.current.classList.remove("visible");
-    setIsResUserMenuOpen(false);
+    setIsResProfileMenuOpen(false);
   };
 
   const handleLoginClick = () => {
@@ -47,7 +47,7 @@ export const Navbar = () => {
     try {
       await signOut();
       setIsUserMenuOpen(false);
-      setIsResUserMenuOpen(false);
+      setIsResProfileMenuOpen(false);
       floatNavRemove();
     } catch (error) {
       console.error("Error signing out:", error);
@@ -163,82 +163,89 @@ export const Navbar = () => {
           <div onClick={floatNavRemove} className="close">
             <CloseIcon fontSize="inherit" color="inherit" />
           </div>
-          <ul className="res-list">
-            <a className="res-list-item" href="/home">
-              Home
-            </a>
-            <a className="res-list-item" href="/blogs">
-              Blogs
-            </a>
-
-            <a className="res-list-item" href="/events">
-              Events
-            </a>
-            <a className="res-list-item" href="vets">
-              Vets
-            </a>
-            <a className="res-list-item" href="/match-making">
-              MatchMaking
-            </a>
-            <a className="res-list-item" href="/daycare">
-              DayCare
-            </a>
-            <a className="res-list-item" href="/marketplace">
-              MarketPlace
-            </a>
-          </ul>
-          {currentUser ? (
-            <div className="res-user-section">
+          {currentUser && isResProfileMenuOpen ? (
+            <div className="res-profile-view">
               <button
                 type="button"
-                className="res-user-avatar"
-                onClick={() => setIsResUserMenuOpen((prev) => !prev)}
-                aria-label="Open profile menu"
+                className="res-back-btn"
+                onClick={() => setIsResProfileMenuOpen(false)}
               >
-                {avatarInitial}
+                &lt;-
               </button>
-              {isResUserMenuOpen && (
-                <div className="res-user-menu">
-                  <a
-                    href="/my-pets"
-                    className="res-register-btn"
-                    onClick={floatNavRemove}
-                  >
-                    My Pets
-                  </a>
-                  <a
-                    href="/my-bookings"
-                    className="res-register-btn"
-                    onClick={floatNavRemove}
-                  >
-                    My Bookings
-                  </a>
-                  <button
-                    onClick={handleLogout}
-                    className="res-register-btn"
-                    style={{
-                      border: "none",
-                      background: "#f06a8a",
-                      color: "white",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+              <ul className="res-list">
+                <a
+                  href="/my-pets"
+                  className="res-list-item"
+                  onClick={floatNavRemove}
+                >
+                  My Pets
+                </a>
+                <a
+                  href="/my-bookings"
+                  className="res-list-item"
+                  onClick={floatNavRemove}
+                >
+                  My Bookings
+                </a>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="res-list-item res-list-item-btn"
+                >
+                  Logout
+                </button>
+              </ul>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                handleLoginClick();
-                floatNavRemove();
-              }}
-              className="res-register-btn"
-              style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
-            >
-              Login
-            </button>
+            <>
+              {currentUser ? (
+                <button
+                  type="button"
+                  className="res-profile-switch"
+                  onClick={() => setIsResProfileMenuOpen(true)}
+                  aria-label="Open profile menu"
+                >
+                  <span className="res-profile-avatar">{avatarInitial}</span>
+                </button>
+              ) : null}
+
+              <ul className="res-list">
+                <a className="res-list-item" href="/home">
+                  Home
+                </a>
+                <a className="res-list-item" href="/blogs">
+                  Blogs
+                </a>
+
+                <a className="res-list-item" href="/events">
+                  Events
+                </a>
+                <a className="res-list-item" href="vets">
+                  Vets
+                </a>
+                <a className="res-list-item" href="/match-making">
+                  MatchMaking
+                </a>
+                <a className="res-list-item" href="/daycare">
+                  DayCare
+                </a>
+                <a className="res-list-item" href="/marketplace">
+                  MarketPlace
+                </a>
+              </ul>
+              {!currentUser ? (
+                <button
+                  onClick={() => {
+                    handleLoginClick();
+                    floatNavRemove();
+                  }}
+                  className="res-register-btn"
+                  style={{ border: "none", background: "#f06a8a", color: "white", cursor: "pointer" }}
+                >
+                  Login
+                </button>
+              ) : null}
+            </>
           )}
         </div>
       </StyledNavbar>

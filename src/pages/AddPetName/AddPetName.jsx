@@ -107,7 +107,7 @@ export const AddPetName = () => {
                     disabled={!petName.trim()}
                     onClick={handleNext}
                   >
-                    Next →
+                    &gt;
                   </button>
                 </div>
               </div>

@@ -51,14 +51,23 @@ export const StyledLoginModal = styled.div`
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
 
     &:hover {
-      background-color: #f0f0f0;
-      color: #000;
+      background-color: transparent;
+      color: #666;
     }
 
     svg {
       font-size: 24px;
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+
+    * {
       animation: none !important;
       transition: none !important;
       transform: none !important;

@@ -106,26 +106,19 @@ export const StyledMyPets = styled.div`
     overflow: hidden;
     width: 100%;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
   }
 
   .carousel-track {
     display: flex;
-    gap: 30px;
-    transition: transform 0.5s ease-in-out;
     width: 100%;
-
-    @media (max-width: 1024px) {
-      gap: 20px;
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 20px;
-    }
+    max-width: 760px;
+    justify-content: center;
   }
 
   .pet-card {
-    flex: 0 0 calc(50% - 15px);
+    width: 100%;
     background: white;
     border-radius: 20px;
     overflow: hidden;
@@ -141,7 +134,6 @@ export const StyledMyPets = styled.div`
     }
 
     @media (max-width: 768px) {
-      flex: 0 0 100%;
       min-height: auto;
     }
   }
@@ -279,23 +271,25 @@ export const StyledMyPets = styled.div`
     }
 
     @media (max-width: 768px) {
-      display: none;
+      width: 42px;
+      height: 42px;
+      font-size: 1rem;
     }
   }
 
   .carousel-button-left {
-    left: -25px;
+    left: 8px;
 
     @media (max-width: 1200px) {
-      left: -15px;
+      left: 6px;
     }
   }
 
   .carousel-button-right {
-    right: -25px;
+    right: 8px;
 
     @media (max-width: 1200px) {
-      right: -15px;
+      right: 6px;
     }
   }
 

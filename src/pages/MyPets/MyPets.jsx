@@ -16,6 +16,8 @@ export const MyPetsPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
+  const touchStartXRef = useRef(0);
+  const touchEndXRef = useRef(0);
 
   useEffect(() => {
     // Redirect to home if not logged in
@@ -39,41 +41,32 @@ export const MyPetsPage = () => {
   };
 
   const handlePrevious = () => {
-    if (pets.length <= 2) return;
     setCurrentIndex((prev) => {
-      if (prev === 0) {
-        // If at start, go to the last possible position that shows 2 cards
-        return Math.max(0, pets.length - 2);
-      }
-      return prev - 1;
+      if (pets.length <= 1) return prev;
+      return prev === 0 ? pets.length - 1 : prev - 1;
     });
   };
 
   const handleNext = () => {
-    if (pets.length <= 2) return;
     setCurrentIndex((prev) => {
-      const maxIndex = Math.max(0, pets.length - 2);
-      if (prev >= maxIndex) {
-        return 0; // Loop back to start
-      }
-      return prev + 1;
+      if (pets.length <= 1) return prev;
+      return prev >= pets.length - 1 ? 0 : prev + 1;
     });
   };
 
-  const getVisiblePets = () => {
-    if (pets.length <= 2) return pets;
-    const visible = [];
-    const maxIndex = pets.length - 1;
-    for (let i = 0; i < 2; i++) {
-      let index = currentIndex + i;
-      if (index > maxIndex) {
-        index = index - pets.length;
-      }
-      if (index >= 0 && index <= maxIndex) {
-        visible.push(pets[index]);
-      }
+  const handleTouchStart = (event) => {
+    touchStartXRef.current = event.changedTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (event) => {
+    touchEndXRef.current = event.changedTouches[0].clientX;
+    const deltaX = touchEndXRef.current - touchStartXRef.current;
+    if (Math.abs(deltaX) < 50) return;
+    if (deltaX > 0) {
+      handlePrevious();
+    } else {
+      handleNext();
     }
-    return visible;
   };
 
   return (
@@ -116,7 +109,7 @@ export const MyPetsPage = () => {
             </div>
           ) : (
             <div className="carousel-container">
-              {pets.length > 2 && (
+              {pets.length > 1 && (
                 <button
                   className="carousel-button carousel-button-left"
                   onClick={handlePrevious}
@@ -126,22 +119,27 @@ export const MyPetsPage = () => {
                 </button>
               )}
 
-              <div className="carousel-wrapper" ref={carouselRef}>
+              <div
+                className="carousel-wrapper"
+                ref={carouselRef}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
                 <div className="carousel-track">
-                  {getVisiblePets().map((pet, index) => (
+                  {pets[currentIndex] ? (
                     <div
-                      key={pet.uid || index}
+                      key={pets[currentIndex].uid || currentIndex}
                       className="pet-card"
-                      onClick={() => navigate(`/pet/${pet.uid}`)}
+                      onClick={() => navigate(`/pet/${pets[currentIndex].uid}`)}
                       style={{ cursor: "pointer" }}
                     >
                       <div className="pet-card-image">
                         <img
                           src={
-                            pet.profilePhoto ||
+                            pets[currentIndex].profilePhoto ||
                             "https://via.placeholder.com/400x300?text=No+Image"
                           }
-                          alt={pet.name || "Pet"}
+                          alt={pets[currentIndex].name || "Pet"}
                           onError={(e) => {
                             e.target.src =
                               "https://via.placeholder.com/400x300?text=No+Image";
@@ -149,20 +147,20 @@ export const MyPetsPage = () => {
                         />
                       </div>
                       <div className="pet-card-content">
-                        <h2 className="pet-name">{pet.name || "Unnamed Pet"}</h2>
+                        <h2 className="pet-name">{pets[currentIndex].name || "Unnamed Pet"}</h2>
                         <div className="pet-details">
                           <div className="pet-detail-item">
                             <span className="detail-label">Breed:</span>
                             <span className="detail-value">
-                              {pet.breed || "Not specified"}
+                              {pets[currentIndex].breed || "Not specified"}
                             </span>
                           </div>
-                          {pet.location?.city && (
+                          {pets[currentIndex].location?.city && (
                             <div className="pet-detail-item">
                               <span className="detail-label">Location:</span>
                               <span className="detail-value">
-                                {pet.location.city}
-                                {pet.location.state && `, ${pet.location.state}`}
+                                {pets[currentIndex].location.city}
+                                {pets[currentIndex].location.state && `, ${pets[currentIndex].location.state}`}
                               </span>
                             </div>
                           )}
@@ -170,33 +168,33 @@ export const MyPetsPage = () => {
                             <span className="detail-label">Available for Adoption:</span>
                             <span
                               className={`detail-value ${
-                                pet.availableForAdoption ? "available" : "not-available"
+                                pets[currentIndex].availableForAdoption ? "available" : "not-available"
                               }`}
                             >
-                              {pet.availableForAdoption ? "Yes" : "No"}
+                              {pets[currentIndex].availableForAdoption ? "Yes" : "No"}
                             </span>
                           </div>
-                          {pet.matchingDiscoveryEnabled !== undefined && (
+                          {pets[currentIndex].matchingDiscoveryEnabled !== undefined && (
                             <div className="pet-detail-item">
                               <span className="detail-label">Matching Enabled:</span>
                               <span className="detail-value">
-                                {pet.matchingDiscoveryEnabled ? "Yes" : "No"}
+                                {pets[currentIndex].matchingDiscoveryEnabled ? "Yes" : "No"}
                               </span>
                             </div>
                           )}
                         </div>
-                        {pet.info && pet.info !== "null" && (
+                        {pets[currentIndex].info && pets[currentIndex].info !== "null" && (
                           <div className="pet-info">
-                            <p>{pet.info}</p>
+                            <p>{pets[currentIndex].info}</p>
                           </div>
                         )}
                       </div>
                     </div>
-                  ))}
+                  ) : null}
                 </div>
               </div>
 
-              {pets.length > 2 && (
+              {pets.length > 1 && (
                 <button
                   className="carousel-button carousel-button-right"
                   onClick={handleNext}
@@ -206,16 +204,16 @@ export const MyPetsPage = () => {
                 </button>
               )}
 
-              {pets.length > 2 && (
+              {pets.length > 1 && (
                 <div className="carousel-indicators">
-                  {Array.from({ length: Math.ceil(pets.length / 2) }).map((_, index) => (
+                  {pets.map((pet, index) => (
                     <button
-                      key={index}
+                      key={pet.uid || index}
                       className={`indicator ${
-                        Math.floor(currentIndex / 2) === index ? "active" : ""
+                        currentIndex === index ? "active" : ""
                       }`}
-                      onClick={() => setCurrentIndex(index * 2)}
-                      aria-label={`Go to page ${index + 1}`}
+                      onClick={() => setCurrentIndex(index)}
+                      aria-label={`Go to pet ${index + 1}`}
                     />
                   ))}
                 </div>
