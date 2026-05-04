@@ -44,6 +44,15 @@ export const StyledAddPetCapture = styled.main`
     cursor: pointer;
     background: #f06a8a;
     color: white;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .action-row button svg {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 
   .hidden-input {

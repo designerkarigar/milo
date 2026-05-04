@@ -26,7 +26,7 @@ export const Banner = () => {
         </div>
         {/* <img className="banner-img second-image" src={second_dog} alt="Happy dog playing" />
         <img className="banner-img first-image" src={dog_svg} alt="Pet dog illustration" /> */}
-        <video className="banner-img banner-video" muted playsInline preload="metadata">
+        <video className="banner-img banner-video" autoPlay muted loop playsInline>
           <source src={cloudfrontVideoUrl} type="video/mp4" />
           <source src={allpetsVideo} type="video/mp4" />
           Your browser does not support the video tag.

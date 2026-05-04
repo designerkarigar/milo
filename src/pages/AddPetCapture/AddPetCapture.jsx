@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useAuth } from "../../contexts/AuthContext";
@@ -33,14 +35,21 @@ export const AddPetCapture = () => {
       </div>
       <StyledAddPetCapture>
         <div className="container">
-          <h1>A good photo will help us :)</h1>
-          <p>Choose how you want to add your pet photo.</p>
+          <h1>All it takes is a good photo :)</h1>
           <div className="action-row">
-            <button type="button" onClick={() => cameraInputRef.current?.click()}>
-              Click
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              aria-label="Open camera"
+            >
+              <CameraAltIcon />
             </button>
-            <button type="button" onClick={() => galleryInputRef.current?.click()}>
-              Gallery
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              aria-label="Open gallery"
+            >
+              <PhotoLibraryIcon />
             </button>
           </div>
         </div>

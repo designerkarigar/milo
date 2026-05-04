@@ -399,7 +399,7 @@ export const StyledNavbar = styled.div`
   }
 
   .res-profile-switch {
-    margin-top: 35px;
+    margin-top: 15px;
     margin-bottom: 28px;
     display: inline-flex;
     align-items: center;

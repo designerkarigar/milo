@@ -61,6 +61,8 @@ svg[data-prefix],
 /* Exclude Material-UI icons */
 .MuiSvgIcon-root,
 [class*="MuiSvgIcon"],
+.MuiSvgIcon-root path,
+[class*="MuiSvgIcon"] path,
 /* Exclude dropdown arrows and navigation icons */
 .down svg,
 .down *,

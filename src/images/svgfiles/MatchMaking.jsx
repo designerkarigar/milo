@@ -1,18 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { MatchMakingStyledComponent } from "../../pages/Match-Making/styledComponent";
 import { SEO } from "../../components/SEO";
-import match_1 from "../../images/svgfiles/match-1.svg";
-import match_2 from "../../images/svgfiles/match-2.svg";
-import match_3 from "../../images/svgfiles/match-3.svg";
-import match_4 from "../../images/svgfiles/match-4.svg";
+import { useAuth } from "../../contexts/AuthContext";
+import { getPets } from "../../utils/Functions/Pets/getPets";
+import { findMatchPets } from "../../utils/Functions/Match/findMatchPets";
+import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
+import { FadeLoader } from "react-spinners";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart, faTimes, faChevronLeft, faChevronRight, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 
-import avatar_1 from "../../images/svgfiles/avatar-1.svg";
-import avatar_2 from "../../images/svgfiles/avatar-2.svg";
-import avatar_3 from "../../images/svgfiles/avatar-3.svg";
 export const MatchMaking = () => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [matchingPets, setMatchingPets] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [pageNo, setPageNo] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [basePet, setBasePet] = useState(null);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -24,6 +34,90 @@ export const MatchMaking = () => {
     "description": "Find the perfect breeding partner for your pet. Responsible pet breeding and matching services for dogs and cats. Connect with reputable breeders who prioritize animal welfare.",
     "areaServed": "India"
   };
+
+  useEffect(() => {
+    const boot = async () => {
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const myPets = await getPets();
+        if (!Array.isArray(myPets) || myPets.length === 0) {
+          navigate("/add-pet/capture");
+          return;
+        }
+
+        const petForMatch = myPets[0];
+        setBasePet(petForMatch);
+
+        const firstBatch = await findMatchPets({
+          pageNo: 1,
+          pageSize: 10,
+          petType: petForMatch?.petType || "",
+          gender: petForMatch?.gender || "",
+          breed: petForMatch?.breed || "",
+        });
+
+        setMatchingPets(firstBatch || []);
+        setHasMore((firstBatch || []).length === 10);
+        setPageNo(1);
+      } catch (error) {
+        console.error("Error loading match pets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    boot();
+  }, [currentUser, navigate]);
+
+  const loadNextPage = async () => {
+    if (!hasMore || loadingMore || !basePet) return;
+    try {
+      setLoadingMore(true);
+      const nextPage = pageNo + 1;
+      const nextBatch = await findMatchPets({
+        pageNo: nextPage,
+        pageSize: 10,
+        petType: basePet?.petType || "",
+        gender: basePet?.gender || "",
+        breed: basePet?.breed || "",
+      });
+
+      setMatchingPets((prev) => [...prev, ...(nextBatch || [])]);
+      setPageNo(nextPage);
+      setHasMore((nextBatch || []).length === 10);
+    } catch (error) {
+      console.error("Error loading more match pets:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (matchingPets.length === 0) return;
+
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= matchingPets.length - 2 && hasMore) {
+      await loadNextPage();
+    }
+
+    setCurrentIndex((prev) => {
+      const max = matchingPets.length - 1;
+      return prev >= max ? prev : prev + 1;
+    });
+  };
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev <= 0 ? 0 : prev - 1));
+  };
+
+  const activePet = useMemo(
+    () => (matchingPets.length ? matchingPets[currentIndex] : null),
+    [matchingPets, currentIndex]
+  );
 
   return (
     <>
@@ -41,11 +135,7 @@ export const MatchMaking = () => {
           <NewNavbar />
         </div>
         <div className="match-banner">
-          <h1>
-            Find your dog's perfect
-            <br />
-            partner
-          </h1>
+          <h1>Find your pet's perfect partner</h1>
         </div>
         <div className="custom-shape-divider-bottom-1690829630">
           <svg
@@ -63,65 +153,78 @@ export const MatchMaking = () => {
       </div>
 
       <div className="match-data">
-        <div className="match-content">
-          <h1>Pet Breeding & Matching Services</h1>
-          <p>
-            Help your furry friend find love and breed with our responsible pet breeding and matching service. 
-            Discover the perfect breeding partner for your dogs and cats today! Our platform connects you with 
-            reputable breeders who prioritize animal welfare and follow ethical breeding standards. Whether you're 
-            looking for dog breeding or cat breeding services, we ensure healthy and responsible pet matching. 
-            Explore our <Link to="/vets" style={{color: '#f1c21b', textDecoration: 'underline'}}>veterinary services</Link> and 
-            <Link to="/daycare" style={{color: '#f1c21b', textDecoration: 'underline', marginLeft: '5px'}}>pet daycare creches</Link> for complete pet care solutions.
-          </p>
-          <div className="join-btn">Launching Soon</div>
-        </div>
+        {loading ? (
+          <div className="loading-con">
+            <FadeLoader color="#f06a8a" />
+          </div>
+        ) : !activePet ? (
+          <div className="empty-con">
+            <h2>No match pets found right now.</h2>
+          </div>
+        ) : (
+          <div className="match-feed">
+            <button
+              type="button"
+              className="arrow-btn left"
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
 
-        <div className="match-card-con">
-          <div className="match-card">
-            <div className="match-card-img">
-              <img src={avatar_3} alt="" className="match-dp" />
+            <div className="swipe-card">
+              <img
+                src={resolveS3Url(
+                  activePet?.profilePhoto ||
+                    activePet?.photos?.[0]?.url ||
+                    activePet?.photos?.[0] ||
+                    ""
+                )}
+                alt={activePet?.name || "Pet"}
+                onError={(event) => {
+                  event.target.src =
+                    "https://via.placeholder.com/400x600?text=No+Image";
+                }}
+              />
+              <div className="overlay">
+                <h3>{activePet?.name || "Unnamed pet"}</h3>
+                <p>{activePet?.breed || "Breed"}</p>
+                <div className="meta-row">
+                  <span>{activePet?.petType || "Pet type"}</span>
+                  <span>{activePet?.gender || "Gender"}</span>
+                </div>
+                <p className="location">
+                  <FontAwesomeIcon icon={faMapMarkerAlt} />
+                  <span>
+                    {activePet?.location?.city || "Location"}
+                    {activePet?.location?.state
+                      ? `, ${activePet.location.state}`
+                      : ""}
+                  </span>
+                </p>
+              </div>
+              <div className="actions">
+                <button type="button" className="cross" onClick={handleNext}>
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+                <button type="button" className="heart" onClick={handleNext}>
+                  <FontAwesomeIcon icon={faHeart} />
+                </button>
+              </div>
             </div>
-            <h4>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero,
-              dignissimos.
-            </h4>
-            <p>Vishal Chandana</p>
-          </div>
-          <div className="match-card">
-            <div className="match-card-img">
-              <img src={avatar_2} alt="" className="match-dp" />
-            </div>
-            <h4>
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ab,
-              enim!
-            </h4>
-            <p>Anil Aggarwal</p>
-          </div>
-          <div className="match-card">
-            <div className="match-card-img">
-              <img src={avatar_1} alt="" className="match-dp" />
-            </div>
-            <h4>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse,
-              facere?
-            </h4>
-            <p>Gopal Arora</p>
-          </div>
-        </div>
 
-        <div className="pup-gallery">
-          <h1>Happy PUP Couples</h1>
-          <div className="gallery-con">
-            <div className="row">
-              <img className="gallery-img" src={match_1} alt="Happy dog couple from pet breeding" />
-              <img className="gallery-img" src={match_2} alt="Pet breeding success story" />
-            </div>
-            <div className="row">
-              <img className="gallery-img" src={match_3} alt="Matched dogs from breeding service" />
-              <img className="gallery-img" src={match_4} alt="Pet matching success" />
-            </div>
+            <button
+              type="button"
+              className="arrow-btn right"
+              onClick={handleNext}
+              disabled={currentIndex >= matchingPets.length - 1 && !hasMore}
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
           </div>
-        </div>
+        )}
+
+        {loadingMore ? <p className="loading-more">Loading more pets...</p> : null}
       </div>
 
       <NewFooter />

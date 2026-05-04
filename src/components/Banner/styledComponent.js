@@ -179,6 +179,7 @@ export const StyledBanner = styled.div`
       width: 350px;
       height: 350px;
       margin: 0 auto;
+      margin-top: 20px;
     }
     .heading {
       h1 {
