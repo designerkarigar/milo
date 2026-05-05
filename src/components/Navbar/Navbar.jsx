@@ -49,6 +49,7 @@ export const Navbar = () => {
       setIsUserMenuOpen(false);
       setIsResProfileMenuOpen(false);
       floatNavRemove();
+      window.location.href = "/home";
     } catch (error) {
       console.error("Error signing out:", error);
     }

@@ -12,7 +12,7 @@ const ProtectedRoute = ({ component: Component, path, access, ...props }) => {
   if (access === "allow") {
     return value ? <Navigate to="/dashboard" /> : <Component />;
   } else {
-    return value ? <Component /> : <Navigate to="/login" />;
+    return value ? <Component /> : <Navigate to="/home" />;
   }
 };
 

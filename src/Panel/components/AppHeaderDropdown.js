@@ -44,7 +44,7 @@ export const AppHeaderDropdown = () => {
   const handleLogout = async () => {
     try {
       await _Logout();
-      navigate("/login");
+      navigate("/home");
     } catch (error) {
       alert("Error logingOut : " + error);
     }

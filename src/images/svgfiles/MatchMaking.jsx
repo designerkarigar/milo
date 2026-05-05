@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { MatchMakingStyledComponent } from "../../pages/Match-Making/styledComponent";
 import { SEO } from "../../components/SEO";
 import { useAuth } from "../../contexts/AuthContext";
-import { getPets } from "../../utils/Functions/Pets/getPets";
 import { findMatchPets } from "../../utils/Functions/Match/findMatchPets";
 import { resolveS3Url } from "../../utils/Functions/Others/resolveS3Url";
 import { FadeLoader } from "react-spinners";
@@ -21,7 +20,7 @@ export const MatchMaking = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pageNo, setPageNo] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [basePet, setBasePet] = useState(null);
+  const [cardsPerView, setCardsPerView] = useState(1);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -43,21 +42,9 @@ export const MatchMaking = () => {
       }
 
       try {
-        const myPets = await getPets();
-        if (!Array.isArray(myPets) || myPets.length === 0) {
-          navigate("/add-pet/capture");
-          return;
-        }
-
-        const petForMatch = myPets[0];
-        setBasePet(petForMatch);
-
         const firstBatch = await findMatchPets({
           pageNo: 1,
           pageSize: 10,
-          petType: petForMatch?.petType || "",
-          gender: petForMatch?.gender || "",
-          breed: petForMatch?.breed || "",
         });
 
         setMatchingPets(firstBatch || []);
@@ -73,17 +60,33 @@ export const MatchMaking = () => {
     boot();
   }, [currentUser, navigate]);
 
+  useEffect(() => {
+    const updateCardsPerView = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setCardsPerView(1);
+      } else if (width < 1100) {
+        setCardsPerView(2);
+      } else if (width < 1450) {
+        setCardsPerView(3);
+      } else {
+        setCardsPerView(4);
+      }
+    };
+
+    updateCardsPerView();
+    window.addEventListener("resize", updateCardsPerView);
+    return () => window.removeEventListener("resize", updateCardsPerView);
+  }, []);
+
   const loadNextPage = async () => {
-    if (!hasMore || loadingMore || !basePet) return;
+    if (!hasMore || loadingMore) return;
     try {
       setLoadingMore(true);
       const nextPage = pageNo + 1;
       const nextBatch = await findMatchPets({
         pageNo: nextPage,
         pageSize: 10,
-        petType: basePet?.petType || "",
-        gender: basePet?.gender || "",
-        breed: basePet?.breed || "",
       });
 
       setMatchingPets((prev) => [...prev, ...(nextBatch || [])]);
@@ -96,28 +99,50 @@ export const MatchMaking = () => {
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (matchingPets.length === 0) return;
-
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= matchingPets.length - 2 && hasMore) {
-      await loadNextPage();
-    }
-
-    setCurrentIndex((prev) => {
-      const max = matchingPets.length - 1;
-      return prev >= max ? prev : prev + 1;
-    });
+    const maxStartIndex = Math.max(matchingPets.length - cardsPerView, 0);
+    setCurrentIndex((prev) =>
+      prev >= maxStartIndex ? 0 : prev + 1
+    );
   };
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev <= 0 ? 0 : prev - 1));
+    if (matchingPets.length === 0) return;
+    const maxStartIndex = Math.max(matchingPets.length - cardsPerView, 0);
+    setCurrentIndex((prev) =>
+      prev <= 0 ? maxStartIndex : prev - 1
+    );
   };
 
-  const activePet = useMemo(
-    () => (matchingPets.length ? matchingPets[currentIndex] : null),
-    [matchingPets, currentIndex]
-  );
+  const handleOpenPetProfile = (petUid) => {
+    if (!petUid) return;
+    navigate(`/pet/${petUid}`, { state: { readOnly: true, source: "match-making" } });
+  };
+
+  useEffect(() => {
+    const maxStartIndex = Math.max(matchingPets.length - cardsPerView, 0);
+    if (currentIndex >= maxStartIndex - 2 && hasMore && !loadingMore) {
+      loadNextPage();
+    }
+  }, [currentIndex, matchingPets.length, hasMore, loadingMore, cardsPerView]);
+
+  useEffect(() => {
+    if (loading || matchingPets.length <= cardsPerView) return undefined;
+    const autoSlideTimer = setInterval(() => {
+      const maxStartIndex = Math.max(matchingPets.length - cardsPerView, 0);
+      setCurrentIndex((prev) => (prev >= maxStartIndex ? 0 : prev + 1));
+    }, 2500);
+
+    return () => clearInterval(autoSlideTimer);
+  }, [loading, matchingPets.length, cardsPerView]);
+
+  useEffect(() => {
+    const maxStartIndex = Math.max(matchingPets.length - cardsPerView, 0);
+    if (currentIndex > maxStartIndex) {
+      setCurrentIndex(maxStartIndex);
+    }
+  }, [matchingPets.length, cardsPerView, currentIndex]);
 
   return (
     <>
@@ -157,7 +182,7 @@ export const MatchMaking = () => {
           <div className="loading-con">
             <FadeLoader color="#f06a8a" />
           </div>
-        ) : !activePet ? (
+        ) : matchingPets.length === 0 ? (
           <div className="empty-con">
             <h2>No match pets found right now.</h2>
           </div>
@@ -167,49 +192,89 @@ export const MatchMaking = () => {
               type="button"
               className="arrow-btn left"
               onClick={handlePrevious}
-              disabled={currentIndex === 0}
+              disabled={matchingPets.length <= cardsPerView}
             >
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
 
-            <div className="swipe-card">
-              <img
-                src={resolveS3Url(
-                  activePet?.profilePhoto ||
-                    activePet?.photos?.[0]?.url ||
-                    activePet?.photos?.[0] ||
-                    ""
-                )}
-                alt={activePet?.name || "Pet"}
-                onError={(event) => {
-                  event.target.src =
-                    "https://via.placeholder.com/400x600?text=No+Image";
+            <div className="carousel-window">
+              <div
+                className="carousel-track"
+                style={{
+                  transform: `translateX(-${(currentIndex * 100) / cardsPerView}%)`,
                 }}
-              />
-              <div className="overlay">
-                <h3>{activePet?.name || "Unnamed pet"}</h3>
-                <p>{activePet?.breed || "Breed"}</p>
-                <div className="meta-row">
-                  <span>{activePet?.petType || "Pet type"}</span>
-                  <span>{activePet?.gender || "Gender"}</span>
-                </div>
-                <p className="location">
-                  <FontAwesomeIcon icon={faMapMarkerAlt} />
-                  <span>
-                    {activePet?.location?.city || "Location"}
-                    {activePet?.location?.state
-                      ? `, ${activePet.location.state}`
-                      : ""}
-                  </span>
-                </p>
-              </div>
-              <div className="actions">
-                <button type="button" className="cross" onClick={handleNext}>
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-                <button type="button" className="heart" onClick={handleNext}>
-                  <FontAwesomeIcon icon={faHeart} />
-                </button>
+              >
+                {matchingPets.map((pet, index) => (
+                  <div
+                    className="carousel-slide"
+                    style={{ flex: `0 0 ${100 / cardsPerView}%` }}
+                    key={`${pet?.id || "pet"}-${index}`}
+                  >
+                    <div
+                      className="swipe-card"
+                      onClick={() => handleOpenPetProfile(pet?.uid)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleOpenPetProfile(pet?.uid);
+                        }
+                      }}
+                    >
+                      <img
+                        src={resolveS3Url(
+                          pet?.profilePhoto ||
+                            pet?.photos?.[0]?.url ||
+                            pet?.photos?.[0] ||
+                            ""
+                        )}
+                        alt={pet?.name || "Pet"}
+                        onError={(event) => {
+                          event.target.src =
+                            "https://via.placeholder.com/400x600?text=No+Image";
+                        }}
+                      />
+                      <div className="overlay">
+                        <h3>{pet?.name || "Unnamed pet"}</h3>
+                        <p>{pet?.breed || "Breed"}</p>
+                        <div className="meta-row">
+                          <span>{pet?.petType || "Pet type"}</span>
+                          <span>{pet?.gender || "Gender"}</span>
+                        </div>
+                        <p className="location">
+                          <FontAwesomeIcon icon={faMapMarkerAlt} />
+                          <span>
+                            {pet?.location?.city || "Location"}
+                            {pet?.location?.state ? `, ${pet.location.state}` : ""}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="actions">
+                        <button
+                          type="button"
+                          className="cross"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleNext();
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faTimes} />
+                        </button>
+                        <button
+                          type="button"
+                          className="heart"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleNext();
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faHeart} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -217,7 +282,7 @@ export const MatchMaking = () => {
               type="button"
               className="arrow-btn right"
               onClick={handleNext}
-              disabled={currentIndex >= matchingPets.length - 1 && !hasMore}
+              disabled={matchingPets.length <= cardsPerView}
             >
               <FontAwesomeIcon icon={faChevronRight} />
             </button>

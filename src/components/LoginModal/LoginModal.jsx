@@ -447,6 +447,49 @@ const LoginModal = ({ isOpen, onClose }) => {
             {/* Email/Password Form */}
             {!showPhoneVerification ? (
               <>
+                {/* Phone Authentication */}
+                <form onSubmit={handlePhoneAuth} className="auth-form">
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <div className="phone-input-group">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="phone-code"
+                        required
+                        disabled={loading}
+                      >
+                        <option value="">Code</option>
+                        <option value="1">+1 (US)</option>
+                        <option value="91">+91 (IN)</option>
+                        <option value="44">+44 (UK)</option>
+                        <option value="61">+61 (AU)</option>
+                        <option value="86">+86 (CN)</option>
+                      </select>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                        placeholder="Enter your phone number"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={loading}
+                  >
+                    {loading ? "Sending code..." : "Send Verification Code"}
+                  </button>
+                </form>
+
+                <div className="divider">
+                  <span>OR</span>
+                </div>
+
                 <form onSubmit={handleEmailAuth} className="auth-form">
                   <div className="form-group">
                     <label>Email</label>
@@ -489,49 +532,6 @@ const LoginModal = ({ isOpen, onClose }) => {
                     disabled={loading}
                   >
                     {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
-                  </button>
-                </form>
-
-                <div className="divider">
-                  <span>OR</span>
-                </div>
-
-                {/* Phone Authentication */}
-                <form onSubmit={handlePhoneAuth} className="auth-form">
-                  <div className="form-group">
-                    <label>Phone Number</label>
-                    <div className="phone-input-group">
-                      <select
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                        className="phone-code"
-                        required
-                        disabled={loading}
-                      >
-                        <option value="">Code</option>
-                        <option value="1">+1 (US)</option>
-                        <option value="91">+91 (IN)</option>
-                        <option value="44">+44 (UK)</option>
-                        <option value="61">+61 (AU)</option>
-                        <option value="86">+86 (CN)</option>
-                      </select>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                        placeholder="Enter your phone number"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="submit-btn"
-                    disabled={loading}
-                  >
-                    {loading ? "Sending code..." : "Send Verification Code"}
                   </button>
                 </form>
               </>

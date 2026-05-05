@@ -4,6 +4,7 @@ import {
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import { auth } from "../firebase";
+import { _Logout } from "../utils/Functions/Authentication/_Logout";
 
 const AuthContext = createContext({});
 
@@ -25,11 +26,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-    } catch (error) {
-      console.error("Error signing out:", error);
-      throw error;
+    const [firebaseResult, cognitoResult] = await Promise.allSettled([
+      firebaseSignOut(auth),
+      _Logout(),
+    ]);
+
+    // Ensure UI immediately reflects logged-out state even if one provider fails.
+    setCurrentUser(null);
+
+    if (firebaseResult.status === "rejected") {
+      console.error("Firebase sign out failed:", firebaseResult.reason);
+    }
+    if (cognitoResult.status === "rejected") {
+      console.error("Cognito sign out failed:", cognitoResult.reason);
     }
   };
 

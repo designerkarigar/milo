@@ -9,7 +9,7 @@ export const MatchMakingStyledComponent = styled.div`
   .match-top-con {
     position: relative;
     width: 100%;
-    height: 80vh;
+    height: 40vh;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -29,18 +29,22 @@ export const MatchMakingStyledComponent = styled.div`
     background-color: rgba(0, 102, 186, 0.7);
   } */
   .match-nav-con {
+    position: relative;
     width: 100%;
+    z-index: 3;
     background-color: transparent;
   }
 
   .match-banner {
+    position: relative;
     display: flex;
     width: 100%;
     height: 100%;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    z-index: 2;
+    padding-top: 60px;
+    z-index: 5;
     h1 {
       font-family: Quicksand;
       font-size: 4rem;
@@ -50,7 +54,7 @@ export const MatchMakingStyledComponent = styled.div`
   }
 
   .custom-shape-divider-bottom-1690829630 {
-    z-index: 4;
+    z-index: 1;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -103,6 +107,25 @@ export const MatchMakingStyledComponent = styled.div`
     gap: 16px;
   }
 
+  .carousel-window {
+    width: min(96vw, 1460px);
+    overflow: hidden;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.55s ease-in-out;
+    will-change: transform;
+  }
+
+  .carousel-slide {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    padding: 0 8px;
+    box-sizing: border-box;
+  }
+
   .arrow-btn {
     width: 48px;
     height: 48px;
@@ -121,11 +144,13 @@ export const MatchMakingStyledComponent = styled.div`
 
   .swipe-card {
     position: relative;
-    width: min(88vw, 440px);
-    height: min(74vh, 680px);
+    width: calc(100% - 4px);
+    max-width: 500px;
+    height: min(62vh, 620px);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
   }
 
   .swipe-card img {
@@ -346,7 +371,11 @@ export const MatchMakingStyledComponent = styled.div`
   }
   @media (max-width: 980px) {
     .match-top-con {
-      height: 60vh;
+      height: 34vh;
+    }
+
+    .match-banner {
+      padding-top: 48px;
     }
     .match-feed {
       gap: 10px;
@@ -355,9 +384,10 @@ export const MatchMakingStyledComponent = styled.div`
 
   @media (max-width: 600px) {
     .match-top-con {
-      height: 50vh;
+      height: 30vh;
     }
     .match-banner {
+      padding-top: 40px;
       h1 {
         font-size: 2rem;
       }
@@ -370,8 +400,13 @@ export const MatchMakingStyledComponent = styled.div`
     }
 
     .swipe-card {
-      width: min(90vw, 420px);
+      width: calc(100% - 4px);
+      max-width: 440px;
       height: min(72vh, 620px);
+    }
+
+    .carousel-window {
+      width: min(94vw, 500px);
     }
 
     .swipe-card .actions {

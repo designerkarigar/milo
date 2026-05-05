@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -23,6 +23,7 @@ const DetailRow = ({
   label,
   value,
   isEditing,
+  canEdit,
   onStartEdit,
   onChange,
 }) => (
@@ -34,7 +35,7 @@ const DetailRow = ({
       ) : (
         <strong>{value || "—"}</strong>
       )}
-      {!isEditing ? (
+      {canEdit && !isEditing ? (
         <button type="button" className="edit-btn" onClick={onStartEdit}>
           ✎
         </button>
@@ -46,6 +47,8 @@ const DetailRow = ({
 export const PetProfilePage = () => {
   const { petId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isReadOnly = !!location.state?.readOnly;
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -185,7 +188,7 @@ export const PetProfilePage = () => {
         <div className="container">
           <div className="header-row">
             <div className="name-row">
-              {editableFields.name ? (
+              {!isReadOnly && editableFields.name ? (
                 <input
                   className="name-input"
                   value={manualValues.name}
@@ -196,7 +199,7 @@ export const PetProfilePage = () => {
               ) : (
                 <h1>{manualValues.name || "Your Pet"}</h1>
               )}
-              {!editableFields.name ? (
+              {isReadOnly || editableFields.name ? null : (
                 <button
                   type="button"
                   className="edit-btn"
@@ -204,7 +207,7 @@ export const PetProfilePage = () => {
                 >
                   ✎
                 </button>
-              ) : null}
+              )}
             </div>
             <p>Pet details ready</p>
           </div>
@@ -226,7 +229,8 @@ export const PetProfilePage = () => {
                   key={field.key}
                   label={field.label}
                   value={manualValues[field.key]}
-                  isEditing={!!editableFields[field.key]}
+                  isEditing={!isReadOnly && !!editableFields[field.key]}
+                  canEdit={!isReadOnly}
                   onStartEdit={() =>
                     setEditableFields((prev) => ({ ...prev, [field.key]: true }))
                   }
@@ -241,7 +245,7 @@ export const PetProfilePage = () => {
           <div className="info-card">
             <h2>About {manualValues.name || "your pet"}</h2>
             <div className="about-editor">
-              {!editableFields.description ? (
+              {!isReadOnly && !editableFields.description ? (
                 <button
                   type="button"
                   className="edit-btn"
@@ -252,7 +256,7 @@ export const PetProfilePage = () => {
                   ✎
                 </button>
               ) : null}
-              {editableFields.description ? (
+              {!isReadOnly && editableFields.description ? (
                 <textarea
                   value={manualValues.description}
                   onChange={(event) =>
@@ -271,18 +275,20 @@ export const PetProfilePage = () => {
 
           {saveError ? <p className="error-line">{saveError}</p> : null}
           <div className="actions-row">
-            <button
-              type="button"
-              className="save-btn"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
+            {!isReadOnly ? (
+              <button
+                type="button"
+                className="save-btn"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            ) : null}
             <button
               type="button"
               className="back-button"
-              onClick={() => navigate("/my-pets")}
+              onClick={() => (isReadOnly ? navigate(-1) : navigate("/my-pets"))}
             >
               Back
             </button>
