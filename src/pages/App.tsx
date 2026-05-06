@@ -17,6 +17,8 @@ import DashboardPage from "../Panel/pages/DashBoardPage";
 import { AuthProvider } from "../contexts/AuthContext";
 import HeartBalloons from "../components/HeartBalloons/index";
 import FloatingQuickActions from "../components/FloatingQuickActions/FloatingQuickActions";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const { Amplify, Auth } = require("aws-amplify");
 
@@ -57,6 +59,13 @@ function App() {
 
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        autoClose={6500}
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
       <Provider store={store}>
         <AuthProvider>
           <Router>
