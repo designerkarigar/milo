@@ -12,6 +12,27 @@ import { SEO } from "../../components/SEO";
 
 const DEFAULT_THUMBNAIL = "https://via.placeholder.com/600x400?text=No+Image";
 
+const formatBlogDate = (value) => {
+  if (!value && value !== 0) {
+    return "";
+  }
+
+  const numericValue = Number(value);
+  const parsedDate = Number.isFinite(numericValue)
+    ? new Date(numericValue)
+    : new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "";
+  }
+
+  return parsedDate.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 export const Blog = () => {
   const [blogdata, setBlogData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +118,9 @@ export const Blog = () => {
                     />
                   </div>
                   <div className="blog-card-text-con">
-                    <p className="blog-card-date">{blog.time}</p>
+                    <p className="blog-card-date">
+                      {formatBlogDate(blog.time)}
+                    </p>
                     <p className="blog-card-text">{blog.title}</p>
                   </div>
                 </Link>

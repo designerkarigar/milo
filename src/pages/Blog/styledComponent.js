@@ -80,6 +80,9 @@ export const StyledBlog = styled.div`
     box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.25);
     /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); */
     border-radius: 20px;
+    transform: none;
+    transition: none;
+    animation: none;
   }
 
   .blog-card-img {
@@ -91,6 +94,9 @@ export const StyledBlog = styled.div`
     img {
       width: 100%;
       object-fit: cover;
+      transform: none;
+      transition: none;
+      animation: none;
     }
   }
 
