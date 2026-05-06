@@ -4,10 +4,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import NewNavbar from "../../components/Navbar";
 import NewFooter from "../../components/Footer";
 import { getPets } from "../../utils/Functions/Pets/getPets";
+import { getPetById } from "../../utils/Functions/Pets/getPetById";
 import { FadeLoader } from "react-spinners";
 import { StyledMyPets } from "./styledComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { readAvailableForAdoption } from "../../utils/Functions/Pets/petAdoptionField";
 
 export const MyPetsPage = () => {
   const navigate = useNavigate();
@@ -27,6 +29,33 @@ export const MyPetsPage = () => {
     }
     fetchPets();
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    const pet = pets[currentIndex];
+    const uid = pet?.uid;
+    if (!uid || Object.prototype.hasOwnProperty.call(pet, "availableForAdoption")) {
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const full = await getPetById(uid);
+        if (cancelled || !full) return;
+        setPets((prev) =>
+          prev.map((p) =>
+            p.uid === uid ? { ...p, availableForAdoption: full.availableForAdoption } : p
+          )
+        );
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentIndex, pets]);
 
   const fetchPets = async () => {
     try {
@@ -168,10 +197,12 @@ export const MyPetsPage = () => {
                             <span className="detail-label">Available for Adoption:</span>
                             <span
                               className={`detail-value ${
-                                pets[currentIndex].availableForAdoption ? "available" : "not-available"
+                                readAvailableForAdoption(pets[currentIndex])
+                                  ? "available"
+                                  : "not-available"
                               }`}
                             >
-                              {pets[currentIndex].availableForAdoption ? "Yes" : "No"}
+                              {readAvailableForAdoption(pets[currentIndex]) ? "Yes" : "No"}
                             </span>
                           </div>
                           {pets[currentIndex].matchingDiscoveryEnabled !== undefined && (

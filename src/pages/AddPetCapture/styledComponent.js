@@ -28,6 +28,18 @@ export const StyledAddPetCapture = styled.main`
     color: #687888;
   }
 
+  .limit-notice {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #fff8f0;
+    border: 1px solid #f0dfc8;
+    color: #5c4a3a;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    text-align: left;
+  }
+
   .action-row {
     display: flex;
     justify-content: center;
@@ -47,6 +59,11 @@ export const StyledAddPetCapture = styled.main`
     transition: none !important;
     animation: none !important;
     transform: none !important;
+  }
+
+  .action-row button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 
   .action-row button svg {

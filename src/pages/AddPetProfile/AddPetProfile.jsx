@@ -8,6 +8,9 @@ import { createPet } from "../../utils/Functions/Pets/createPet";
 import { updatePetFromAi } from "../../utils/Functions/Pets/updatePetFromAi";
 import { StyledAddPetProfile } from "./styledComponent";
 import { useAuth } from "../../contexts/AuthContext";
+import { toast } from "react-toastify";
+import { PET_LIMIT_MESSAGE } from "../../utils/Constants/petLimits";
+import { getCurrentUserPetCount, isAtPetLimit } from "../../utils/Functions/Pets/petLimitHelpers";
 
 const DETAIL_FIELDS = [
   { key: "petType", label: "Pet Type" },
@@ -101,9 +104,19 @@ export const AddPetProfile = () => {
     if (draft.createdPetUid) return;
     if (draft.createPetStatus !== "pending") return;
 
-    updatePetDraft(draftId, { createPetStatus: "processing" });
     (async () => {
       try {
+        const count = await getCurrentUserPetCount();
+        if (isAtPetLimit(count)) {
+          updatePetDraft(draftId, {
+            createPetStatus: "failed",
+            error: PET_LIMIT_MESSAGE,
+          });
+          toast.warning(PET_LIMIT_MESSAGE);
+          return;
+        }
+
+        updatePetDraft(draftId, { createPetStatus: "processing" });
         const createdPet = await createPet({
           name: draft.name,
           imageUrl: draft.firebaseUrl,

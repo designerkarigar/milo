@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { getPetById } from "../../utils/Functions/Pets/getPetById";
-import { getAuthToken } from "../../utils/Functions/Pets/getAuthToken";
-import { BaseUrl } from "../../utils/Constants/Url";
 import { FadeLoader } from "react-spinners";
 import { StyledPetProfile } from "./styledComponent";
 import defaultAvatar from "../../images/Default_pfp.svg.png";
+import {
+  adoptionFieldsForApi,
+  readAvailableForAdoption,
+} from "../../utils/Functions/Pets/petAdoptionField";
+import { updatePetRecord } from "../../utils/Functions/Pets/updatePetRecord";
 
 const DETAIL_FIELDS = [
   { key: "petType", label: "Pet Type" },
@@ -44,6 +46,38 @@ const DetailRow = ({
   </div>
 );
 
+const BooleanDetailRow = ({
+  label,
+  value,
+  isEditing,
+  canEdit,
+  onStartEdit,
+  onChange,
+}) => (
+  <div className="detail-row">
+    <span>{label}</span>
+    <div className="detail-row-right">
+      {isEditing ? (
+        <select
+          value={value ? "yes" : "no"}
+          onChange={(event) => onChange(event.target.value === "yes")}
+          className="detail-input"
+        >
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      ) : (
+        <strong>{value ? "Yes" : "No"}</strong>
+      )}
+      {canEdit && !isEditing ? (
+        <button type="button" className="edit-btn" onClick={onStartEdit}>
+          ✎
+        </button>
+      ) : null}
+    </div>
+  </div>
+);
+
 export const PetProfilePage = () => {
   const { petId } = useParams();
   const navigate = useNavigate();
@@ -63,6 +97,7 @@ export const PetProfilePage = () => {
     avgMass: "",
     lifespan: "",
     description: "",
+    availableForAdoption: false,
   });
 
   useEffect(() => {
@@ -83,6 +118,7 @@ export const PetProfilePage = () => {
         avgMass: data?.avgMass || "",
         lifespan: data?.lifespan || "",
         description: data?.description || data?.info || "",
+        availableForAdoption: readAvailableForAdoption(data),
       });
       setLoading(false);
     } catch (error) {
@@ -107,11 +143,6 @@ export const PetProfilePage = () => {
     setSaveError("");
 
     try {
-      const token = await getAuthToken();
-      if (!token) {
-        throw new Error("No authentication token available");
-      }
-
       const payload = {
         ...pet,
         name: manualValues.name,
@@ -123,17 +154,21 @@ export const PetProfilePage = () => {
         lifespan: manualValues.lifespan,
         description: manualValues.description,
         info: manualValues.description,
+        ...adoptionFieldsForApi(!!manualValues.availableForAdoption),
       };
 
-      await axios.put(`${BaseUrl}/pets/${petId}`, payload, {
-        headers: {
-          token,
-        },
-      });
+      const response = await updatePetRecord(petId, payload);
+
+      const record = response?.data?.response?.record;
+      const savedPet = Array.isArray(record) ? record[0] : record;
+      const merged =
+        savedPet && typeof savedPet === "object"
+          ? { ...payload, ...savedPet }
+          : payload;
 
       setPet((prev) => ({
         ...prev,
-        ...payload,
+        ...merged,
       }));
       setEditableFields({});
       navigate("/my-pets");
@@ -239,6 +274,19 @@ export const PetProfilePage = () => {
                   }
                 />
               ))}
+
+              <BooleanDetailRow
+                label="Available for Adoption"
+                value={manualValues.availableForAdoption}
+                isEditing={!isReadOnly && !!editableFields.availableForAdoption}
+                canEdit={!isReadOnly}
+                onStartEdit={() =>
+                  setEditableFields((prev) => ({ ...prev, availableForAdoption: true }))
+                }
+                onChange={(nextValue) =>
+                  setManualValues((prev) => ({ ...prev, availableForAdoption: nextValue }))
+                }
+              />
             </div>
           </div>
 

@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { StyledFloatingQuickActions } from "./styledComponent";
 import { useAuth } from "../../contexts/AuthContext";
 import { LoginModal } from "../LoginModal";
+import { toast } from "react-toastify";
+import { PET_LIMIT_MESSAGE } from "../../utils/Constants/petLimits";
+import { getCurrentUserPetCount, isAtPetLimit } from "../../utils/Functions/Pets/petLimitHelpers";
 
 const MENU_OPTIONS = ["Add your pet", "Lost n found", "Post about your pet"];
 
@@ -41,9 +44,18 @@ const FloatingQuickActions = () => {
     setIsOpen(false);
   };
 
-  const handleAddPetAction = () => {
+  const handleAddPetAction = async () => {
     setIsOpen(false);
-    navigate("/add-pet/capture");
+    try {
+      const count = await getCurrentUserPetCount();
+      if (isAtPetLimit(count)) {
+        toast.warning(PET_LIMIT_MESSAGE);
+        return;
+      }
+      navigate("/add-pet/capture");
+    } catch {
+      toast.error("We couldn't check how many pets you have. Please try again.");
+    }
   };
 
   const runAction = (action) => {
