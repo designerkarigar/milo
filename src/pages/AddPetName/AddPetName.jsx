@@ -57,7 +57,7 @@ export const AddPetName = () => {
             </div>
           ) : (
             <>
-              <h1>Name your pet</h1>
+              <h1>Name of your pet</h1>
               <div className="content">
                 <div className="preview-box">
                   <button
