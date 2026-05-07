@@ -37,7 +37,7 @@ export const MatchMaking = () => {
   useEffect(() => {
     const boot = async () => {
       if (!currentUser) {
-        navigate("/login");
+        navigate("/home");
         return;
       }
 
