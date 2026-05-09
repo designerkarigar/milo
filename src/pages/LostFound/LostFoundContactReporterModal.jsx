@@ -2,17 +2,7 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
 import { StyledLostFoundContactModal } from "./styledComponent";
-import { pickReporterContactFields } from "../../utils/Functions/LostFound/lostFoundUtils";
-
-function normalizeTelDigits(value) {
-  const digits = String(value || "").replace(/\D/g, "");
-  return digits.length >= 7 ? digits : null;
-}
-
-function isEmailLike(value) {
-  const s = String(value || "").trim();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-}
+import { pickVisibleReporterContact } from "../../utils/Functions/LostFound/lostFoundUtils";
 
 export function LostFoundContactReporterModal({ isOpen, onClose, report }) {
   useEffect(() => {
@@ -26,20 +16,11 @@ export function LostFoundContactReporterModal({ isOpen, onClose, report }) {
 
   if (!isOpen || !report) return null;
 
-  const { contactDetails: contactFromApi, userName: reporterId } = pickReporterContactFields(report);
-  const contactRaw = String(contactFromApi || "").trim();
-  const userName = String(reporterId || "").trim();
-
-  const telFromContact = normalizeTelDigits(contactRaw);
-  const telFromUser = normalizeTelDigits(userName);
-  const telDigits = telFromContact || telFromUser;
-
-  const contactEmail = isEmailLike(contactRaw) ? contactRaw : null;
-  const userEmail = isEmailLike(userName) ? userName : null;
+  const { phoneDisplay, emailDisplay } = pickVisibleReporterContact(report);
 
   const summaryLines = [
-    userName && `Reporter: ${userName}`,
-    contactRaw && `Contact: ${contactRaw}`,
+    phoneDisplay && `Phone: ${phoneDisplay}`,
+    emailDisplay && `Email: ${emailDisplay}`,
   ].filter(Boolean);
   const copyText = summaryLines.join("\n");
 
@@ -75,35 +56,31 @@ export function LostFoundContactReporterModal({ isOpen, onClose, report }) {
           <h2 id="lnf-contact-title" className="modal-title">
             Reporter contact
           </h2>
-          <p className="modal-sub">How to reach the person who filed this report.</p>
+          <p className="modal-sub">
+            Only details the reporter chose to share are shown here.
+          </p>
 
-          <dl className="fields">
-            {(contactRaw || userName) && (
-              <div className="row row-highlight">
-                <dt>Contact</dt>
-                <dd>{contactRaw || userName || "—"}</dd>
-              </div>
-            )}
-            {userName && contactRaw && userName !== contactRaw && (
-              <div className="row">
-                <dt>Reporter account</dt>
-                <dd>{userName}</dd>
-              </div>
-            )}
-          </dl>
+          {!phoneDisplay && !emailDisplay ? (
+            <p className="modal-empty">This reporter has not shared contact details.</p>
+          ) : (
+            <dl className="fields">
+              {phoneDisplay ? (
+                <div className="row row-highlight">
+                  <dt>Phone</dt>
+                  <dd>{phoneDisplay}</dd>
+                </div>
+              ) : null}
+              {emailDisplay ? (
+                <div className={`row ${phoneDisplay ? "" : "row-highlight"}`}>
+                  <dt>Email</dt>
+                  <dd>{emailDisplay}</dd>
+                </div>
+              ) : null}
+            </dl>
+          )}
 
           <div className="actions">
-            {telDigits && (
-              <a className="btn primary" href={`tel:${telDigits}`}>
-                Call
-              </a>
-            )}
-            {(contactEmail || userEmail) && (
-              <a className="btn primary" href={`mailto:${contactEmail || userEmail}`}>
-                Email
-              </a>
-            )}
-            <button type="button" className="btn ghost" onClick={handleCopy}>
+            <button type="button" className="btn ghost copy-full" onClick={handleCopy} disabled={!copyText}>
               Copy details
             </button>
           </div>

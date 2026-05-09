@@ -5,7 +5,13 @@ import Footer from "../../components/Footer";
 import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
 import { fetchLostAndFound } from "../../utils/Functions/LostFound/lostAndFoundApi";
-import { formatTimeSince, pickReporterContactFields } from "../../utils/Functions/LostFound/lostFoundUtils";
+import {
+  formatTimeSince,
+  getLostFoundStableId,
+  getNormalizedLostFoundStatus,
+  hasVisibleReporterContact,
+  normalizeLostFoundRecord,
+} from "../../utils/Functions/LostFound/lostFoundUtils";
 import defaultPhoto from "../../images/svgfiles/avatar-1.svg";
 import { LostFoundPetPhoto } from "./LostFoundPetPhoto";
 import { LostFoundContactReporterModal } from "./LostFoundContactReporterModal";
@@ -22,8 +28,12 @@ export const LostFoundDetailsPage = () => {
       try {
         setLoading(true);
         const list = await fetchLostAndFound({});
-        const found = Array.isArray(list) ? list.find((x) => x?.uid === uid) : null;
-        setItem(found || null);
+        const rows = list.map(normalizeLostFoundRecord);
+        const decoded = uid ? decodeURIComponent(uid) : "";
+        const found =
+          rows.find((x) => getLostFoundStableId(x) === decoded || String(x?.uid || "") === decoded) ||
+          null;
+        setItem(found);
       } catch (error) {
         toast.error(String(error?.message || error));
       } finally {
@@ -33,10 +43,22 @@ export const LostFoundDetailsPage = () => {
   }, [uid]);
 
   const title = useMemo(() => {
-    const status = String(item?.status || "").toUpperCase();
+    const status =
+      (item && getNormalizedLostFoundStatus(item)) ||
+      String(item?.status || "").trim().toUpperCase();
     if (status === "FOUND") return `Found: ${item?.name || "Unknown Pet"}`;
     return `Lost: ${item?.name || "Unknown Pet"}`;
   }, [item]);
+
+  const handleReporterContactClick = () => {
+    if (!item) return;
+    const ok = hasVisibleReporterContact(item);
+    if (!ok) {
+      toast.info("This reporter has not shared contact details (or none are visible).");
+      return;
+    }
+    setContactModalOpen(true);
+  };
 
   return (
     <>
@@ -109,18 +131,7 @@ export const LostFoundDetailsPage = () => {
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-                  <button
-                    type="button"
-                    className="primary"
-                    onClick={() => {
-                      const { contactDetails, userName } = pickReporterContactFields(item);
-                      if (!contactDetails && !userName) {
-                        toast.info("Contact details not provided.");
-                        return;
-                      }
-                      setContactModalOpen(true);
-                    }}
-                  >
+                  <button type="button" className="primary" onClick={handleReporterContactClick}>
                     Contact Reporter
                   </button>
                   <button
