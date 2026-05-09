@@ -65,7 +65,8 @@ const FloatingQuickActions = () => {
     }
 
     if (action === "Lost n found") {
-      alert("Lost n found will be enabled next.");
+      setIsOpen(false);
+      navigate("/lost-found");
       return;
     }
 

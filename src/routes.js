@@ -16,6 +16,10 @@ import PetProfilePage from "./pages/PetProfile/index";
 import AddPetCapture from "./pages/AddPetCapture/index";
 import AddPetName from "./pages/AddPetName/index";
 import AddPetProfile from "./pages/AddPetProfile/index";
+import LostFoundPage from "./pages/LostFound/index";
+import LostFoundReportPage from "./pages/LostFound/LostFoundReport";
+import LostFoundDetailsPage from "./pages/LostFound/LostFoundDetails";
+import LostFoundSightingPage from "./pages/LostFound/LostFoundSighting";
 import MyBookingsPage from "./pages/MyBookings/index";
 import BookingCheckoutPage from "./pages/BookingCheckout/index";
 import VetBookingCheckoutPage from "./pages/VetBookingCheckout/index";
@@ -103,6 +107,22 @@ export const routesConfig = [
   {
     path: "/add-pet/profile",
     Component: AddPetProfile,
+  },
+  {
+    path: "/lost-found",
+    Component: LostFoundPage,
+  },
+  {
+    path: "/lost-found/report",
+    Component: LostFoundReportPage,
+  },
+  {
+    path: "/lost-found/:uid",
+    Component: LostFoundDetailsPage,
+  },
+  {
+    path: "/lost-found/:reportId/sighting",
+    Component: LostFoundSightingPage,
   },
   {
     path: "/booking-checkout",
