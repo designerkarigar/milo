@@ -5,6 +5,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { _Logout } from "../utils/Functions/Authentication/_Logout";
+import { registerBrowserFcmToken } from "../utils/Functions/Notifications/browserFcmRegistration";
 
 const AuthContext = createContext({});
 
@@ -15,6 +16,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [didRegisterFcm, setDidRegisterFcm] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -24,6 +26,25 @@ export const AuthProvider = ({ children }) => {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setDidRegisterFcm(false);
+      return;
+    }
+    if (didRegisterFcm) return;
+
+    const userName =
+      localStorage.getItem("username") ||
+      currentUser?.displayName ||
+      currentUser?.email ||
+      "";
+
+    // Fire-and-forget; backend handles token persistence.
+    registerBrowserFcmToken(userName)
+      .catch(() => null)
+      .finally(() => setDidRegisterFcm(true));
+  }, [currentUser, didRegisterFcm]);
 
   const signOut = async () => {
     const [firebaseResult, cognitoResult] = await Promise.allSettled([
