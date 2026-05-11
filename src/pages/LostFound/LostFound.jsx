@@ -8,16 +8,13 @@ import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
 import { fetchLostAndFound } from "../../utils/Functions/LostFound/lostAndFoundApi";
 import {
-  formatTimeSince,
+  getNormalizedLostFoundStatus,
   haversineKm,
-  pickReporterContactFields,
+  normalizeLostFoundRecords,
 } from "../../utils/Functions/LostFound/lostFoundUtils";
 import defaultPhoto from "../../images/svgfiles/avatar-1.svg";
-import { LostFoundPetPhoto } from "./LostFoundPetPhoto";
+import { LostFoundSwipeDeck } from "./LostFoundSwipeDeck";
 import { LostFoundContactReporterModal } from "./LostFoundContactReporterModal";
-
-const DEFAULT_CITY = "Noida";
-const DEFAULT_ZIP = "201301";
 
 function useUserGeo() {
   const [coords, setCoords] = useState(null);
@@ -43,10 +40,8 @@ export const LostFoundPage = () => {
   const { currentUser } = useAuth();
   const userCoords = useUserGeo();
 
-  const [statusFilter, setStatusFilter] = useState("ALL"); // LOST | FOUND | ALL
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [contactModalReport, setContactModalReport] = useState(null);
 
   useEffect(() => {
@@ -60,12 +55,8 @@ export const LostFoundPage = () => {
     (async () => {
       try {
         setLoading(true);
-        const record = await fetchLostAndFound({
-          city: DEFAULT_CITY,
-          zip: DEFAULT_ZIP,
-        });
-        setItems(Array.isArray(record) ? record : []);
-        setCurrentIndex(0);
+        const record = await fetchLostAndFound({});
+        setItems(normalizeLostFoundRecords(record));
       } catch (error) {
         toast.error(String(error?.message || error));
         setItems([]);
@@ -75,38 +66,38 @@ export const LostFoundPage = () => {
     })();
   }, [currentUser]);
 
-  const filtered = useMemo(() => {
-    if (statusFilter === "ALL") return items;
-    return items.filter((it) => String(it?.status || "").toUpperCase() === statusFilter);
-  }, [items, statusFilter]);
+  const { lostSorted, foundSorted } = useMemo(() => {
+    const norm = (it) =>
+      getNormalizedLostFoundStatus(it) || String(it?.status || "").trim().toUpperCase();
 
-  const sortedByDistance = useMemo(() => {
-    if (!userCoords) return filtered;
-    const withDistance = filtered.map((it) => {
-      const distanceKm =
-        it?.location?.lat && it?.location?.long
-          ? haversineKm(userCoords, { lat: it.location.lat, long: it.location.long })
-          : null;
-      return { it, distanceKm };
-    });
-    withDistance.sort((a, b) => {
-      if (a.distanceKm == null && b.distanceKm == null) return 0;
-      if (a.distanceKm == null) return 1;
-      if (b.distanceKm == null) return -1;
-      return a.distanceKm - b.distanceKm;
-    });
-    return withDistance.map((x) => x.it);
-  }, [filtered, userCoords]);
+    const sortByDistance = (list) => {
+      if (!userCoords) return list;
+      const withDistance = list.map((it) => {
+        const distanceKm =
+          it?.location?.lat && it?.location?.long
+            ? haversineKm(userCoords, { lat: it.location.lat, long: it.location.long })
+            : null;
+        return { it, distanceKm };
+      });
+      withDistance.sort((a, b) => {
+        if (a.distanceKm == null && b.distanceKm == null) return 0;
+        if (a.distanceKm == null) return 1;
+        if (b.distanceKm == null) return -1;
+        return a.distanceKm - b.distanceKm;
+      });
+      return withDistance.map((x) => x.it);
+    };
 
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [statusFilter]);
+    const lost = items.filter((it) => norm(it) === "LOST");
+    const found = items.filter((it) => norm(it) === "FOUND");
 
-  const safeIndex = Math.min(currentIndex, Math.max(0, sortedByDistance.length - 1));
+    return {
+      lostSorted: sortByDistance(lost),
+      foundSorted: sortByDistance(found),
+    };
+  }, [items, userCoords]);
 
-  const handlePrev = () => setCurrentIndex((prev) => Math.max(0, prev - 1));
-  const handleNext = () =>
-    setCurrentIndex((prev) => Math.min(sortedByDistance.length - 1, prev + 1));
+  const hasAnyReports = lostSorted.length > 0 || foundSorted.length > 0;
 
   return (
     <>
@@ -117,7 +108,7 @@ export const LostFoundPage = () => {
           </div>
           <div className="banner">
             <h1>Lost & Found</h1>
-            <p>Report lost pets and help reunite families.</p>
+            <p>Swipe cards — lost on the left, found on the right.</p>
           </div>
           <div className="wave">
             <svg
@@ -135,131 +126,53 @@ export const LostFoundPage = () => {
         </div>
 
         <div className="content">
-          <div className="toolbar">
-            <div className="filters">
-              <button
-                type="button"
-                className={`pill ${statusFilter === "ALL" ? "active" : ""}`}
-                onClick={() => setStatusFilter("ALL")}
-              >
-                All
+          <div className="toolbar toolbar-dual">
+            <p className="toolbar-tagline">
+              Red stack = pets people are looking for · Green stack = pets someone found
+            </p>
+            <div className="toolbar-actions">
+              <button type="button" className="pill" onClick={() => navigate("/lost-found/report?mode=lost")}>
+                Report lost pet
               </button>
-              <button
-                type="button"
-                className={`pill ${statusFilter === "LOST" ? "active" : ""}`}
-                onClick={() => setStatusFilter("LOST")}
-              >
-                Lost
-              </button>
-              <button
-                type="button"
-                className={`pill ${statusFilter === "FOUND" ? "active" : ""}`}
-                onClick={() => setStatusFilter("FOUND")}
-              >
-                Found
+              <button type="button" className="primary" onClick={() => navigate("/lost-found/report?mode=found")}>
+                Report found pet
               </button>
             </div>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => navigate("/lost-found/report")}
-            >
-              Report a Pet
-            </button>
           </div>
 
           {loading ? (
             <div className="loading">
               <FadeLoader color="#f06a8a" />
             </div>
-          ) : sortedByDistance.length === 0 ? (
+          ) : !hasAnyReports ? (
             <div className="empty">No reports yet.</div>
           ) : (
-            <div className="carousel">
-              <button
-                type="button"
-                className="arrow-btn"
-                onClick={handlePrev}
-                disabled={safeIndex === 0}
-                aria-label="Previous report"
-              >
-                ‹
-              </button>
-
-              <div className="carousel-window">
-                <div
-                  className="carousel-track"
-                  style={{ transform: `translateX(-${safeIndex * 100}%)` }}
-                >
-                  {sortedByDistance.map((it) => {
-                const status = String(it?.status || "LOST").toUpperCase();
-                const title =
-                  status === "FOUND"
-                    ? `Found: ${it?.name || "Unknown Pet"}`
-                    : `Lost: ${it?.name || "Unknown Pet"}`;
-                const city = it?.location?.city || it?.city || "—";
-                const timeSince = formatTimeSince(it?.reportedAt || it?.upddt || it?.crdt);
-                const distanceKm =
-                  userCoords && it?.location?.lat && it?.location?.long
-                    ? haversineKm(userCoords, { lat: it.location.lat, long: it.location.long })
-                    : null;
-                const distanceLabel =
-                  typeof distanceKm === "number" ? `${distanceKm.toFixed(1)} km` : "—";
-
-                return (
-                  <div key={it?.uid || `${status}-${title}`} className="carousel-slide">
-                    <div className="card">
-                    <LostFoundPetPhoto record={it} fallbackSrc={defaultPhoto} alt={it?.name || "Pet"} />
-
-                    <div className="overlay">
-                      <div className="titleRow">
-                        <h3>{title}</h3>
-                        <span className="badge">{it?.verified ? "Matched" : "Active"}</span>
-                      </div>
-                      <div className="meta">
-                        <span>{it?.breed || "Unknown breed"}</span>
-                        <span>{it?.color || "Unknown color"}</span>
-                        <span>{city}</span>
-                        <span>{timeSince}</span>
-                        <span>{distanceLabel}</span>
-                      </div>
-                    </div>
-
-                    <div className="actions">
-                      <button type="button" onClick={() => navigate(`/lost-found/${it?.uid}`)}>
-                        View Details
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary"
-                        onClick={() => {
-                          const { contactDetails, userName } = pickReporterContactFields(it);
-                          if (!contactDetails && !userName) {
-                            toast.info("Contact details not provided.");
-                            return;
-                          }
-                          setContactModalReport(it);
-                        }}
-                      >
-                        Contact Reporter
-                      </button>
-                    </div>
-                    </div>
-                  </div>
-                );
-                  })}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="arrow-btn"
-                onClick={handleNext}
-                disabled={safeIndex >= sortedByDistance.length - 1}
-                aria-label="Next report"
-              >
-                ›
-              </button>
+            <div className="dual-deck">
+              <LostFoundSwipeDeck
+                variant="lost"
+                items={lostSorted}
+                userCoords={userCoords}
+                defaultPhoto={defaultPhoto}
+                onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
+                onReportSighting={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}/sighting`)}
+                onNotifyNoId={() => toast.info("This report has no id yet.")}
+                onContactReporter={(report) => setContactModalReport(report)}
+                onNotifyNoContact={() =>
+                  toast.info("This reporter has not shared contact details (or none are visible).")
+                }
+              />
+              <LostFoundSwipeDeck
+                variant="found"
+                items={foundSorted}
+                userCoords={userCoords}
+                defaultPhoto={defaultPhoto}
+                onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
+                onNotifyNoId={() => toast.info("This report has no id yet.")}
+                onContactReporter={(report) => setContactModalReport(report)}
+                onNotifyNoContact={() =>
+                  toast.info("This reporter has not shared contact details (or none are visible).")
+                }
+              />
             </div>
           )}
         </div>
@@ -275,4 +188,3 @@ export const LostFoundPage = () => {
 };
 
 export default LostFoundPage;
-

@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { useAuth } from "../../contexts/AuthContext";
 import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
+import { StyledLostFoundSighting } from "./lostFoundSightingStyled";
 import { createSighting } from "../../utils/Functions/LostFound/sightingsApi";
+import { uploadPetImageToFirebase } from "../../utils/Functions/Pets/uploadPetImageToFirebase";
 
 function useUserGeo() {
   const [coords, setCoords] = useState(null);
@@ -28,16 +33,22 @@ function useUserGeo() {
 export const LostFoundSightingPage = () => {
   const { reportId } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const userCoords = useUserGeo();
+  const cameraRef = useRef(null);
+  const galleryRef = useRef(null);
 
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState("");
   const [long, setLong] = useState("");
   const [seenAt, setSeenAt] = useState("");
   const [notes, setNotes] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [confidence, setConfidence] = useState("high");
   const [canHelp, setCanHelp] = useState(true);
+  const [sharePhoneAllowed, setSharePhoneAllowed] = useState(false);
+  const [shareEmailAllowed, setShareEmailAllowed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -52,9 +63,35 @@ export const LostFoundSightingPage = () => {
     if (!long) setLong(String(userCoords.long));
   }, [userCoords, lat, long]);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview && photoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
+  const handleSightingPhotoSelected = (file) => {
+    if (!file) return;
+    setPhotoPreview((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setPhotoFile(file);
+  };
+
+  const clearSightingPhoto = () => {
+    setPhotoPreview((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return "";
+    });
+    setPhotoFile(null);
+    if (cameraRef.current) cameraRef.current.value = "";
+    if (galleryRef.current) galleryRef.current.value = "";
+  };
+
   const seenAtIso = useMemo(() => {
     if (!seenAt) return new Date().toISOString();
-    // `datetime-local` gives "YYYY-MM-DDTHH:mm"
     return new Date(seenAt).toISOString();
   }, [seenAt]);
 
@@ -77,6 +114,17 @@ export const LostFoundSightingPage = () => {
 
     try {
       setSaving(true);
+      let photoUrl = "";
+      if (photoFile) {
+        photoUrl = await uploadPetImageToFirebase({ file: photoFile, currentUser });
+      }
+
+      const phone = String(currentUser?.phoneNumber || "").trim();
+      const email = String(currentUser?.email || "").trim();
+      const contactParts = [];
+      if (canHelp && sharePhoneAllowed && phone) contactParts.push(phone);
+      if (canHelp && shareEmailAllowed && email) contactParts.push(email);
+
       await createSighting(reportId, {
         location: {
           lat: latNum,
@@ -85,9 +133,12 @@ export const LostFoundSightingPage = () => {
         },
         seenAt: seenAtIso,
         notes: notes.trim(),
-        photoUrl: photoUrl.trim(),
+        photoUrl,
         confidence,
         canHelp: !!canHelp,
+        phoneContactAllowed: !!(canHelp && sharePhoneAllowed && phone),
+        emailContactAllowed: !!(canHelp && shareEmailAllowed && email),
+        ...(contactParts.length ? { contactDetails: contactParts.join("\n") } : {}),
       });
       toast.success("Sighting submitted.");
       navigate(`/lost-found/${encodeURIComponent(reportId)}`);
@@ -106,8 +157,8 @@ export const LostFoundSightingPage = () => {
             <Navbar />
           </div>
           <div className="banner">
-            <h1>I have seen this pet</h1>
-            <p>Share where and when you saw them.</p>
+            <h1>Sighting squad 📍</h1>
+            <p>Loud colors, loud clues — help a pet find their way home.</p>
           </div>
           <div className="wave">
             <svg
@@ -125,111 +176,231 @@ export const LostFoundSightingPage = () => {
         </div>
 
         <div className="content">
-          <div className="toolbar">
-            <button
-              type="button"
-              className="pill"
-              onClick={() => navigate(`/lost-found/${encodeURIComponent(reportId || "")}`)}
-            >
-              Back
-            </button>
-          </div>
-
-          <div
-            style={{
-              background: "white",
-              border: "1px solid #ececf4",
-              borderRadius: 16,
-              padding: 16,
-              maxWidth: 760,
-              margin: "0 auto",
-            }}
-          >
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <label>
-                <div style={{ fontWeight: 800, marginBottom: 6 }}>Seen at</div>
-                <input
-                  type="datetime-local"
-                  value={seenAt}
-                  onChange={(e) => setSeenAt(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 10 }}
-                />
-              </label>
-              <label>
-                <div style={{ fontWeight: 800, marginBottom: 6 }}>Confidence</div>
-                <select
-                  value={confidence}
-                  onChange={(e) => setConfidence(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 10 }}
-                >
-                  <option value="high">high</option>
-                  <option value="medium">medium</option>
-                  <option value="low">low</option>
-                </select>
-              </label>
-              <label>
-                <div style={{ fontWeight: 800, marginBottom: 6 }}>Latitude</div>
-                <input
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 10 }}
-                />
-              </label>
-              <label>
-                <div style={{ fontWeight: 800, marginBottom: 6 }}>Longitude</div>
-                <input
-                  value={long}
-                  onChange={(e) => setLong(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 10 }}
-                />
-              </label>
-            </div>
-
-            <label style={{ display: "block", marginTop: 12 }}>
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>Address / Landmark</div>
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="e.g., Garden A1, Noida"
-                style={{ width: "100%", padding: 10, borderRadius: 10 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 12 }}>
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>Notes</div>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Running near gate"
-                style={{ width: "100%", padding: 10, borderRadius: 10, minHeight: 110 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 12 }}>
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>Photo URL (optional)</div>
-              <input
-                value={photoUrl}
-                onChange={(e) => setPhotoUrl(e.target.value)}
-                placeholder="https://example.com/photo.jpg"
-                style={{ width: "100%", padding: 10, borderRadius: 10 }}
-              />
-            </label>
-
-            <label style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 14 }}>
-              <input
-                type="checkbox"
-                checked={canHelp}
-                onChange={(e) => setCanHelp(e.target.checked)}
-              />
-              <span style={{ fontWeight: 800, color: "#40536b" }}>I can help if needed</span>
-            </label>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
-              <button type="button" className="primary" onClick={handleSubmit} disabled={saving}>
-                {saving ? "Submitting..." : "Submit Sighting"}
+          <StyledLostFoundSighting>
+            <div className="sight-toolbar">
+              <button
+                type="button"
+                className="sight-back"
+                onClick={() => navigate(`/lost-found/${encodeURIComponent(reportId || "")}`)}
+              >
+                ← Back to report
               </button>
             </div>
-          </div>
+
+            <div className="sight-shell">
+              <span className="sight-blob sight-blob-a" aria-hidden />
+              <span className="sight-blob sight-blob-b" aria-hidden />
+              <span className="sight-blob sight-blob-c" aria-hidden />
+
+              <div className="sight-card">
+                <div className="sight-rail" aria-hidden>
+                  👁️ 📍 ✨ 🐾
+                </div>
+                <div className="sight-kicker">I saw this pet</div>
+                <h2 className="sight-title">Paint the scene in neon detail</h2>
+                <p className="sight-lead">
+                  When, where, and how sure are you? GPS helps tons — we&apos;ll grab yours when allowed,
+                  but tweak anything that feels off.
+                </p>
+
+                <div className="sight-grid">
+                  <div className="sight-field">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🕐</span> Seen at
+                    </span>
+                    <input
+                      className="sight-input"
+                      type="datetime-local"
+                      value={seenAt}
+                      onChange={(e) => setSeenAt(e.target.value)}
+                    />
+                  </div>
+                  <div className="sight-field">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🎯</span> Confidence
+                    </span>
+                    <select
+                      className="sight-select"
+                      value={confidence}
+                      onChange={(e) => setConfidence(e.target.value)}
+                    >
+                      <option value="high">🔥 High — I&apos;m pretty sure</option>
+                      <option value="medium">🤔 Medium — could be them</option>
+                      <option value="low">👀 Low — worth a peek</option>
+                    </select>
+                  </div>
+                  <div className="sight-field">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">📐</span> Latitude
+                    </span>
+                    <input className="sight-input" value={lat} onChange={(e) => setLat(e.target.value)} />
+                  </div>
+                  <div className="sight-field">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">📐</span> Longitude
+                    </span>
+                    <input className="sight-input" value={long} onChange={(e) => setLong(e.target.value)} />
+                  </div>
+                  <div className="sight-field span-2">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🏠</span> Address / landmark
+                    </span>
+                    <input
+                      className="sight-input"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="e.g., Garden A1, near Sector 62 metro"
+                    />
+                  </div>
+                  <div className="sight-field span-2">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">📝</span> Notes
+                    </span>
+                    <textarea
+                      className="sight-textarea"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Running near gate, cream collar, super friendly…"
+                    />
+                  </div>
+                  <div className="sight-field span-2">
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🖼️</span> Photo
+                      <span className="sight-label-sub">(optional)</span>
+                    </span>
+                    <input
+                      ref={cameraRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        handleSightingPhotoSelected(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                    <input
+                      ref={galleryRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        handleSightingPhotoSelected(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="sight-photo-actions">
+                      <p className="sight-photo-hint">
+                        Snap a quick pic or upload from your gallery — we&apos;ll attach it when you submit.
+                      </p>
+                      <div className="sight-capture-row">
+                        <button
+                          type="button"
+                          className="sight-icon-btn"
+                          disabled={saving}
+                          onClick={() => cameraRef.current?.click()}
+                          aria-label="Take photo"
+                        >
+                          <CameraAltIcon />
+                        </button>
+                        <button
+                          type="button"
+                          className="sight-icon-btn"
+                          disabled={saving}
+                          onClick={() => galleryRef.current?.click()}
+                          aria-label="Choose from gallery"
+                        >
+                          <PhotoLibraryIcon />
+                        </button>
+                      </div>
+                      {photoPreview ? (
+                        <>
+                          <button type="button" className="sight-photo-clear" onClick={clearSightingPhoto}>
+                            Remove photo
+                          </button>
+                          <div className="sight-preview-wrap">
+                            <img src={photoPreview} alt="Sighting preview" />
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <label className="sight-checkbox-card">
+                  <input
+                    type="checkbox"
+                    checked={canHelp}
+                    onChange={(e) => {
+                      const v = e.target.checked;
+                      setCanHelp(v);
+                      if (!v) {
+                        setSharePhoneAllowed(false);
+                        setShareEmailAllowed(false);
+                      }
+                    }}
+                  />
+                  <div className="sight-checkbox-copy">
+                    <strong>I can help if needed</strong>
+                    <span>The pet parent might reach out — opt in to be their sidewalk hero.</span>
+                  </div>
+                </label>
+
+                {canHelp ? (
+                  <div className="sight-field span-2" style={{ marginTop: 4 }}>
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🔐</span> Share with pet parent
+                      <span className="sight-label-sub">(optional)</span>
+                    </span>
+                    <div style={{ display: "grid", gap: 10, marginTop: 6 }}>
+                      <label className="sight-checkbox-card" style={{ margin: 0, padding: "10px 12px" }}>
+                        <input
+                          type="checkbox"
+                          checked={sharePhoneAllowed}
+                          disabled={!currentUser?.phoneNumber}
+                          onChange={(e) => setSharePhoneAllowed(e.target.checked)}
+                        />
+                        <div className="sight-checkbox-copy">
+                          <strong>Allow my phone number</strong>
+                          <span>
+                            {currentUser?.phoneNumber
+                              ? "Pet parents can call or text you from the sightings panel."
+                              : "Add a phone number to your MILO profile to enable this."}
+                          </span>
+                        </div>
+                      </label>
+                      <label className="sight-checkbox-card" style={{ margin: 0, padding: "10px 12px" }}>
+                        <input
+                          type="checkbox"
+                          checked={shareEmailAllowed}
+                          disabled={!currentUser?.email}
+                          onChange={(e) => setShareEmailAllowed(e.target.checked)}
+                        />
+                        <div className="sight-checkbox-copy">
+                          <strong>Allow my email</strong>
+                          <span>
+                            {currentUser?.email
+                              ? "Shown only when you opt in — pet parents can reach you by email."
+                              : "Sign in with an email on your account to enable this."}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="sight-actions">
+                  <button type="button" className="sight-submit" onClick={handleSubmit} disabled={saving}>
+                    {saving ? "Sending your sighting…" : "Launch sighting 🚀"}
+                  </button>
+                </div>
+
+                <p className="sight-mini-note">
+                  Every clue stacks up — even rough timings and fuzzy corners help MILO piece the puzzle.
+                </p>
+              </div>
+            </div>
+          </StyledLostFoundSighting>
         </div>
       </StyledLostFound>
       <Footer />
@@ -238,4 +409,3 @@ export const LostFoundSightingPage = () => {
 };
 
 export default LostFoundSightingPage;
-
