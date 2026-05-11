@@ -236,6 +236,93 @@ export const StyledLostFoundSighting = styled.div`
     line-height: 1.45;
   }
 
+  .sight-photo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  .sight-photo-hint {
+    width: 100%;
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  .sight-capture-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .sight-icon-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    border: 3px solid #11161f;
+    background: linear-gradient(145deg, #0066ba, #004e8f);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 0 #11161f;
+    transition: transform 0.12s ease;
+
+    &:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 #11161f;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    svg {
+      font-size: 32px;
+    }
+  }
+
+  .sight-photo-clear {
+    border: none;
+    background: transparent;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #0066ba;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 4px 0;
+
+    &:hover {
+      color: #f06a8a;
+    }
+  }
+
+  .sight-preview-wrap {
+    margin-top: 12px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 3px solid #11161f;
+    background: #e2e8f0;
+    max-height: 220px;
+    box-shadow: 4px 4px 0 rgba(17, 22, 31, 0.1);
+  }
+
+  .sight-preview-wrap img {
+    width: 100%;
+    height: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
   .sight-checkbox-card {
     margin-top: 18px;
     padding: 14px 16px;

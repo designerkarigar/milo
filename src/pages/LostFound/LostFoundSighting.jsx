@@ -1,11 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { useAuth } from "../../contexts/AuthContext";
 import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
 import { StyledLostFoundSighting } from "./lostFoundSightingStyled";
 import { createSighting } from "../../utils/Functions/LostFound/sightingsApi";
+import { uploadPetImageToFirebase } from "../../utils/Functions/Pets/uploadPetImageToFirebase";
 
 function useUserGeo() {
   const [coords, setCoords] = useState(null);
@@ -29,16 +33,22 @@ function useUserGeo() {
 export const LostFoundSightingPage = () => {
   const { reportId } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const userCoords = useUserGeo();
+  const cameraRef = useRef(null);
+  const galleryRef = useRef(null);
 
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState("");
   const [long, setLong] = useState("");
   const [seenAt, setSeenAt] = useState("");
   const [notes, setNotes] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [confidence, setConfidence] = useState("high");
   const [canHelp, setCanHelp] = useState(true);
+  const [sharePhoneAllowed, setSharePhoneAllowed] = useState(false);
+  const [shareEmailAllowed, setShareEmailAllowed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -52,6 +62,33 @@ export const LostFoundSightingPage = () => {
     if (!lat) setLat(String(userCoords.lat));
     if (!long) setLong(String(userCoords.long));
   }, [userCoords, lat, long]);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview && photoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
+  const handleSightingPhotoSelected = (file) => {
+    if (!file) return;
+    setPhotoPreview((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setPhotoFile(file);
+  };
+
+  const clearSightingPhoto = () => {
+    setPhotoPreview((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return "";
+    });
+    setPhotoFile(null);
+    if (cameraRef.current) cameraRef.current.value = "";
+    if (galleryRef.current) galleryRef.current.value = "";
+  };
 
   const seenAtIso = useMemo(() => {
     if (!seenAt) return new Date().toISOString();
@@ -77,6 +114,17 @@ export const LostFoundSightingPage = () => {
 
     try {
       setSaving(true);
+      let photoUrl = "";
+      if (photoFile) {
+        photoUrl = await uploadPetImageToFirebase({ file: photoFile, currentUser });
+      }
+
+      const phone = String(currentUser?.phoneNumber || "").trim();
+      const email = String(currentUser?.email || "").trim();
+      const contactParts = [];
+      if (canHelp && sharePhoneAllowed && phone) contactParts.push(phone);
+      if (canHelp && shareEmailAllowed && email) contactParts.push(email);
+
       await createSighting(reportId, {
         location: {
           lat: latNum,
@@ -85,9 +133,12 @@ export const LostFoundSightingPage = () => {
         },
         seenAt: seenAtIso,
         notes: notes.trim(),
-        photoUrl: photoUrl.trim(),
+        photoUrl,
         confidence,
         canHelp: !!canHelp,
+        phoneContactAllowed: !!(canHelp && sharePhoneAllowed && phone),
+        emailContactAllowed: !!(canHelp && shareEmailAllowed && email),
+        ...(contactParts.length ? { contactDetails: contactParts.join("\n") } : {}),
       });
       toast.success("Sighting submitted.");
       navigate(`/lost-found/${encodeURIComponent(reportId)}`);
@@ -214,15 +265,65 @@ export const LostFoundSightingPage = () => {
                   </div>
                   <div className="sight-field span-2">
                     <span className="sight-label">
-                      <span className="sight-label-badge">🖼️</span> Photo URL
+                      <span className="sight-label-badge">🖼️</span> Photo
                       <span className="sight-label-sub">(optional)</span>
                     </span>
                     <input
-                      className="sight-input"
-                      value={photoUrl}
-                      onChange={(e) => setPhotoUrl(e.target.value)}
-                      placeholder="https://example.com/my-photo.jpg"
+                      ref={cameraRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        handleSightingPhotoSelected(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
                     />
+                    <input
+                      ref={galleryRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        handleSightingPhotoSelected(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="sight-photo-actions">
+                      <p className="sight-photo-hint">
+                        Snap a quick pic or upload from your gallery — we&apos;ll attach it when you submit.
+                      </p>
+                      <div className="sight-capture-row">
+                        <button
+                          type="button"
+                          className="sight-icon-btn"
+                          disabled={saving}
+                          onClick={() => cameraRef.current?.click()}
+                          aria-label="Take photo"
+                        >
+                          <CameraAltIcon />
+                        </button>
+                        <button
+                          type="button"
+                          className="sight-icon-btn"
+                          disabled={saving}
+                          onClick={() => galleryRef.current?.click()}
+                          aria-label="Choose from gallery"
+                        >
+                          <PhotoLibraryIcon />
+                        </button>
+                      </div>
+                      {photoPreview ? (
+                        <>
+                          <button type="button" className="sight-photo-clear" onClick={clearSightingPhoto}>
+                            Remove photo
+                          </button>
+                          <div className="sight-preview-wrap">
+                            <img src={photoPreview} alt="Sighting preview" />
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
 
@@ -230,13 +331,63 @@ export const LostFoundSightingPage = () => {
                   <input
                     type="checkbox"
                     checked={canHelp}
-                    onChange={(e) => setCanHelp(e.target.checked)}
+                    onChange={(e) => {
+                      const v = e.target.checked;
+                      setCanHelp(v);
+                      if (!v) {
+                        setSharePhoneAllowed(false);
+                        setShareEmailAllowed(false);
+                      }
+                    }}
                   />
                   <div className="sight-checkbox-copy">
                     <strong>I can help if needed</strong>
                     <span>The pet parent might reach out — opt in to be their sidewalk hero.</span>
                   </div>
                 </label>
+
+                {canHelp ? (
+                  <div className="sight-field span-2" style={{ marginTop: 4 }}>
+                    <span className="sight-label">
+                      <span className="sight-label-badge">🔐</span> Share with pet parent
+                      <span className="sight-label-sub">(optional)</span>
+                    </span>
+                    <div style={{ display: "grid", gap: 10, marginTop: 6 }}>
+                      <label className="sight-checkbox-card" style={{ margin: 0, padding: "10px 12px" }}>
+                        <input
+                          type="checkbox"
+                          checked={sharePhoneAllowed}
+                          disabled={!currentUser?.phoneNumber}
+                          onChange={(e) => setSharePhoneAllowed(e.target.checked)}
+                        />
+                        <div className="sight-checkbox-copy">
+                          <strong>Allow my phone number</strong>
+                          <span>
+                            {currentUser?.phoneNumber
+                              ? "Pet parents can call or text you from the sightings panel."
+                              : "Add a phone number to your MILO profile to enable this."}
+                          </span>
+                        </div>
+                      </label>
+                      <label className="sight-checkbox-card" style={{ margin: 0, padding: "10px 12px" }}>
+                        <input
+                          type="checkbox"
+                          checked={shareEmailAllowed}
+                          disabled={!currentUser?.email}
+                          onChange={(e) => setShareEmailAllowed(e.target.checked)}
+                        />
+                        <div className="sight-checkbox-copy">
+                          <strong>Allow my email</strong>
+                          <span>
+                            {currentUser?.email
+                              ? "Shown only when you opt in — pet parents can reach you by email."
+                              : "Sign in with an email on your account to enable this."}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="sight-actions">
                   <button type="button" className="sight-submit" onClick={handleSubmit} disabled={saving}>

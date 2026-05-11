@@ -1,6 +1,30 @@
 import styled from "styled-components";
 
 export const StyledLostFound = styled.main`
+  @keyframes lfStatusPulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 0 rgba(254, 203, 2, 0.35),
+        0 8px 22px rgba(15, 23, 42, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 0 22px 4px rgba(254, 203, 2, 0.45),
+        0 10px 28px rgba(15, 23, 42, 0.14);
+    }
+  }
+
+  @keyframes lfFloaty {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
   width: 100%;
   min-height: 75vh;
   background: #ffffff;
@@ -115,29 +139,24 @@ export const StyledLostFound = styled.main`
   }
 
   .deck-column {
-    border-radius: 28px;
-    padding: 14px 12px 18px;
+    border-radius: 32px;
+    padding: 18px 14px 22px;
     box-sizing: border-box;
+    border: none;
   }
 
   .deck-column.deck-lost {
-    background: linear-gradient(
-      165deg,
-      rgba(254, 226, 226, 0.65) 0%,
-      rgba(255, 255, 255, 0.92) 38%,
-      #ffffff 100%
-    );
-    border: 2px solid rgba(220, 38, 38, 0.22);
+    background: radial-gradient(120% 80% at 10% 0%, rgba(251, 113, 133, 0.35) 0%, transparent 55%),
+      radial-gradient(90% 70% at 90% 20%, rgba(253, 186, 116, 0.32) 0%, transparent 50%),
+      linear-gradient(165deg, rgba(255, 247, 252, 0.95) 0%, rgba(255, 255, 255, 0.88) 45%, #fafbff 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
 
   .deck-column.deck-found {
-    background: linear-gradient(
-      165deg,
-      rgba(220, 252, 231, 0.65) 0%,
-      rgba(255, 255, 255, 0.92) 38%,
-      #ffffff 100%
-    );
-    border: 2px solid rgba(22, 163, 74, 0.22);
+    background: radial-gradient(120% 80% at 8% 0%, rgba(52, 211, 153, 0.28) 0%, transparent 55%),
+      radial-gradient(90% 70% at 92% 18%, rgba(167, 243, 208, 0.35) 0%, transparent 50%),
+      linear-gradient(165deg, rgba(240, 253, 250, 0.95) 0%, rgba(255, 255, 255, 0.9) 45%, #fafbff 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
 
   .deck-column-head {
@@ -150,23 +169,22 @@ export const StyledLostFound = styled.main`
 
   .deck-pill {
     font-weight: 900;
-    font-size: 0.82rem;
-    letter-spacing: 0.08em;
-    padding: 8px 14px;
+    font-size: 0.8rem;
+    letter-spacing: 0.07em;
+    padding: 8px 16px;
     border-radius: 999px;
-    border: 2px solid #11161f;
+    border: none;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
   }
 
   .deck-pill-lost {
-    background: #dc2626;
+    background: linear-gradient(135deg, #fb7185, #f43f5e);
     color: #fff;
-    border-color: #7f1d1d;
   }
 
   .deck-pill-found {
-    background: #16a34a;
+    background: linear-gradient(135deg, #34d399, #10b981);
     color: #fff;
-    border-color: #14532d;
   }
 
   .deck-count {
@@ -177,102 +195,185 @@ export const StyledLostFound = styled.main`
 
   .deck-stack-area {
     position: relative;
-    min-height: 520px;
+    min-height: 540px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 8px;
+    padding-top: 12px;
+  }
+
+  .lf-card-ambient {
+    position: relative;
+    z-index: 1;
+    width: calc(100% - 4px);
+    max-width: 352px;
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 36px;
+    background: radial-gradient(70% 60% at 50% 0%, rgba(255, 182, 193, 0.45) 0%, transparent 70%),
+      radial-gradient(60% 50% at 20% 80%, rgba(196, 181, 253, 0.35) 0%, transparent 65%);
+    filter: blur(0);
+    transition:
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.35s ease;
+  }
+
+  .deck-found .lf-card-ambient {
+    background: radial-gradient(70% 60% at 50% 0%, rgba(167, 243, 208, 0.55) 0%, transparent 70%),
+      radial-gradient(60% 50% at 80% 70%, rgba(125, 211, 252, 0.35) 0%, transparent 65%);
+  }
+
+  @media (hover: hover) {
+    .lf-card-ambient.lf-can-hover:hover {
+      transform: translateY(-6px) scale(1.01);
+    }
   }
 
   .floating-card {
-    border-radius: 22px;
+    border-radius: 28px 28px 22px 22px;
     overflow: hidden;
-    border: 3px solid #11161f;
-    background: #fff;
+    border: none;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-sizing: border-box;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.85) inset,
+      0 24px 50px rgba(15, 23, 42, 0.12),
+      0 8px 20px rgba(240, 106, 138, 0.08);
   }
 
-  .floating-card-peek {
-    position: absolute;
-    left: 50%;
-    top: 28px;
-    width: calc(100% - 8px);
-    max-width: 332px;
-    transform: translateX(-50%) scale(0.93);
-    opacity: 0.62;
-    pointer-events: none;
-    z-index: 0;
-    filter: saturate(0.88);
-    border-radius: 22px;
-    overflow: hidden;
-    border: 3px solid rgba(17, 22, 31, 0.35);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-  }
-
-  .floating-card-top {
+  .lf-card-v2 {
     position: relative;
-    z-index: 1;
-    width: calc(100% - 8px);
-    max-width: 340px;
-    margin: 0 auto;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
   }
 
-  .floating-card-top:active {
+  .lf-card-v2:active {
     cursor: grabbing;
+  }
+
+  .lf-card-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .lf-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(28px);
+    opacity: 0.45;
+  }
+
+  .lf-blob-a {
+    width: 120px;
+    height: 120px;
+    background: #fecdd3;
+    top: -40px;
+    right: -20px;
+  }
+
+  .lf-blob-b {
+    width: 100px;
+    height: 100px;
+    background: #ddd6fe;
+    bottom: 120px;
+    left: -30px;
+  }
+
+  .lf-paw {
+    position: absolute;
+    bottom: 18%;
+    right: 8%;
+    width: 36px;
+    height: 36px;
+    opacity: 0.12;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2311161f'%3E%3Cpath d='M12 14c-2 0-3.5-1.5-3.5-3.5S10 7 12 7s3.5 1.5 3.5 3.5S14 14 12 14zm-5-2.5c-.8 0-1.5-.7-1.5-1.5S6.2 8.5 7 8.5 8.5 9.2 8.5 10 7.8 11.5 7 11.5zm10 0c-.8 0-1.5-.7-1.5-1.5S15.2 8.5 16 8.5s1.5.7 1.5 1.5S16.8 11.5 16 11.5zM8 16.5c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm8 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  .floating-card-peek {
+    position: absolute;
+    left: 50%;
+    top: 32px;
+    width: calc(100% - 8px);
+    max-width: 328px;
+    transform: translateX(-50%) scale(0.9);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+    filter: saturate(0.92) blur(0.5px);
+    border-radius: 26px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
+  }
+
+  .lf-peek-v2 {
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .floating-card-top {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
   }
 
   .deck-surface-lost {
     box-shadow:
-      10px 14px 0 rgba(220, 38, 38, 0.16),
-      0 18px 42px rgba(0, 0, 0, 0.14);
+      0 1px 0 rgba(255, 255, 255, 0.85) inset,
+      0 28px 60px rgba(244, 63, 94, 0.14),
+      0 12px 32px rgba(15, 23, 42, 0.1);
   }
 
   .deck-surface-found {
     box-shadow:
-      -10px 14px 0 rgba(34, 197, 94, 0.16),
-      0 18px 42px rgba(0, 0, 0, 0.14);
+      0 1px 0 rgba(255, 255, 255, 0.85) inset,
+      0 28px 60px rgba(16, 185, 129, 0.14),
+      0 12px 32px rgba(15, 23, 42, 0.1);
   }
 
-  .deck-ribbon {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 4;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    color: #fff;
-    font-weight: 900;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    padding: 16px 9px;
-    pointer-events: none;
-  }
-
-  .deck-ribbon-lost {
-    left: 0;
-    background: linear-gradient(180deg, #ef4444, #b91c1c);
-    border-radius: 0 14px 14px 0;
-    box-shadow: 4px 0 14px rgba(185, 28, 28, 0.35);
-  }
-
-  .deck-ribbon-found {
-    right: 0;
-    background: linear-gradient(180deg, #22c55e, #15803d);
-    border-radius: 14px 0 0 14px;
-    box-shadow: -4px 0 14px rgba(21, 128, 61, 0.35);
+  .lf-card-photo-wrap {
+    position: relative;
+    z-index: 2;
   }
 
   .floating-card-photo {
-    height: 220px;
-    background: #eef2f7;
+    height: 228px;
+    background: linear-gradient(180deg, #e0e7ff 0%, #fce7f3 100%);
     overflow: hidden;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .lf-photo-v2 {
+    position: relative;
+  }
+
+  .lf-photo-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 52%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 38%,
+      rgba(255, 255, 255, 0.92) 100%
+    );
+    pointer-events: none;
   }
 
   .floating-card-photo.peek-photo {
     height: 176px;
+    border-radius: 24px 24px 0 0;
   }
 
   .floating-card-photo img {
@@ -282,107 +383,213 @@ export const StyledLostFound = styled.main`
     display: block;
   }
 
-  .floating-card-body {
-    padding: 14px 14px 10px;
-    color: #11161f;
+  .lf-photo-overlays {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 3;
   }
 
-  .floating-card-title-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .floating-card-title-row h3 {
-    margin: 0;
-    font-family: Quicksand, sans-serif;
-    font-size: 1.12rem;
+  .lf-pill-status {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 0.72rem;
     font-weight: 900;
-    line-height: 1.2;
-  }
-
-  .floating-status-chip {
-    flex-shrink: 0;
-    font-size: 0.65rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 5px 9px;
+    letter-spacing: 0.06em;
+    padding: 7px 12px;
     border-radius: 999px;
-    background: #11161f;
-    color: #fecb02;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
 
-  .floating-desc {
-    margin: 10px 0 12px;
-    font-size: 0.87rem;
-    line-height: 1.45;
-    color: #40536b;
+  .lf-pill-lost {
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+  }
+
+  .lf-pill-found {
+    background: linear-gradient(135deg, #4ade80, #059669);
+  }
+
+  .lf-pill-active-search {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 999px;
+    color: #422006;
+    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.98));
+    border: 1px solid rgba(253, 224, 71, 0.65);
+    animation: lfStatusPulse 2.8s ease-in-out infinite;
+  }
+
+  .lf-sightings-bubble {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 16px;
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: lfFloaty 4s ease-in-out infinite;
+  }
+
+  .floating-card-body {
+    padding: 0;
+    color: #11161f;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lf-body-v2 {
+    padding: 16px 16px 8px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(248, 250, 252, 0.95) 18%);
+  }
+
+  .lf-hero-title {
+    margin: 0 0 6px;
+    font-family: Quicksand, system-ui, sans-serif;
+    font-size: clamp(1.35rem, 4.5vw, 1.65rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: #0f172a;
+  }
+
+  .lf-hero-sub {
+    margin: 0 0 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  .lf-desc-v2 {
+    margin: 0 0 12px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: #64748b;
     font-weight: 600;
   }
 
-  .floating-facts {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
+  .lf-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
-  .floating-facts li {
+  .lf-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #1e293b;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  }
+
+  .lf-link-details {
+    display: inline-block;
+    margin: 4px 0 2px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: #0066ba;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-family: inherit;
+  }
+
+  .lf-link-details:hover {
+    color: #f06a8a;
+  }
+
+  .lf-actions-v2 {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  .fact-label {
-    font-size: 0.62rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #7a8794;
-  }
-
-  .fact-val {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #11161f;
-    word-break: break-word;
-  }
-
-  .floating-card-actions {
-    display: flex;
     gap: 10px;
-    padding: 12px 14px 14px;
-    border-top: 1px solid #e8edf5;
-    background: #fbfcfe;
+    padding: 14px 16px 18px;
+    border-top: 1px solid rgba(226, 232, 240, 0.65);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(248, 250, 252, 0.92) 100%);
     position: relative;
-    z-index: 2;
+    z-index: 3;
     touch-action: manipulation;
   }
 
-  .floating-card-actions button {
-    flex: 1;
+  .lf-actions-v2 .lf-btn-primary,
+  .lf-actions-v2 .lf-btn-ghost {
+    width: 100%;
     border-radius: 999px;
-    padding: 10px 12px;
-    font-weight: 800;
+    padding: 14px 16px;
+    font-weight: 900;
     cursor: pointer;
+    font-family: Quicksand, system-ui, sans-serif;
+    font-size: 0.92rem;
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.22s ease,
+      filter 0.2s ease;
+  }
+
+  .lf-btn-primary {
     border: none;
-    font-family: inherit;
-    font-size: 0.88rem;
+    color: #fff;
+    background: linear-gradient(135deg, #f97316 0%, #f43f5e 45%, #a855f7 130%);
+    box-shadow: 0 12px 28px rgba(244, 63, 94, 0.35);
   }
 
-  .floating-card-actions .btn-detail {
-    background: #11161f;
-    color: #fff;
+  .lf-btn-primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+    box-shadow: 0 16px 36px rgba(244, 63, 94, 0.42);
   }
 
-  .floating-card-actions .btn-contact {
-    background: #f06a8a;
-    color: #fff;
+  .lf-btn-found {
+    background: linear-gradient(135deg, #10b981 0%, #0d9488 50%, #2563eb 130%);
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.32);
+  }
+
+  .lf-btn-found:hover {
+    box-shadow: 0 16px 36px rgba(16, 185, 129, 0.4);
+  }
+
+  .lf-btn-ghost {
+    background: rgba(255, 255, 255, 0.65);
+    color: #334155;
+    border: 1px solid rgba(203, 213, 225, 0.95);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  }
+
+  .lf-btn-ghost:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .floating-card-actions button {
+    flex: none;
   }
 
   .deck-swipe-hint {

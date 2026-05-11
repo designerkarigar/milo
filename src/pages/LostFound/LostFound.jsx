@@ -154,6 +154,7 @@ export const LostFoundPage = () => {
                 userCoords={userCoords}
                 defaultPhoto={defaultPhoto}
                 onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
+                onReportSighting={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}/sighting`)}
                 onNotifyNoId={() => toast.info("This report has no id yet.")}
                 onContactReporter={(report) => setContactModalReport(report)}
                 onNotifyNoContact={() =>
