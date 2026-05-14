@@ -21,6 +21,7 @@ export const createPetDraft = (draftInput = {}) => {
     updatePetStatus: "pending",
     createdPetUid: "",
     aiResult: null,
+    aiError: "",
     error: "",
     ...draftInput,
   };
@@ -45,6 +46,28 @@ export const updatePetDraft = (id, patch = {}) => {
 export const getPetDraft = (id) => {
   if (!id) return null;
   return drafts.get(id) || null;
+};
+
+/**
+ * Atomically move `createPetStatus` from `pending` → `processing` so only one
+ * effect run can start POST /pets (avoids duplicates when draft updates, e.g. AI failure,
+ * retrigger the effect while the first run is still awaiting getCurrentUserPetCount).
+ * @returns {boolean} true if this caller claimed creation
+ */
+export const claimPetCreationIfPending = (id) => {
+  const existing = drafts.get(id);
+  if (!existing) return false;
+  if (!existing.name || !existing.firebaseUrl) return false;
+  if (existing.createdPetUid) return false;
+  if (existing.createPetStatus !== "pending") return false;
+  const updated = {
+    ...existing,
+    createPetStatus: "processing",
+    updatedAt: Date.now(),
+  };
+  drafts.set(id, updated);
+  notify();
+  return true;
 };
 
 export const subscribePetDrafts = (listener) => {

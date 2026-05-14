@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { PetNameCreateStep } from "../../components/AddPet/PetNameCreateStep";
 import { useAuth } from "../../contexts/AuthContext";
 import { StyledAddPetCapture } from "./styledComponent";
 import { startAddPetPipeline } from "../../utils/Functions/Pets/startAddPetPipeline";
@@ -13,6 +14,8 @@ import { getCurrentUserPetCount, isAtPetLimit } from "../../utils/Functions/Pets
 
 export const AddPetCapture = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get("draft");
   const { currentUser } = useAuth();
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
@@ -58,9 +61,21 @@ export const AddPetCapture = () => {
       toast.error("We couldn't verify your pet limit. Please try again.");
       return;
     }
-    const draftId = startAddPetPipeline({ file, currentUser });
-    navigate(`/add-pet/name?draft=${encodeURIComponent(draftId)}`);
+    const newDraftId = startAddPetPipeline({ file, currentUser });
+    navigate(`/add-pet/capture?draft=${encodeURIComponent(newDraftId)}`);
   };
+
+  if (draftId) {
+    return (
+      <>
+        <div style={{ backgroundColor: "#0066ba" }}>
+          <Navbar />
+        </div>
+        <PetNameCreateStep draftId={draftId} currentUser={currentUser} />
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -117,4 +132,3 @@ export const AddPetCapture = () => {
 };
 
 export default AddPetCapture;
-

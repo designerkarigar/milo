@@ -8,8 +8,10 @@ import {
   sendPasswordResetEmail,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  signOut,
 } from "firebase/auth";
 import { auth } from "../../firebase";
+import { syncMiloProfileAfterFirebaseAuth } from "../../utils/Functions/Authentication/syncMiloProfileAfterFirebaseAuth";
 import { StyledLoginModal } from "./styledComponent";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -27,6 +29,26 @@ const LoginModal = ({ isOpen, onClose }) => {
 
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
+
+  const rollbackFirebaseSession = async () => {
+    try {
+      await signOut(auth);
+    } catch {
+      // ignore
+    }
+    localStorage.setItem("idToken", "0");
+    localStorage.setItem("username", "none");
+    localStorage.setItem("role", "");
+  };
+
+  const finalizeFirebaseLogin = async (user) => {
+    try {
+      await syncMiloProfileAfterFirebaseAuth(user);
+    } catch (syncErr) {
+      await rollbackFirebaseSession();
+      throw syncErr;
+    }
+  };
 
   // reCAPTCHA Enterprise site key
   const RECAPTCHA_SITE_KEY = "6LfGXDIsAAAAAILcLK1xmSF0nlNsdutCliLF5EhN";
@@ -128,15 +150,19 @@ const LoginModal = ({ isOpen, onClose }) => {
       }
 
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        await finalizeFirebaseLogin(user);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+        await finalizeFirebaseLogin(user);
       }
       onClose();
       setEmail("");
       setPassword("");
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      setError(
+        error?.code ? getErrorMessage(error.code) : error?.message || getErrorMessage()
+      );
     } finally {
       setLoading(false);
     }
@@ -154,10 +180,13 @@ const LoginModal = ({ isOpen, onClose }) => {
         // Continue with auth even if reCAPTCHA fails
       }
 
-      await signInWithPopup(auth, googleProvider);
+      const { user } = await signInWithPopup(auth, googleProvider);
+      await finalizeFirebaseLogin(user);
       onClose();
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      setError(
+        error?.code ? getErrorMessage(error.code) : error?.message || getErrorMessage()
+      );
     } finally {
       setLoading(false);
     }
@@ -175,10 +204,13 @@ const LoginModal = ({ isOpen, onClose }) => {
         // Continue with auth even if reCAPTCHA fails
       }
 
-      await signInWithPopup(auth, facebookProvider);
+      const { user } = await signInWithPopup(auth, facebookProvider);
+      await finalizeFirebaseLogin(user);
       onClose();
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      setError(
+        error?.code ? getErrorMessage(error.code) : error?.message || getErrorMessage()
+      );
     } finally {
       setLoading(false);
     }
@@ -258,6 +290,11 @@ const LoginModal = ({ isOpen, onClose }) => {
 
     try {
       await confirmationResult.confirm(verificationCode);
+      const phoneUser = auth.currentUser;
+      if (!phoneUser) {
+        throw new Error("Phone sign-in did not complete.");
+      }
+      await finalizeFirebaseLogin(phoneUser);
       onClose();
       setPhone("");
       setCountryCode("");
@@ -268,7 +305,11 @@ const LoginModal = ({ isOpen, onClose }) => {
         window.recaptchaVerifier = null;
       }
     } catch (error) {
-      setError("Invalid verification code. Please try again.");
+      setError(
+        error?.code
+          ? getErrorMessage(error.code)
+          : error?.message || "Invalid verification code. Please try again."
+      );
     } finally {
       setLoading(false);
     }

@@ -4,13 +4,9 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { usePetDraft } from "../../utils/Functions/Pets/usePetDraft";
 import { updatePetDraft } from "../../utils/Functions/Pets/addPetDraftStore";
-import { createPet } from "../../utils/Functions/Pets/createPet";
 import { updatePetFromAi } from "../../utils/Functions/Pets/updatePetFromAi";
 import { StyledAddPetProfile } from "./styledComponent";
 import { useAuth } from "../../contexts/AuthContext";
-import { toast } from "react-toastify";
-import { PET_LIMIT_MESSAGE } from "../../utils/Constants/petLimits";
-import { getCurrentUserPetCount, isAtPetLimit } from "../../utils/Functions/Pets/petLimitHelpers";
 
 const DETAIL_FIELDS = [
   { key: "petType", label: "Pet Type" },
@@ -56,6 +52,10 @@ export const AddPetProfile = () => {
   const draftId = searchParams.get("draft");
   const draft = usePetDraft(draftId);
   const isInvalidDraft = useMemo(() => !draftId || !draft, [draftId, draft]);
+  const isMissingServerPet = useMemo(
+    () => Boolean(draftId && draft && !draft.createdPetUid),
+    [draftId, draft]
+  );
   const [aiTimedOut, setAiTimedOut] = useState(false);
   const [editableFields, setEditableFields] = useState({});
   const [manualValues, setManualValues] = useState({
@@ -71,6 +71,24 @@ export const AddPetProfile = () => {
   const aiData = draft?.aiResult || {};
   const isAiPending = draft?.aiStatus === "pending" || draft?.aiStatus === "processing";
   const canEditDetails = true;
+
+  const aiSettled = useMemo(() => {
+    if (!draft) return false;
+    return draft.aiStatus === "done" || draft.aiStatus === "failed";
+  }, [draft]);
+
+  const canSave =
+    Boolean(draft?.createdPetUid) &&
+    aiSettled &&
+    draft?.updatePetStatus !== "processing";
+
+  const profileSubtitle = useMemo(() => {
+    if (isAiPending) return "Analyzing pet details in the background…";
+    if (draft?.aiStatus === "failed") {
+      return "Auto-detect did not complete — you can still edit and save.";
+    }
+    return "Review details and tap Save when you are ready.";
+  }, [isAiPending, draft?.aiStatus]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -97,68 +115,6 @@ export const AddPetProfile = () => {
       description: prev.description || aiData.description || "",
     }));
   }, [draft, aiData]);
-
-  useEffect(() => {
-    if (!draftId || !draft) return;
-    if (!draft.name || !draft.firebaseUrl) return;
-    if (draft.createdPetUid) return;
-    if (draft.createPetStatus !== "pending") return;
-
-    (async () => {
-      try {
-        const count = await getCurrentUserPetCount();
-        if (isAtPetLimit(count)) {
-          updatePetDraft(draftId, {
-            createPetStatus: "failed",
-            error: PET_LIMIT_MESSAGE,
-          });
-          toast.warning(PET_LIMIT_MESSAGE);
-          return;
-        }
-
-        updatePetDraft(draftId, { createPetStatus: "processing" });
-        const createdPet = await createPet({
-          name: draft.name,
-          imageUrl: draft.firebaseUrl,
-        });
-        updatePetDraft(draftId, {
-          createPetStatus: "done",
-          createdPetUid: createdPet?.uid || "",
-        });
-      } catch (error) {
-        updatePetDraft(draftId, {
-          createPetStatus: "failed",
-          error: String(error?.message || error),
-        });
-      }
-    })();
-  }, [draftId, draft]);
-
-  useEffect(() => {
-    if (!draftId || !draft) return;
-    if (!draft.createdPetUid || !draft.aiResult) return;
-    if (draft.updatePetStatus !== "pending") return;
-
-    updatePetDraft(draftId, { updatePetStatus: "processing" });
-    (async () => {
-      try {
-        await updatePetFromAi({
-          uid: draft.createdPetUid,
-          name: draft.name,
-          imageUrl: draft.firebaseUrl,
-          aiData: draft.aiResult,
-        });
-        updatePetDraft(draftId, {
-          updatePetStatus: "done",
-        });
-      } catch (error) {
-        updatePetDraft(draftId, {
-          updatePetStatus: "failed",
-          error: String(error?.message || error),
-        });
-      }
-    })();
-  }, [draftId, draft]);
 
   const handleDetailChange = (key, value) => {
     setManualValues((prev) => ({ ...prev, [key]: value }));
@@ -208,18 +164,32 @@ export const AddPetProfile = () => {
                 Go Home
               </button>
             </div>
+          ) : isMissingServerPet ? (
+            <div className="error-box">
+              <p>Your pet profile was not created yet. Go back to enter the name and try again.</p>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/add-pet/capture?draft=${encodeURIComponent(draftId)}`)
+                }
+              >
+                Back to name step
+              </button>
+            </div>
           ) : (
             <>
               <div className="header-row">
                 <h1>{draft?.name || "Your Pet"}</h1>
-                <p>{isAiPending ? "Analyzing pet details..." : "Pet details ready"}</p>
-                {draft?.createPetStatus === "done" ? (
-                  <p className="success-tick blink">✓</p>
-                ) : null}
-                {draft?.createPetStatus === "failed" ? (
-                  <p className="error-line">Pet not created :(</p>
+                <p>{profileSubtitle}</p>
+                {draft?.createdPetUid ? (
+                  <p className="success-tick blink" title="Pet created">
+                    ✓
+                  </p>
                 ) : null}
                 {draft?.error ? <p className="error-line">{draft.error}</p> : null}
+                {draft?.aiStatus === "failed" && draft?.aiError ? (
+                  <p className="error-line subtle">{draft.aiError}</p>
+                ) : null}
               </div>
 
               <div className="profile-grid">
@@ -287,13 +257,16 @@ export const AddPetProfile = () => {
 
               {canEditDetails ? (
                 <div className="actions-row">
+                  {!canSave && draft?.createdPetUid && !aiSettled ? (
+                    <p className="save-hint" role="status">
+                      Save unlocks when photo analysis succeeds or cannot complete.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     className="save-btn"
                     onClick={handleSaveManualDetails}
-                    disabled={
-                      !draft?.createdPetUid || draft?.updatePetStatus === "processing"
-                    }
+                    disabled={!canSave}
                   >
                     {draft?.updatePetStatus === "processing" ? "Saving..." : "Save"}
                   </button>
@@ -309,4 +282,3 @@ export const AddPetProfile = () => {
 };
 
 export default AddPetProfile;
-

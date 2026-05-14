@@ -41,6 +41,12 @@ export const StyledAddPetProfile = styled.main`
     font-weight: 600;
   }
 
+  .error-line.subtle {
+    color: #69788e !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+
   .profile-grid {
     display: grid;
     grid-template-columns: minmax(260px, 420px) 1fr;
@@ -151,7 +157,19 @@ export const StyledAddPetProfile = styled.main`
   .actions-row {
     margin-top: 12px;
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .save-hint {
+    margin: 0;
+    flex: 1 1 220px;
+    text-align: right;
+    color: #69788e;
+    font-size: 0.88rem;
+    line-height: 1.35;
   }
 
   .save-btn {

@@ -15,6 +15,18 @@ export const StyledAddPetName = styled.main`
     margin-bottom: 8px;
   }
 
+  .limit-notice {
+    color: #5b6770;
+    font-size: 0.95rem;
+    margin: 0 0 12px;
+  }
+
+  .error-line {
+    color: #c62828;
+    font-size: 0.95rem;
+    margin: 0 0 12px;
+  }
+
   .content {
     display: grid;
     grid-template-columns: minmax(260px, 360px) 1fr;
