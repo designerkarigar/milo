@@ -21,6 +21,8 @@ import LostFoundReportPage from "./pages/LostFound/LostFoundReport";
 import LostFoundDetailsPage from "./pages/LostFound/LostFoundDetails";
 import LostFoundSightingPage from "./pages/LostFound/LostFoundSighting";
 import LostFoundSightingDetailPage from "./pages/LostFound/LostFoundSightingDetailPage";
+import LostFoundMatchRequestsHubPage from "./pages/LostFound/LostFoundMatchRequestsHub";
+import LostFoundMatchChatStubPage from "./pages/LostFound/LostFoundMatchChatStub";
 import MyBookingsPage from "./pages/MyBookings/index";
 import BookingCheckoutPage from "./pages/BookingCheckout/index";
 import VetBookingCheckoutPage from "./pages/VetBookingCheckout/index";
@@ -116,6 +118,14 @@ export const routesConfig = [
   {
     path: "/lost-found/report",
     Component: LostFoundReportPage,
+  },
+  {
+    path: "/lost-found/match-requests",
+    Component: LostFoundMatchRequestsHubPage,
+  },
+  {
+    path: "/lost-found/match-room/:roomId",
+    Component: LostFoundMatchChatStubPage,
   },
   {
     path: "/lost-found/:reportId/sighting",

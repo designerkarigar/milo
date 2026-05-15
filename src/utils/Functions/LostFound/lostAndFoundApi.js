@@ -86,3 +86,52 @@ export async function createLostAndFound(payload = {}) {
   return coerceLostFoundRecordList(response?.data?.response?.record);
 }
 
+/**
+ * Owner marks a lost report as reunited.
+ *
+ * PATCH `{BaseUrl}/lostAndFound/:reportUid/reunited` — same `BaseUrl` as other lostAndFound APIs.
+ * Request body is optional: include `reunionMessage` and/or `reunionPhoto` only when set; otherwise `{}`.
+ *
+ * Example (Windows cmd / PowerShell):
+ * ```bash
+ * curl.exe -sS -X PATCH "https://st40k7zbg3.execute-api.ap-south-1.amazonaws.com/v1/lostAndFound/REPORT_UID_HERE/reunited" ^
+ *   -H "accept: application/json" ^
+ *   -H "content-type: application/json" ^
+ *   -H "token: YOUR_JWT_OR_MILO_TOKEN_HERE" ^
+ *   -d "{\"reunionMessage\":\"Thank you everyone for helping us find Rosy.\",\"reunionPhoto\":\"https://example.com/optional-photo.jpg\"}"
+ * ```
+ *
+ * @param {string} reportUid — Report id in the path (`REPORT_UID_HERE`).
+ * @param {{ reunionMessage?: string, reunionPhoto?: string, reunionPhotoUrl?: string }} [options] — Both optional; `reunionPhotoUrl` is accepted as an alias for `reunionPhoto` (wire name in JSON is `reunionPhoto`).
+ * @returns {Promise<object|null>} Updated record when the API returns one, otherwise null.
+ */
+export async function markLostReportReunited(reportUid, options = {}) {
+  const token = await getAuthToken().catch(() => "");
+  if (!token) throw new Error("No authentication token available");
+  const id = String(reportUid || "").trim();
+  if (!id) throw new Error("Missing report id");
+
+  const reunionMessage = String(options.reunionMessage || "").trim();
+  const reunionPhoto = String(options.reunionPhoto || options.reunionPhotoUrl || "").trim();
+
+  const body = {};
+  if (reunionMessage) body.reunionMessage = reunionMessage;
+  if (reunionPhoto) body.reunionPhoto = reunionPhoto;
+
+  const base = `${String(BaseUrl || "").replace(/\/+$/, "")}/`;
+  const reuniteUrl = new URL(`lostAndFound/${encodeURIComponent(id)}/reunited`, base).toString();
+
+  const response = await axios.patch(reuniteUrl, body, {
+    headers: {
+      token,
+      "Content-Type": "application/json",
+      accept: "application/json",
+    },
+  });
+
+  const raw = response?.data?.response?.record;
+  const list = coerceLostFoundRecordList(raw);
+  if (list.length) return list[0];
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) return raw;
+  return null;
+}

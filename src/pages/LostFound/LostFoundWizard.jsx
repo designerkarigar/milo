@@ -18,6 +18,9 @@ import {
 } from "../../utils/Functions/LostFound/mapPetDetectionToLostFound";
 import { reverseGeocodeFromCoords } from "../../utils/Functions/LostFound/reverseGeocode";
 
+/** Quick success/info toasts in this flow — shorter than app default so they do not stack as long. */
+const WIZARD_TOAST_QUICK_MS = 2000;
+
 const MAIN_STEPS = 4;
 
 function emptyErrors() {
@@ -127,7 +130,7 @@ export function LostFoundWizardPage() {
       .then((record) => {
         const mapped = mapAiDetectionToLostFoundForm(record);
         applyAiForm(mapped);
-        toast.success("MILO found clues — peek at pet details!");
+        toast.success("MILO found clues — peek at pet details!", { autoClose: WIZARD_TOAST_QUICK_MS });
       })
       .catch((err) => {
         const msg = String(err?.response?.data?.message || err?.message || err);
@@ -152,7 +155,7 @@ export function LostFoundWizardPage() {
       startBackgroundAiIfFound(url);
       setStep(2);
       if (reportKind !== "FOUND") {
-        toast.success("Photo uploaded — keep rolling!");
+        toast.success("Photo uploaded — keep rolling!", { autoClose: WIZARD_TOAST_QUICK_MS });
       }
     } catch (err) {
       const msg = String(err?.message || err);
@@ -212,8 +215,8 @@ export function LostFoundWizardPage() {
             zip: geo.zip || prev.zip,
             country: geo.country || prev.country || "India",
           }));
-          if (!geo.zip) toast.info("Add PIN/ZIP if it’s blank.");
-          toast.success("Location dropped in!");
+          if (!geo.zip) toast.info("Add PIN/ZIP if it’s blank.", { autoClose: WIZARD_TOAST_QUICK_MS });
+          toast.success("Location dropped in!", { autoClose: WIZARD_TOAST_QUICK_MS });
         } catch {
           setLocation((prev) => ({ ...prev, lat, long: lng }));
           toast.warning("Got coordinates — street fields are yours to finish.");
@@ -274,6 +277,17 @@ export function LostFoundWizardPage() {
         },
         contactDetails: contactDetails.trim(),
       };
+
+      const cd = contactDetails.trim();
+      if (cd) {
+        const digits = cd.replace(/\D/g, "");
+        if (digits.length >= 7) {
+          payload.phoneContactAllowed = true;
+        }
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cd)) {
+          payload.emailContactAllowed = true;
+        }
+      }
 
       await createLostAndFound(payload);
       setStep(5);

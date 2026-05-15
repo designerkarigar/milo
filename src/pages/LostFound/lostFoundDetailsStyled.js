@@ -114,4 +114,51 @@ export const StyledOwnerContextStrip = styled.div`
     color: #fff;
     vertical-align: middle;
   }
+
+  .strip-badge.strip-badge-reunited {
+    background: linear-gradient(135deg, #22c55e, #059669);
+  }
+`;
+
+export const StyledMightBePetCTA = styled.div`
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(254, 249, 231, 0.85), rgba(240, 253, 250, 0.75));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+
+  .might-be-btn {
+    border: none;
+    cursor: pointer;
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-weight: 900;
+    font-family: Quicksand, system-ui, sans-serif;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background: linear-gradient(135deg, #fde68a, #fcd34d);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(245, 158, 11, 0.35);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      box-shadow: none;
+    }
+  }
+
+  .might-be-helper {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #64748b;
+    line-height: 1.45;
+    max-width: 36em;
+  }
 `;

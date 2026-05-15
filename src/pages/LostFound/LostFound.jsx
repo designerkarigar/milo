@@ -8,13 +8,16 @@ import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
 import { fetchLostAndFound } from "../../utils/Functions/LostFound/lostAndFoundApi";
 import {
+  getLostFoundStableId,
   getNormalizedLostFoundStatus,
   haversineKm,
   normalizeLostFoundRecords,
+  pickReunionStory,
 } from "../../utils/Functions/LostFound/lostFoundUtils";
 import defaultPhoto from "../../images/svgfiles/avatar-1.svg";
 import { LostFoundSwipeDeck } from "./LostFoundSwipeDeck";
 import { LostFoundContactReporterModal } from "./LostFoundContactReporterModal";
+import { LostFoundPetPhoto } from "./LostFoundPetPhoto";
 
 function useUserGeo() {
   const [coords, setCoords] = useState(null);
@@ -66,7 +69,7 @@ export const LostFoundPage = () => {
     })();
   }, [currentUser]);
 
-  const { lostSorted, foundSorted } = useMemo(() => {
+  const { lostSorted, foundSorted, reunitedSorted } = useMemo(() => {
     const norm = (it) =>
       getNormalizedLostFoundStatus(it) || String(it?.status || "").trim().toUpperCase();
 
@@ -88,16 +91,18 @@ export const LostFoundPage = () => {
       return withDistance.map((x) => x.it);
     };
 
-    const lost = items.filter((it) => norm(it) === "LOST");
+    const lostActive = items.filter((it) => norm(it) === "LOST");
     const found = items.filter((it) => norm(it) === "FOUND");
+    const reunited = items.filter((it) => norm(it) === "REUNITED");
 
     return {
-      lostSorted: sortByDistance(lost),
+      lostSorted: sortByDistance(lostActive),
       foundSorted: sortByDistance(found),
+      reunitedSorted: sortByDistance(reunited),
     };
   }, [items, userCoords]);
 
-  const hasAnyReports = lostSorted.length > 0 || foundSorted.length > 0;
+  const hasAnyReports = lostSorted.length > 0 || foundSorted.length > 0 || reunitedSorted.length > 0;
 
   return (
     <>
@@ -131,6 +136,9 @@ export const LostFoundPage = () => {
               Red stack = pets people are looking for · Green stack = pets someone found
             </p>
             <div className="toolbar-actions">
+              <button type="button" className="pill" onClick={() => navigate("/lost-found/match-requests")}>
+                Requests for my found pets
+              </button>
               <button type="button" className="pill" onClick={() => navigate("/lost-found/report?mode=lost")}>
                 Report lost pet
               </button>
@@ -147,33 +155,74 @@ export const LostFoundPage = () => {
           ) : !hasAnyReports ? (
             <div className="empty">No reports yet.</div>
           ) : (
-            <div className="dual-deck">
-              <LostFoundSwipeDeck
-                variant="lost"
-                items={lostSorted}
-                userCoords={userCoords}
-                defaultPhoto={defaultPhoto}
-                onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
-                onReportSighting={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}/sighting`)}
-                onNotifyNoId={() => toast.info("This report has no id yet.")}
-                onContactReporter={(report) => setContactModalReport(report)}
-                onNotifyNoContact={() =>
-                  toast.info("This reporter has not shared contact details (or none are visible).")
-                }
-              />
-              <LostFoundSwipeDeck
-                variant="found"
-                items={foundSorted}
-                userCoords={userCoords}
-                defaultPhoto={defaultPhoto}
-                onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
-                onNotifyNoId={() => toast.info("This report has no id yet.")}
-                onContactReporter={(report) => setContactModalReport(report)}
-                onNotifyNoContact={() =>
-                  toast.info("This reporter has not shared contact details (or none are visible).")
-                }
-              />
-            </div>
+            <>
+              <div className="dual-deck">
+                <LostFoundSwipeDeck
+                  variant="lost"
+                  items={lostSorted}
+                  userCoords={userCoords}
+                  defaultPhoto={defaultPhoto}
+                  onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
+                  onReportSighting={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}/sighting`)}
+                  onNotifyNoId={() => toast.info("This report has no id yet.")}
+                  onContactReporter={(report) => setContactModalReport(report)}
+                  onNotifyNoContact={() =>
+                    toast.info("This reporter has not shared contact details (or none are visible).")
+                  }
+                />
+                <LostFoundSwipeDeck
+                  variant="found"
+                  items={foundSorted}
+                  userCoords={userCoords}
+                  defaultPhoto={defaultPhoto}
+                  onViewDetails={(rowId) => navigate(`/lost-found/${encodeURIComponent(rowId)}`)}
+                  onNotifyNoId={() => toast.info("This report has no id yet.")}
+                  onContactReporter={(report) => setContactModalReport(report)}
+                  onNotifyNoContact={() =>
+                    toast.info("This reporter has not shared contact details (or none are visible).")
+                  }
+                />
+              </div>
+              {reunitedSorted.length > 0 ? (
+                <section className="reunited-zone" aria-labelledby="reunited-pets-heading">
+                  <div className="reunited-zone-head">
+                    <h2 id="reunited-pets-heading" className="reunited-zone-title">
+                      Reunited pets
+                    </h2>
+                    <p className="reunited-zone-sub">
+                      Happy endings from the MILO community — these pets are safely back with their families.
+                    </p>
+                  </div>
+                  <div className="reunited-cards">
+                    {reunitedSorted.map((row) => {
+                      const id = getLostFoundStableId(row);
+                      const story = pickReunionStory(row);
+                      const snippet =
+                        story.message || "Marked as reunited — thank you to everyone who helped along the way.";
+                      return (
+                        <article key={id || row.uid || JSON.stringify(row)} className="reunited-card">
+                          <div className="reunited-card-photo">
+                            <LostFoundPetPhoto record={row} fallbackSrc={defaultPhoto} alt={row?.name || "Pet"} />
+                          </div>
+                          <div className="reunited-card-body">
+                            <span className="reunited-card-badge">Reunited</span>
+                            <h3 className="reunited-card-name">{row?.name || "Pet"}</h3>
+                            <p className="reunited-card-snippet">{snippet}</p>
+                            <button
+                              type="button"
+                              className="pill"
+                              onClick={() => navigate(`/lost-found/${encodeURIComponent(id)}`)}
+                            >
+                              View story
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+            </>
           )}
         </div>
       </StyledLostFound>
