@@ -1,4 +1,5 @@
 import { Auth, Storage } from "aws-amplify";
+import { parseAwsS3HttpUrlToObjectKey } from "../Others/resolveS3Url";
 
 const S3_BUCKET = "milo-s3-bucket-25";
 const S3_REGION = "ap-south-1";
@@ -28,11 +29,17 @@ async function ensureAwsCredentialsForRead() {
 
 /**
  * When public CloudFront URL 404s or is blocked, try Amplify signed URL for the same object key.
+ * @param {string} keyOrUrl — Storage object key, or full S3 HTTPS URL (path-style / virtual-hosted).
  */
-export async function tryGetSignedPublicUrl(key) {
-  if (!key || typeof key !== "string") return "";
-  if (key.startsWith("http://") || key.startsWith("https://") || key.startsWith("data:")) {
-    return key;
+export async function tryGetSignedPublicUrl(keyOrUrl) {
+  if (!keyOrUrl || typeof keyOrUrl !== "string") return "";
+  if (keyOrUrl.startsWith("data:")) return keyOrUrl;
+
+  let key = keyOrUrl.trim();
+  if (key.startsWith("http://") || key.startsWith("https://")) {
+    const extracted = parseAwsS3HttpUrlToObjectKey(key);
+    if (!extracted) return "";
+    key = extracted;
   }
 
   try {

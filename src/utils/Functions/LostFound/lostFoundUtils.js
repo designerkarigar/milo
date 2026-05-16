@@ -1,4 +1,4 @@
-import { resolveS3Url } from "../Others/resolveS3Url";
+import { resolveS3UrlForDisplay, parseAwsS3HttpUrlToObjectKey } from "../Others/resolveS3Url";
 
 function firstNonEmptyTrimmed(values) {
   for (const v of values) {
@@ -149,6 +149,20 @@ export function pickVisibleReporterContact(report) {
   let emailDisplay = "";
   if (emailContactAllowed) {
     emailDisplay = emailFromContact || emailFromAccount || "";
+  }
+
+  // Many list rows store a phone or email only in `contactDetails` while the API defaults both
+  // share flags to false. If strict privacy hides everything but `contactDetails` clearly holds
+  // reach-out info, treat that field as intentional share for matching channel(s).
+  if (!phoneDisplay.trim() && !emailDisplay.trim() && contactRaw) {
+    const bothFlagsOff = phoneContactAllowed === false && emailContactAllowed === false;
+    if (bothFlagsOff) {
+      if (isEmailLike(contactRaw)) {
+        emailDisplay = contactRaw;
+      } else if (phoneFromContact) {
+        phoneDisplay = contactRaw;
+      }
+    }
   }
 
   return {
@@ -331,13 +345,6 @@ export function pickLostFoundSightingCount(record) {
   return Math.floor(n);
 }
 
-/** Human label when backend adds resolution fields later. */
-export function pickOwnerReportStatusLabel(record) {
-  const r = String(record?.resolutionStatus || record?.reportResolution || "").trim().toUpperCase();
-  if (r === "REUNITED" || r === "RESOLVED" || r === "CLOSED") return "Reunited";
-  return "Active";
-}
-
 export function formatSightingClock(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -516,9 +523,18 @@ function pickNumericCoord(...vals) {
   return undefined;
 }
 
-/** Map API status variants to `LOST` | `FOUND` so filters match list payloads. */
+/** Map API status variants to `LOST` | `FOUND` | `REUNITED` so filters match list payloads. */
 export function getNormalizedLostFoundStatus(record) {
   if (!record || typeof record !== "object") return "";
+  const resolution = String(
+    firstNonEmptyTrimmed([
+      record.resolutionStatus,
+      record.resolution_status,
+      record.reportResolution,
+      record.report_resolution,
+    ])
+  ).toUpperCase();
+
   const raw = firstNonEmptyTrimmed([
     record.status,
     record.reportStatus,
@@ -527,13 +543,58 @@ export function getNormalizedLostFoundStatus(record) {
     record.lost_found_status,
   ]);
   const u = String(raw).trim().toUpperCase();
-  if (!u) return "";
+
+  if (resolution === "REUNITED" || resolution === "RESOLVED" || resolution === "CLOSED") {
+    if (u === "LOST" || u === "MISSING" || !u) return "REUNITED";
+  }
+
+  if (u === "REUNITED" || u === "REUNITED_PET") return "REUNITED";
   if (u === "FOUND" || u === "FIND" || u === "FOUND_PET") return "FOUND";
   if (u === "LOST" || u === "MISSING") return "LOST";
+  if (!u) return "";
   return u;
 }
 
-/** Mongo / primary key as string (`_id` may be a business slug like `bhawna-lnf-06052026105544`). */
+/** Lost report is closed as reunited (not an active missing-pet search). */
+export function isLostReportMarkedReunited(record) {
+  return getNormalizedLostFoundStatus(record) === "REUNITED";
+}
+
+/** Active LOST rows only (e.g. optional link when contacting a finder). */
+export function filterActiveLostReports(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.filter((r) => {
+    const s = getNormalizedLostFoundStatus(r) || String(r?.status || "").trim().toUpperCase();
+    return s === "LOST";
+  });
+}
+
+/** Human label for owner context strip (active search vs reunited). */
+export function pickOwnerReportStatusLabel(record) {
+  if (getNormalizedLostFoundStatus(record) === "REUNITED") return "Reunited";
+  const r = String(record?.resolutionStatus || record?.reportResolution || "").trim().toUpperCase();
+  if (r === "REUNITED" || r === "RESOLVED" || r === "CLOSED") return "Reunited";
+  return "Active";
+}
+
+/** Optional story fields after owner marks reunited (camelCase / snake_case). */
+export function pickReunionStory(record) {
+  if (!record || typeof record !== "object") {
+    return { message: "", photoUrl: "" };
+  }
+  return {
+    message: firstNonEmptyTrimmed([record.reunionMessage, record.reunion_message, record.reunionNote, record.reunion_note]),
+    photoUrl: firstNonEmptyTrimmed([
+      record.reunionPhoto,
+      record.reunion_photo,
+      record.reunionPhotoUrl,
+      record.reunion_photo_url,
+      record.reunionImageUrl,
+      record.reunion_image_url,
+    ]),
+  };
+}
+
 export function mongoPrimaryKeyString(record) {
   if (!record || typeof record !== "object") return "";
   const mid = record._id;
@@ -572,6 +633,48 @@ export function getSightingsApiReportId(record) {
     mongoPrimaryKeyString(record),
     getLostFoundStableId(record),
   ]);
+}
+
+/**
+ * Find a lost/found row when opening /lost-found/:id from URL (stable id, uid, or sightings API id).
+ */
+export function findLostFoundRecordByRouteParam(rows, routeParam) {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const decoded = routeParam ? decodeURIComponent(String(routeParam).trim()) : "";
+  if (!decoded) return null;
+  for (const x of rows) {
+    if (!x || typeof x !== "object") continue;
+    if (getLostFoundStableId(x) === decoded) return x;
+    if (String(x.uid || "").trim() === decoded) return x;
+    if (getSightingsApiReportId(x) === decoded) return x;
+  }
+  return null;
+}
+
+/**
+ * `uid` path segment for PATCH `{BaseUrl}/lostAndFound/{uid}/reunited` (same style as other lostAndFound routes).
+ * Prefer business `uid` on the row and the route param; then stable / sightings ids as fallback.
+ */
+export function getLostFoundReunionApiUid(record, routeUidParam) {
+  const decodeRoute = (p) => {
+    const s = String(p || "").trim();
+    if (!s) return "";
+    try {
+      return decodeURIComponent(s);
+    } catch {
+      return s;
+    }
+  };
+  if (record && typeof record === "object") {
+    const u = String(record.uid || "").trim();
+    if (u) return u;
+  }
+  const fromRoute = decodeRoute(routeUidParam);
+  if (fromRoute) return fromRoute;
+  if (record && typeof record === "object") {
+    return getLostFoundStableId(record) || getSightingsApiReportId(record) || "";
+  }
+  return "";
 }
 
 /**
@@ -644,20 +747,35 @@ export function haversineKm(a, b) {
   return R * c;
 }
 
-/** Raw S3/storage key from DB (before CloudFront base + encoding). */
+/** Raw S3 object key for signing / fallback (not a full https URL when avoidable). */
 export function getFirstPhotoStorageKey(record) {
   if (!record?.photos?.length) return "";
   const p = record.photos[0];
-  if (typeof p === "string") return p;
-  return p?.url || p?.path || p?.s3Url || "";
+  let raw = "";
+  if (typeof p === "string") raw = String(p).trim();
+  else raw = String(p?.url || p?.path || p?.s3Url || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    const key = parseAwsS3HttpUrlToObjectKey(raw);
+    return key || "";
+  }
+  return raw;
 }
 
 export function pickPhotoUrl(record) {
   if (!record) return "";
-  if (record.profilePhoto) return resolveS3Url(record.profilePhoto);
+  if (record.profilePhoto) return resolveS3UrlForDisplay(record.profilePhoto);
+  const topUrl = firstNonEmptyTrimmed([
+    record.photoUrl,
+    record.photo_url,
+    record.imageUrl,
+    record.image_url,
+    record.image,
+  ]);
+  if (topUrl) return resolveS3UrlForDisplay(topUrl);
   if (Array.isArray(record.photos) && record.photos.length > 0) {
     const p = record.photos[0];
-    if (typeof p === "string") return resolveS3Url(p);
+    if (typeof p === "string") return resolveS3UrlForDisplay(p);
 
     const url =
       p?.url ||
@@ -665,8 +783,10 @@ export function pickPhotoUrl(record) {
       p?.cloudFrontUrl ||
       p?.cdnUrl ||
       p?.path ||
+      p?.imageUrl ||
+      p?.image ||
       "";
-    if (url) return resolveS3Url(url);
+    if (url) return resolveS3UrlForDisplay(url);
 
     // If backend echoes base64, render via data URL.
     if (p?.base64Data) {

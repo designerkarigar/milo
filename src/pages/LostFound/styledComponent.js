@@ -138,6 +138,125 @@ export const StyledLostFound = styled.main`
     }
   }
 
+  .reunited-zone {
+    margin-top: 28px;
+    padding: 20px 18px 22px;
+    border-radius: 28px;
+    background: linear-gradient(
+      165deg,
+      rgba(220, 252, 231, 0.55) 0%,
+      rgba(255, 255, 255, 0.95) 45%,
+      #fafbff 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      0 14px 36px rgba(16, 185, 129, 0.12);
+  }
+
+  .reunited-zone-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+
+  .reunited-zone-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #047857;
+    font-family: Quicksand, system-ui, sans-serif;
+  }
+
+  .reunited-zone-sub {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #5b6770;
+    max-width: 520px;
+    line-height: 1.45;
+  }
+
+  .reunited-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .reunited-card {
+    flex: 1 1 220px;
+    max-width: 320px;
+    min-width: 200px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reunited-card-photo {
+    height: 120px;
+    background: #eef2f7;
+  }
+
+  .reunited-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .reunited-card-body {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .reunited-card-badge {
+    align-self: flex-start;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22c55e, #059669);
+    color: #fff;
+  }
+
+  .reunited-card-name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #0f172a;
+    font-family: Quicksand, system-ui, sans-serif;
+  }
+
+  .reunited-card-snippet {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    line-height: 1.4;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .reunited-card .pill {
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
   .deck-column {
     border-radius: 32px;
     padding: 18px 14px 22px;
@@ -954,6 +1073,88 @@ export const StyledLostFoundContactModal = styled.div`
   .actions .btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+  }
+`;
+
+export const StyledLostFoundReunitedModal = styled(StyledLostFoundContactModal)`
+  .reunion-field {
+    margin-top: 14px;
+  }
+
+  .reunion-field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #7a8794;
+    margin-bottom: 6px;
+  }
+
+  .reunion-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 88px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #d8e1ef;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #11161f;
+    resize: vertical;
+  }
+
+  .reunion-textarea:focus {
+    outline: 2px solid rgba(240, 106, 138, 0.35);
+    border-color: #f06a8a;
+  }
+
+  .reunion-photo-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .reunion-photo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #d8e1ef;
+    background: #f6f8fc;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+    color: #40536b;
+  }
+
+  .reunion-photo-btn:hover {
+    border-color: #f06a8a;
+    color: #11161f;
+  }
+
+  .reunion-photo-preview {
+    max-width: 100%;
+    max-height: 140px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid #ececf4;
+  }
+
+  .reunion-photo-clear {
+    border: none;
+    background: none;
+    color: #0066ba;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: underline;
+    font-size: 0.88rem;
   }
 `;
 

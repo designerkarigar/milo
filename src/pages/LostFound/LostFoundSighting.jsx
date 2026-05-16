@@ -9,6 +9,12 @@ import { toast } from "react-toastify";
 import { StyledLostFound } from "./styledComponent";
 import { StyledLostFoundSighting } from "./lostFoundSightingStyled";
 import { createSighting } from "../../utils/Functions/LostFound/sightingsApi";
+import { fetchLostAndFound } from "../../utils/Functions/LostFound/lostAndFoundApi";
+import {
+  findLostFoundRecordByRouteParam,
+  isLostReportMarkedReunited,
+  normalizeLostFoundRecord,
+} from "../../utils/Functions/LostFound/lostFoundUtils";
 import { uploadPetImageToFirebase } from "../../utils/Functions/Pets/uploadPetImageToFirebase";
 
 function useUserGeo() {
@@ -50,6 +56,28 @@ export const LostFoundSightingPage = () => {
   const [sharePhoneAllowed, setSharePhoneAllowed] = useState(false);
   const [shareEmailAllowed, setShareEmailAllowed] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!reportId || !currentUser) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await fetchLostAndFound({});
+        const rows = list.map(normalizeLostFoundRecord);
+        const row = findLostFoundRecordByRouteParam(rows, reportId);
+        if (cancelled || !row) return;
+        if (isLostReportMarkedReunited(row)) {
+          toast.info("This pet has already been marked as reunited — new sightings are closed.");
+          navigate(`/lost-found/${encodeURIComponent(reportId)}`);
+        }
+      } catch {
+        /* list optional for sighting flow */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [reportId, currentUser, navigate]);
 
   useEffect(() => {
     if (!seenAt) {
@@ -114,6 +142,15 @@ export const LostFoundSightingPage = () => {
 
     try {
       setSaving(true);
+      const list = await fetchLostAndFound({});
+      const rows = list.map(normalizeLostFoundRecord);
+      const row = findLostFoundRecordByRouteParam(rows, reportId);
+      if (row && isLostReportMarkedReunited(row)) {
+        toast.info("This pet has already been marked as reunited — new sightings are closed.");
+        navigate(`/lost-found/${encodeURIComponent(reportId)}`);
+        return;
+      }
+
       let photoUrl = "";
       if (photoFile) {
         photoUrl = await uploadPetImageToFirebase({ file: photoFile, currentUser });

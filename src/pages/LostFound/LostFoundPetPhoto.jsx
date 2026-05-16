@@ -3,7 +3,6 @@ import { pickPhotoUrl, getFirstPhotoStorageKey } from "../../utils/Functions/Los
 import { tryGetSignedPublicUrl } from "../../utils/Functions/LostFound/signedLostFoundPhotoUrl";
 
 export function LostFoundPetPhoto({ record, fallbackSrc, alt }) {
-  const rawKey = getFirstPhotoStorageKey(record);
   const mainSrc = pickPhotoUrl(record) || fallbackSrc;
   const [src, setSrc] = useState(mainSrc);
   const attemptRef = useRef(0);
@@ -16,8 +15,9 @@ export function LostFoundPetPhoto({ record, fallbackSrc, alt }) {
   const handleError = async () => {
     if (attemptRef.current === 0) {
       attemptRef.current = 1;
-      if (rawKey) {
-        const signed = await tryGetSignedPublicUrl(rawKey);
+      const key = getFirstPhotoStorageKey(record);
+      if (key) {
+        const signed = await tryGetSignedPublicUrl(key);
         if (signed) {
           setSrc(signed);
           return;

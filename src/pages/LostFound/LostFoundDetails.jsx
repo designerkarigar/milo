@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -8,14 +8,17 @@ import { StyledLostFound } from "./styledComponent";
 import {
   StyledLostFoundDetailAside,
   StyledLostFoundDetailGrid,
+  StyledMightBePetCTA,
   StyledOwnerContextStrip,
 } from "./lostFoundDetailsStyled";
-import { fetchLostAndFound } from "../../utils/Functions/LostFound/lostAndFoundApi";
+import { fetchLostAndFound, markLostReportReunited } from "../../utils/Functions/LostFound/lostAndFoundApi";
 import { fetchSightingsForReport } from "../../utils/Functions/LostFound/sightingsApi";
+import { uploadPetImageToFirebase } from "../../utils/Functions/Pets/uploadPetImageToFirebase";
 import {
+  findLostFoundRecordByRouteParam,
   formatLostFoundLastSeenLine,
   formatTimeSince,
-  getLostFoundStableId,
+  getLostFoundReunionApiUid,
   getNormalizedLostFoundStatus,
   getSightingsApiReportId,
   hasVisibleReporterContact,
@@ -23,12 +26,14 @@ import {
   normalizeLostFoundRecord,
   normalizeSightingRecords,
   pickOwnerReportStatusLabel,
+  pickReunionStory,
 } from "../../utils/Functions/LostFound/lostFoundUtils";
 import defaultPhoto from "../../images/svgfiles/avatar-1.svg";
 import { LostFoundPetPhoto } from "./LostFoundPetPhoto";
 import { LostFoundContactReporterModal } from "./LostFoundContactReporterModal";
 import { LostFoundSightingsPanel } from "./LostFoundSightingsPanel";
-
+import { LostFoundMarkReunitedModal } from "./LostFoundMarkReunitedModal";
+import { LostFoundMightBeMyPetModal, sessionSentKey } from "./LostFoundMightBeMyPetModal";
 export const LostFoundDetailsPage = () => {
   const { uid } = useParams();
   const navigate = useNavigate();
@@ -36,32 +41,34 @@ export const LostFoundDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [item, setItem] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [reunitedModalOpen, setReunitedModalOpen] = useState(false);
+  const [reuniteSubmitting, setReuniteSubmitting] = useState(false);
   const [sightings, setSightings] = useState([]);
   const [sightingsLoading, setSightingsLoading] = useState(false);
   const [sightingsPanelOpen, setSightingsPanelOpen] = useState(false);
+  const [mightBeModalOpen, setMightBeModalOpen] = useState(false);
+  const [matchRequestSent, setMatchRequestSent] = useState(false);
+
+  const reloadItemFromList = useCallback(async () => {
+    const list = await fetchLostAndFound({});
+    const rows = list.map(normalizeLostFoundRecord);
+    const found = findLostFoundRecordByRouteParam(rows, uid) || null;
+    setItem(found);
+  }, [uid]);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const list = await fetchLostAndFound({});
-        const rows = list.map(normalizeLostFoundRecord);
-        const decoded = uid ? decodeURIComponent(uid) : "";
-        const found =
-          rows.find(
-            (x) =>
-              getLostFoundStableId(x) === decoded ||
-              String(x?.uid || "") === decoded ||
-              getSightingsApiReportId(x) === decoded
-          ) || null;
-        setItem(found);
+        await reloadItemFromList();
       } catch (error) {
         toast.error(String(error?.message || error));
+        setItem(null);
       } finally {
         setLoading(false);
       }
     })();
-  }, [uid]);
+  }, [uid, reloadItemFromList]);
 
   const isOwner = useMemo(() => isLostFoundReportOwner(item, currentUser), [item, currentUser]);
   const statusNorm = useMemo(() => (item ? getNormalizedLostFoundStatus(item) : ""), [item]);
@@ -76,7 +83,8 @@ export const LostFoundDetailsPage = () => {
     }
   }, [currentUser]);
 
-  const shouldFetchSightings = Boolean(item && statusNorm === "LOST" && hasSessionAuth);
+  const isActiveLost = statusNorm === "LOST";
+  const shouldFetchSightings = Boolean(item && isActiveLost && hasSessionAuth);
   const reportIdForSightings = useMemo(() => (item ? getSightingsApiReportId(item) : ""), [item]);
 
   useEffect(() => {
@@ -113,6 +121,24 @@ export const LostFoundDetailsPage = () => {
     };
   }, [shouldFetchSightings, reportIdForSightings]);
 
+  const isFoundReport = statusNorm === "FOUND";
+  const foundApiUid = useMemo(
+    () => (item && isFoundReport ? getLostFoundReunionApiUid(item, uid) : ""),
+    [item, isFoundReport, uid]
+  );
+
+  useEffect(() => {
+    if (!item || !isFoundReport || isOwner || !hasSessionAuth || !foundApiUid) {
+      setMatchRequestSent(false);
+      return;
+    }
+    try {
+      setMatchRequestSent(sessionStorage.getItem(sessionSentKey(foundApiUid)) === "1");
+    } catch {
+      setMatchRequestSent(false);
+    }
+  }, [item, isFoundReport, isOwner, hasSessionAuth, foundApiUid]);
+
   const sortedSightings = useMemo(() => {
     return [...sightings].sort((a, b) => {
       const ta = new Date(a.seenAt).getTime();
@@ -122,7 +148,7 @@ export const LostFoundDetailsPage = () => {
   }, [sightings]);
 
   const showOwnerContextStrip = Boolean(
-    statusNorm === "LOST" && (isOwner || sortedSightings.length > 0)
+    (isActiveLost && (isOwner || sortedSightings.length > 0)) || statusNorm === "REUNITED"
   );
 
   const title = useMemo(() => {
@@ -130,11 +156,13 @@ export const LostFoundDetailsPage = () => {
       (item && getNormalizedLostFoundStatus(item)) ||
       String(item?.status || "").trim().toUpperCase();
     if (status === "FOUND") return `Found: ${item?.name || "Unknown Pet"}`;
+    if (status === "REUNITED") return `Reunited: ${item?.name || "Unknown Pet"}`;
     return `Lost: ${item?.name || "Unknown Pet"}`;
   }, [item]);
 
   const lastSeenLine = useMemo(() => formatLostFoundLastSeenLine(item), [item]);
   const ownerStatusLabel = useMemo(() => pickOwnerReportStatusLabel(item), [item]);
+  const reunionStory = useMemo(() => pickReunionStory(item), [item]);
 
   const handleReporterContactClick = () => {
     if (!item) return;
@@ -147,7 +175,42 @@ export const LostFoundDetailsPage = () => {
   };
 
   const reportRouteId = uid ? encodeURIComponent(uid) : "";
-  const showSightingsLaunch = Boolean(statusNorm === "LOST" && hasSessionAuth);
+  const showSightingsLaunch = Boolean(isActiveLost && hasSessionAuth);
+
+  const handleConfirmReunited = async ({ reunionMessage, reunionPhotoFile }) => {
+    if (!item) return;
+    try {
+      setReuniteSubmitting(true);
+      let reunionPhoto = "";
+      if (reunionPhotoFile) {
+        reunionPhoto = await uploadPetImageToFirebase({ file: reunionPhotoFile, currentUser });
+      }
+      const reunionUid = getLostFoundReunionApiUid(item, uid);
+      if (!reunionUid) {
+        toast.error("Missing report id for reunion.");
+        return;
+      }
+      const updatedRow = await markLostReportReunited(reunionUid, {
+        reunionMessage,
+        reunionPhoto,
+      });
+      if (updatedRow) {
+        setItem(normalizeLostFoundRecord(updatedRow));
+      } else {
+        await reloadItemFromList();
+      }
+      setSightings([]);
+      setReunitedModalOpen(false);
+      toast.success(
+        "Wonderful news — your pet is marked as reunited. The community is cheering for you and your family!"
+      );
+    } catch (error) {
+      const msg = String(error?.response?.data?.message || error?.message || error);
+      toast.error(msg || "Could not update this report. Please try again.");
+    } finally {
+      setReuniteSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -190,7 +253,12 @@ export const LostFoundDetailsPage = () => {
             <>
               {showOwnerContextStrip ? (
                 <StyledOwnerContextStrip>
-                  <span className="strip-badge">Lost</span>
+                  <span
+                    className={`strip-badge ${statusNorm === "REUNITED" ? "strip-badge-reunited" : ""}`}
+                    aria-label={statusNorm === "REUNITED" ? "Reunited" : "Lost"}
+                  >
+                    {statusNorm === "REUNITED" ? "Reunited" : "Lost"}
+                  </span>
                   <strong>Last seen:</strong> {lastSeenLine}
                   <span style={{ margin: "0 6px", color: "#cbd5e1" }}>|</span>
                   <strong>Status:</strong> {ownerStatusLabel}
@@ -216,6 +284,27 @@ export const LostFoundDetailsPage = () => {
                               : `${sortedSightings.length} Sighting${sortedSightings.length === 1 ? "" : "s"}`}
                           </span>
                         </button>
+                      </div>
+                    ) : null}
+                    {statusNorm === "REUNITED" ? (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 12,
+                          left: 12,
+                          zIndex: 5,
+                          padding: "6px 12px",
+                          borderRadius: 999,
+                          fontWeight: 900,
+                          fontSize: "0.72rem",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          background: "linear-gradient(135deg, #22c55e, #059669)",
+                          color: "#fff",
+                          boxShadow: "0 8px 20px rgba(15,23,42,0.2)",
+                        }}
+                      >
+                        REUNITED
                       </div>
                     ) : null}
                   </div>
@@ -253,26 +342,69 @@ export const LostFoundDetailsPage = () => {
                     </div>
                   </div>
 
+                  {statusNorm === "REUNITED" && (reunionStory.message || reunionStory.photoUrl) ? (
+                    <div
+                      style={{
+                        marginTop: 16,
+                        padding: 14,
+                        borderRadius: 14,
+                        background: "linear-gradient(135deg, rgba(220,252,231,0.5), rgba(240,253,250,0.9))",
+                        border: "1px solid rgba(34,197,94,0.25)",
+                      }}
+                    >
+                      <strong style={{ color: "#047857" }}>Reunion story</strong>
+                      {reunionStory.message ? (
+                        <p style={{ margin: "8px 0 0", color: "#334155", lineHeight: 1.5, fontWeight: 600 }}>
+                          {reunionStory.message}
+                        </p>
+                      ) : null}
+                      {reunionStory.photoUrl ? (
+                        <img
+                          src={reunionStory.photoUrl}
+                          alt="Reunion"
+                          style={{ marginTop: 10, maxWidth: "100%", borderRadius: 12, maxHeight: 220, objectFit: "cover" }}
+                        />
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
                     {!isOwner ? (
                       <button type="button" className="primary" onClick={handleReporterContactClick}>
                         Contact Reporter
                       </button>
                     ) : null}
-                    <button
-                      type="button"
-                      className="pill"
-                      onClick={() => navigate(`/lost-found/${reportRouteId}/sighting`)}
-                    >
-                      I Have Seen This Pet
-                    </button>
-                    <button
-                      type="button"
-                      className="pill"
-                      onClick={() => toast.info("We’ll add “Reunited” workflow next.")}
-                    >
-                      Mark as Reunited
-                    </button>
+                    {isFoundReport && hasSessionAuth && !isOwner ? (
+                      <StyledMightBePetCTA style={{ flex: "1 1 100%", marginTop: 0 }}>
+                        <button
+                          type="button"
+                          className="might-be-btn"
+                          disabled={matchRequestSent}
+                          onClick={() => setMightBeModalOpen(true)}
+                        >
+                          {matchRequestSent ? "Request Sent" : "🐾 This Might Be My Pet"}
+                        </button>
+                        {!matchRequestSent ? (
+                          <p className="might-be-helper">
+                            Send a private request to the finder and connect safely.
+                          </p>
+                        ) : null}
+                      </StyledMightBePetCTA>
+                    ) : null}
+                    {isActiveLost ? (
+                      <button
+                        type="button"
+                        className="pill"
+                        onClick={() => navigate(`/lost-found/${reportRouteId}/sighting`)}
+                      >
+                        I Have Seen This Pet
+                      </button>
+                    ) : null}
+                    {isOwner && isActiveLost ? (
+                      <button type="button" className="primary" onClick={() => setReunitedModalOpen(true)}>
+                        🎉 Mark as Reunited
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </StyledLostFoundDetailGrid>
@@ -292,11 +424,31 @@ export const LostFoundDetailsPage = () => {
         />
       ) : null}
 
+      <LostFoundMarkReunitedModal
+        isOpen={reunitedModalOpen}
+        onClose={() => {
+          if (!reuniteSubmitting) setReunitedModalOpen(false);
+        }}
+        onConfirm={handleConfirmReunited}
+        submitting={reuniteSubmitting}
+      />
+
       <LostFoundContactReporterModal
         isOpen={contactModalOpen}
         onClose={() => setContactModalOpen(false)}
         report={item}
       />
+
+      {item && isFoundReport && foundApiUid ? (
+        <LostFoundMightBeMyPetModal
+          isOpen={mightBeModalOpen}
+          onClose={() => setMightBeModalOpen(false)}
+          foundReportUid={foundApiUid}
+          currentUser={currentUser}
+          onSent={() => setMatchRequestSent(true)}
+        />
+      ) : null}
+
       <Footer />
     </>
   );
