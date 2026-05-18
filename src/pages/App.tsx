@@ -61,7 +61,7 @@ function App() {
     <>
       <ToastContainer
         position="top-center"
-        autoClose={6500}
+        autoClose={3800}
         closeOnClick
         pauseOnHover
         theme="colored"
