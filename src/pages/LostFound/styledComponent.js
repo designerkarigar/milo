@@ -29,28 +29,52 @@ export const StyledLostFound = styled.main`
   min-height: 75vh;
   background: #ffffff;
 
+  .nav {
+    width: 100%;
+    background-color: rgb(0, 102, 186);
+  }
+
   .top {
     position: relative;
     width: 100%;
-    background: rgb(0, 102, 186);
-    padding-bottom: 70px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(0, 102, 186);
   }
 
-  .nav {
+  .top-shade {
     width: 100%;
-    background: transparent;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background-color: rgb(0, 102, 186);
+  }
+
+  .top .nav {
+    position: relative;
+    z-index: 5;
+    background-color: transparent;
   }
 
   .banner {
-    padding: 62px 16px 0;
+    position: relative;
+    width: 100%;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 16px 100px;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    color: #fecb02;
   }
 
   .banner h1 {
     margin: 0;
     font-family: Quicksand;
-    font-size: 3.2rem;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #fecb02;
   }
 
   .banner p {
@@ -60,6 +84,7 @@ export const StyledLostFound = styled.main`
   }
 
   .wave {
+    z-index: 4;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -73,7 +98,7 @@ export const StyledLostFound = styled.main`
     position: relative;
     display: block;
     width: calc(151% + 1.3px);
-    height: 92px;
+    height: 102px;
     transform: rotateY(180deg);
   }
 
