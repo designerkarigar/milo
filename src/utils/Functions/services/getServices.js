@@ -38,6 +38,7 @@ export const getServices = async () => {
         uid: data.uid || "N/A",
         verified: data.verified?.toString() || "false",
         userName: data.userName || "N/A",
+        crdt: data.crdt,
       };
     });
 

@@ -1,3 +1,11 @@
+import { formatDate } from "../DetailComponents/CommonDetailUtils";
+
+/** Formats verified flag for grid cells. */
+export const formatVerifiedForCell = (verified) => {
+  if (verified === true || verified === "true") return "Yes";
+  return "No";
+};
+
 /** Formats API location (string or { address, city, state, zip, country }) for grid cells. */
 export const formatLocationForCell = (location) => {
   if (location == null) return "";
@@ -122,6 +130,13 @@ export const chrecheColumn = [
     header: "Verified",
     name: "verified",
     defaultFlex: 1,
+    render: ({ value }) => formatVerifiedForCell(value),
+  },
+  {
+    header: "Created At",
+    name: "crdt",
+    defaultFlex: 1.5,
+    render: ({ value }) => formatDate(value),
   },
   {
     header: "Email",
@@ -156,6 +171,13 @@ export const usersColumn = [
     header: "Verified",
     name: "verified",
     defaultFlex: 0.8,
+    render: ({ value }) => formatVerifiedForCell(value),
+  },
+  {
+    header: "Created At",
+    name: "crdt",
+    defaultFlex: 1.5,
+    render: ({ value }) => formatDate(value),
   },
   {
     header: "Type",
@@ -190,6 +212,13 @@ export const vetColumn = [
     header: "Verified",
     name: "verified",
     defaultFlex: 1,
+    render: ({ value }) => formatVerifiedForCell(value),
+  },
+  {
+    header: "Created At",
+    name: "crdt",
+    defaultFlex: 1.5,
+    render: ({ value }) => formatDate(value),
   },
   {
     header: "Location",
@@ -232,6 +261,13 @@ export const ngoColumn = [
     header: "Verified",
     name: "verified",
     defaultFlex: 0.8,
+    render: ({ value }) => formatVerifiedForCell(value),
+  },
+  {
+    header: "Created At",
+    name: "crdt",
+    defaultFlex: 1.5,
+    render: ({ value }) => formatDate(value),
   },
   {
     header: "Days of Operation",
@@ -267,5 +303,12 @@ export const serviceProviderColumn = [
     header: "Verified",
     name: "verified",
     defaultFlex: 0.8,
+    render: ({ value }) => formatVerifiedForCell(value),
+  },
+  {
+    header: "Created At",
+    name: "crdt",
+    defaultFlex: 1.5,
+    render: ({ value }) => formatDate(value),
   },
 ];
