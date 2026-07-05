@@ -25,6 +25,24 @@ export const StyledLostFound = styled.main`
     }
   }
 
+  @keyframes lfMarqueeRightToLeft {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes lfMarqueeLeftToRight {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   width: 100%;
   min-height: 75vh;
   background: #ffffff;
@@ -113,53 +131,470 @@ export const StyledLostFound = styled.main`
     padding: 26px 16px 62px;
   }
 
-  .toolbar {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .lost-found-toolbar {
+    width: 100%;
+    margin: 0 auto 22px;
+    padding: 20px 22px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #d9e3f2;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lost-found-filter-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .search-input-wrap {
+    flex: 1 1 auto;
+    min-width: 280px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d9e3f2;
+    border-radius: 999px;
+    background: #ffffff;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .search-input-wrap:focus-within {
+    border-color: #ef5f85;
+    box-shadow: 0 0 0 3px rgba(239, 95, 133, 0.14);
+  }
+
+  .free-search-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #24324a;
+    font: inherit;
+    font-weight: 600;
+    padding: 0 16px;
+  }
+
+  .free-search-input::placeholder {
+    color: #66758f;
+    font-weight: 500;
+  }
+
+  .search-buttons,
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .search-buttons {
+    flex: 0 0 auto;
+  }
+
+  .lost-found-toolbar button {
+    min-height: 44px;
+    border-radius: 14px;
+    padding: 0 16px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      transform 0.16s ease,
+      border-color 0.18s ease,
+      background 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .lost-found-toolbar button:hover {
+    transform: translateY(-1px);
+  }
+
+  .lost-found-toolbar .primary {
+    border: 1px solid #ef5f85;
+    background: #ef5f85;
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(239, 95, 133, 0.2);
+  }
+
+  .lost-found-toolbar .filter-btn {
+    border: 1px solid #d9e3f2;
+    background: #111827;
+    color: #ffffff;
+  }
+
+  .lost-found-toolbar .filter-btn.active {
+    border-color: #111827;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: inset 0 0 0 1px #111827;
+  }
+
+  .lost-found-toolbar .outline {
+    border: 1px solid #d9e3f2;
+    background: #f8fafc;
+    color: #24324a;
+    box-shadow: none;
+  }
+
+  .lost-found-toolbar .outline:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+  }
+
+  .advanced-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
+    gap: 10px 12px;
+    padding-top: 4px;
+  }
+
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .filter-field label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #66758f;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .filter-field input,
+  .filter-field select {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #d9e3f2;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #24324a;
+    font: inherit;
+    font-weight: 600;
+    padding: 0 12px;
+    outline: none;
+  }
+
+  .filter-field input:focus,
+  .filter-field select:focus {
+    border-color: #ef5f85;
+    box-shadow: 0 0 0 3px rgba(239, 95, 133, 0.14);
+  }
+
+  .toolbar-actions {
+    justify-content: flex-end;
+    padding-top: 2px;
+  }
+
+  .lost-found-results-zone {
+    width: 100%;
+  }
+
+  .lost-found-results-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .lost-found-result-card {
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lost-found-result-card .lf-card-ambient {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .lost-found-result-card .floating-card-top {
+    height: 100%;
+  }
+
+  .lost-found-result-card .lf-card-v2 {
+    display: flex;
+    flex-direction: column;
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .lost-found-result-card .lf-card-photo-wrap {
+    flex: 0 0 auto;
+  }
+
+  .lost-found-result-card .floating-card-photo.lf-photo-v2 {
+    height: 260px;
+    min-height: 260px;
+    max-height: 260px;
+  }
+
+  .lost-found-result-card .floating-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lost-found-result-card .lf-body-v2 {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .lost-found-result-card .lf-hero-title {
+    min-height: 44px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lost-found-result-card .lf-hero-sub {
+    min-height: 48px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lost-found-result-card .lf-desc-v2 {
+    min-height: 42px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lost-found-result-card .lf-chip-row {
+    min-height: 128px;
+    align-content: flex-start;
+  }
+
+  .lost-found-result-card .lf-link-details {
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: 12px;
+  }
+
+  .lost-found-result-card .lf-card-v2:active {
+    cursor: default;
+  }
+
+  .lost-found-result-card .lf-actions-v2 {
+    flex: 0 0 auto;
+    margin-top: auto;
+    min-height: 154px;
+    box-sizing: border-box;
+    border-top: 1px solid #e6edf5;
+  }
+
+  .lost-found-result-card .lf-actions-v2 .lf-btn-primary,
+  .lost-found-result-card .lf-actions-v2 .lf-btn-ghost {
+    min-height: 56px;
+    height: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .result-card-found .lf-card-ambient {
+    background: radial-gradient(70% 60% at 50% 0%, rgba(167, 243, 208, 0.55) 0%, transparent 70%),
+      radial-gradient(60% 50% at 80% 70%, rgba(125, 211, 252, 0.35) 0%, transparent 65%);
+  }
+
+  .result-card-reunited .lf-card-ambient {
+    background: radial-gradient(70% 60% at 50% 0%, rgba(196, 181, 253, 0.5) 0%, transparent 70%),
+      radial-gradient(60% 50% at 25% 75%, rgba(134, 239, 172, 0.32) 0%, transparent 65%);
+  }
+
+  .lost-found-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 22px 0 6px;
+  }
+
+  .pagination-page {
+    font-weight: 900;
+    color: #40536b;
+  }
+
+  .lost-found-moving-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .moving-strip {
+    border-radius: 0;
+    padding: 18px 0 22px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+
+  .moving-strip-lost {
+    background: radial-gradient(120% 80% at 10% 0%, rgba(251, 113, 133, 0.35) 0%, transparent 55%),
+      radial-gradient(90% 70% at 90% 20%, rgba(253, 186, 116, 0.32) 0%, transparent 50%),
+      linear-gradient(165deg, rgba(255, 247, 252, 0.95) 0%, rgba(255, 255, 255, 0.88) 45%, #fafbff 100%);
+  }
+
+  .moving-strip-found {
+    background: radial-gradient(120% 80% at 8% 0%, rgba(52, 211, 153, 0.28) 0%, transparent 55%),
+      radial-gradient(90% 70% at 92% 18%, rgba(167, 243, 208, 0.35) 0%, transparent 50%),
+      linear-gradient(165deg, rgba(240, 253, 250, 0.95) 0%, rgba(255, 255, 255, 0.9) 45%, #fafbff 100%);
+  }
+
+  .moving-strip-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 0 0 12px;
   }
 
-  .toolbar-dual {
-    align-items: flex-start;
-  }
-
-  .toolbar-tagline {
+  .moving-strip-title {
     margin: 0;
-    flex: 1 1 260px;
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: #40536b;
-    line-height: 1.45;
-    max-width: 520px;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #0f172a;
+    font-family: Quicksand, system-ui, sans-serif;
   }
 
-  .toolbar-actions {
+  .moving-strip-lost .moving-strip-title {
+    color: #be123c;
+  }
+
+  .moving-strip-found .moving-strip-title {
+    color: #047857;
+  }
+
+  .moving-strip-track-wrap {
+    width: 100%;
+    overflow: hidden;
+    padding: 10px 0 12px;
+  }
+
+  .moving-strip-track {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: flex-end;
+    width: max-content;
+    gap: 18px;
+    will-change: transform;
+    animation-duration: 42s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
 
-  .toolbar .filters {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+  .moving-strip-track.left-to-right {
+    animation-name: lfMarqueeLeftToRight;
   }
 
-  .dual-deck {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px;
-    align-items: stretch;
+  .moving-strip-track.right-to-left {
+    animation-name: lfMarqueeRightToLeft;
   }
 
-  @media (max-width: 900px) {
-    .dual-deck {
-      grid-template-columns: 1fr;
+  .moving-strip-track-wrap:hover .moving-strip-track,
+  .moving-strip-track-wrap:focus-within .moving-strip-track {
+    animation-play-state: paused;
+  }
+
+  .moving-strip-card {
+    flex: 0 0 clamp(280px, 31vw, 352px);
+    width: clamp(280px, 31vw, 352px);
+  }
+
+  .moving-strip-card .lf-card-ambient {
+    width: 100%;
+    max-width: 352px;
+    margin: 0;
+  }
+
+  .moving-strip-found .lf-card-ambient {
+    background: radial-gradient(70% 60% at 50% 0%, rgba(167, 243, 208, 0.55) 0%, transparent 70%),
+      radial-gradient(60% 50% at 80% 70%, rgba(125, 211, 252, 0.35) 0%, transparent 65%);
+  }
+
+  .moving-strip-card .lf-card-v2 {
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .moving-strip-card .lf-card-v2:active {
+    cursor: default;
+  }
+
+  @media (max-width: 720px) {
+    .lost-found-moving-zone {
+      gap: 18px;
+    }
+
+    .moving-strip {
+      padding-top: 16px;
+    }
+
+    .moving-strip-head {
+      width: calc(100% - 28px);
+      padding-bottom: 10px;
+    }
+
+    .moving-strip-track {
+      gap: 14px;
+      animation-duration: 36s;
+    }
+
+    .moving-strip-card {
+      flex-basis: min(82vw, 330px);
+      width: min(82vw, 330px);
     }
   }
 
@@ -484,6 +919,13 @@ export const StyledLostFound = styled.main`
       0 12px 32px rgba(15, 23, 42, 0.1);
   }
 
+  .deck-surface-reunited {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.85) inset,
+      0 28px 60px rgba(124, 58, 237, 0.12),
+      0 12px 32px rgba(15, 23, 42, 0.1);
+  }
+
   .lf-card-photo-wrap {
     position: relative;
     z-index: 2;
@@ -557,6 +999,10 @@ export const StyledLostFound = styled.main`
 
   .lf-pill-found {
     background: linear-gradient(135deg, #4ade80, #059669);
+  }
+
+  .lf-pill-reunited {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
   }
 
   .lf-pill-active-search {
@@ -792,6 +1238,12 @@ export const StyledLostFound = styled.main`
     cursor: pointer;
   }
 
+  .pill:disabled,
+  .primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   .pill.active {
     background: #11161f;
     color: white;
@@ -964,6 +1416,80 @@ export const StyledLostFound = styled.main`
     justify-content: center;
     color: #5b6770;
     font-weight: 700;
+  }
+
+  @media (max-width: 1040px) {
+    .search-row {
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      flex-basis: 100%;
+    }
+
+    .search-buttons,
+    .toolbar-actions {
+      justify-content: flex-start;
+    }
+
+    .advanced-filter-grid {
+      grid-template-columns: repeat(3, minmax(130px, 1fr));
+    }
+
+    .lost-found-results-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .lost-found-toolbar {
+      padding: 16px;
+      border-radius: 18px;
+    }
+
+    .search-input-wrap {
+      flex-basis: 100%;
+      min-width: 0;
+      border-radius: 16px;
+    }
+
+    .search-buttons,
+    .toolbar-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .lost-found-toolbar button {
+      width: 100%;
+    }
+
+    .advanced-filter-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lost-found-results-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .lost-found-result-card .floating-card-photo.lf-photo-v2 {
+      height: 220px;
+      min-height: 220px;
+      max-height: 220px;
+    }
+
+    .lost-found-result-card .lf-chip-row {
+      min-height: 0;
+    }
+
+    .lost-found-pagination {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
   }
 `;
 

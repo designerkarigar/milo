@@ -7,6 +7,7 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import { LoginModal } from "../LoginModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { loggedInUser } from "../../utils/Functions/Users/loggedInUser";
 
 export const Navbar = () => {
   const header = useRef(null);
@@ -15,6 +16,10 @@ export const Navbar = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isResProfileMenuOpen, setIsResProfileMenuOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileDetails, setProfileDetails] = useState(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const { currentUser, signOut } = useAuth();
 
   useEffect(() => {
@@ -48,10 +53,31 @@ export const Navbar = () => {
       await signOut();
       setIsUserMenuOpen(false);
       setIsResProfileMenuOpen(false);
+      setIsProfileModalOpen(false);
+      setProfileDetails(null);
       floatNavRemove();
       window.location.href = "/home";
     } catch (error) {
       console.error("Error signing out:", error);
+    }
+  };
+
+  const handleMyProfileClick = async () => {
+    setIsUserMenuOpen(false);
+    setIsResProfileMenuOpen(false);
+    floatNavRemove();
+    setIsProfileModalOpen(true);
+    setIsProfileLoading(true);
+    setProfileError("");
+
+    try {
+      const userDetails = await loggedInUser();
+      setProfileDetails(userDetails);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setProfileError("Unable to load profile details. Please try again.");
+    } finally {
+      setIsProfileLoading(false);
     }
   };
 
@@ -62,6 +88,19 @@ export const Navbar = () => {
     "User";
 
   const avatarInitial = String(profileName).trim().charAt(0).toUpperCase() || "U";
+  const profilePhoto =
+    profileDetails?.photos?.find((photo) => photo.isProfile)?.url ||
+    profileDetails?.photos?.[0]?.url;
+  const profileFullName = [profileDetails?.firstName, profileDetails?.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const profileLocation = [
+    profileDetails?.location?.city,
+    profileDetails?.location?.state,
+    profileDetails?.location?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -88,6 +127,9 @@ export const Navbar = () => {
             <ul className="nav-bar">
               <a href="/home" className="list-item underline">
                 Home
+              </a>
+              <a href="/lost-found" className="list-item underline">
+                Lost & Found
               </a>
               <a href="/events" className="list-item underline">
                 Events
@@ -127,6 +169,13 @@ export const Navbar = () => {
                   </button>
                   {isUserMenuOpen && (
                     <div className="user-menu">
+                      <button
+                        type="button"
+                        onClick={handleMyProfileClick}
+                        className="user-menu-item"
+                      >
+                        My Profile
+                      </button>
                       <a href="/my-pets" className="user-menu-item">
                         My Pets
                       </a>
@@ -174,6 +223,13 @@ export const Navbar = () => {
                 &lt;-
               </button>
               <ul className="res-list">
+                <button
+                  type="button"
+                  onClick={handleMyProfileClick}
+                  className="res-list-item res-list-item-btn"
+                >
+                  My Profile
+                </button>
                 <a
                   href="/my-pets"
                   className="res-list-item"
@@ -214,6 +270,9 @@ export const Navbar = () => {
                 <a className="res-list-item" href="/home">
                   Home
                 </a>
+                <a className="res-list-item" href="/lost-found">
+                  Lost & Found
+                </a>
                 <a className="res-list-item" href="/blogs">
                   Blogs
                 </a>
@@ -249,6 +308,75 @@ export const Navbar = () => {
             </>
           )}
         </div>
+        {isProfileModalOpen ? (
+          <div className="profile-modal-backdrop" role="presentation">
+            <div
+              className="profile-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="profile-modal-title"
+            >
+              <button
+                type="button"
+                className="profile-modal-close"
+                onClick={() => setIsProfileModalOpen(false)}
+                aria-label="Close profile details"
+              >
+                x
+              </button>
+              <h2 id="profile-modal-title">My Profile</h2>
+              {isProfileLoading ? (
+                <p className="profile-status">Loading profile...</p>
+              ) : profileError ? (
+                <p className="profile-error">{profileError}</p>
+              ) : profileDetails ? (
+                <div className="profile-summary">
+                  {profilePhoto ? (
+                    <img
+                      src={profilePhoto}
+                      alt={profileFullName || "Profile"}
+                      className="profile-photo"
+                    />
+                  ) : (
+                    <div className="profile-photo-placeholder">
+                      {(profileFullName || profileName).charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="profile-summary-details">
+                    <h3>{profileFullName || profileDetails.userName || "User"}</h3>
+                    {profileDetails.about ? <p>{profileDetails.about}</p> : null}
+                    {profileDetails.email ? (
+                      <div className="profile-field">
+                        <span>Email</span>
+                        <strong>{profileDetails.email}</strong>
+                      </div>
+                    ) : null}
+                    {profileDetails.mobile ? (
+                      <div className="profile-field">
+                        <span>Mobile</span>
+                        <strong>{profileDetails.mobile}</strong>
+                      </div>
+                    ) : null}
+                    {profileLocation ? (
+                      <div className="profile-field">
+                        <span>Location</span>
+                        <strong>{profileLocation}</strong>
+                      </div>
+                    ) : null}
+                    {profileDetails.verified !== undefined ? (
+                      <div className="profile-field">
+                        <span>Status</span>
+                        <strong>
+                          {profileDetails.verified ? "Verified" : "Not verified"}
+                        </strong>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </StyledNavbar>
       <LoginModal
         isOpen={isLoginModalOpen}

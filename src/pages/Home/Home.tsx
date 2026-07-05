@@ -23,7 +23,7 @@ export const HomePage = () => {
     ],
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+91-12345678",
+      "telephone": "+91-9927223949",
       "contactType": "customer service",
       "email": "help@milo.social"
     },

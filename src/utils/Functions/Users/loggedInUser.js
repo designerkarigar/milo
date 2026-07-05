@@ -59,7 +59,7 @@ export const loggedInUser = async () => {
   
   try {
     const user = await axios.get(BaseUrl + "/loggedInUser", config);
-    return user.data.response.record;
+    return user.data?.response?.record || user.data?.record || user.data;
   } catch (err) {
     throw new Error("Network Error");
   }

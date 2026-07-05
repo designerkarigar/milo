@@ -18,7 +18,7 @@ const AppFooter = () => {
         <a href="/" rel="noopener noreferrer">
           Milo
         </a>
-        <span className="ms-1">&copy; 2023 </span>
+        <span className="ms-1">&copy; 2026 </span>
       </div>
     </CFooter>
   );

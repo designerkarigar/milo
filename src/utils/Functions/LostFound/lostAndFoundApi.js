@@ -66,9 +66,19 @@ export function coerceLostFoundRecordList(record) {
 // GET list/search
 export async function fetchLostAndFound(params = {}) {
   const token = await getAuthToken().catch(() => "");
+  const searchParams = new URLSearchParams();
 
-  const response = await axios.get(`${BaseUrl}/lostAndFound`, {
-    params,
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value == null) return;
+    const stringValue = String(value).trim();
+    if (!stringValue) return;
+    searchParams.set(key, stringValue);
+  });
+
+  const query = searchParams.toString();
+  const url = query ? `${BaseUrl}/lostAndFound?${query}` : `${BaseUrl}/lostAndFound`;
+
+  const response = await axios.get(url, {
     headers: token ? { token } : undefined,
   });
 

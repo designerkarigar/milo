@@ -100,15 +100,15 @@ export const MatchMakingStyledComponent = styled.div`
 
   .match-feed {
     width: 100%;
-    max-width: 1000px;
+    max-width: none;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
   }
 
   .carousel-window {
-    width: min(96vw, 1460px);
+    width: 100%;
     overflow: hidden;
   }
 
@@ -127,14 +127,26 @@ export const MatchMakingStyledComponent = styled.div`
   }
 
   .arrow-btn {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
     width: 48px;
     height: 48px;
+    transform: translateY(-50%);
     border-radius: 50%;
     border: none;
     background: #11161f;
     color: white;
     font-size: 1.1rem;
     cursor: pointer;
+  }
+
+  .arrow-btn.left {
+    left: 24px;
+  }
+
+  .arrow-btn.right {
+    right: 24px;
   }
 
   .arrow-btn:disabled {
@@ -145,7 +157,7 @@ export const MatchMakingStyledComponent = styled.div`
   .swipe-card {
     position: relative;
     width: calc(100% - 4px);
-    max-width: 500px;
+    max-width: none;
     height: min(62vh, 620px);
     border-radius: 20px;
     overflow: hidden;
@@ -378,7 +390,7 @@ export const MatchMakingStyledComponent = styled.div`
       padding-top: 48px;
     }
     .match-feed {
-      gap: 10px;
+      width: 100%;
     }
   }
 
@@ -406,7 +418,7 @@ export const MatchMakingStyledComponent = styled.div`
     }
 
     .carousel-window {
-      width: min(94vw, 500px);
+      width: 100%;
     }
 
     .swipe-card .actions {

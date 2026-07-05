@@ -441,4 +441,140 @@ export const StyledNavbar = styled.div`
     font-weight: 600;
     cursor: pointer;
   }
+
+  .profile-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .profile-modal {
+    position: relative;
+    width: min(520px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    border-radius: 24px;
+    background: white;
+    padding: 28px;
+    color: #263238;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+
+    h2 {
+      margin: 0 0 22px;
+      color: #0066ba;
+      font-size: 1.7rem;
+    }
+  }
+
+  .profile-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f6f9;
+    color: #263238;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .profile-status,
+  .profile-error {
+    margin: 0;
+    color: #5b6770;
+    font-size: 1rem;
+  }
+
+  .profile-error {
+    color: #d32f2f;
+  }
+
+  .profile-summary {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .profile-photo,
+  .profile-photo-placeholder {
+    width: 110px;
+    height: 110px;
+    flex: 0 0 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f06a8a;
+  }
+
+  .profile-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f8fd;
+    color: #0066ba;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .profile-summary-details {
+    flex: 1;
+    min-width: 0;
+
+    h3 {
+      margin: 0 0 8px;
+      color: #263238;
+      font-size: 1.35rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: #5b6770;
+      line-height: 1.5;
+    }
+  }
+
+  .profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+    span {
+      color: #7a8790;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    strong {
+      color: #263238;
+      font-size: 0.98rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .profile-modal {
+      padding: 24px 20px;
+    }
+
+    .profile-summary {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .profile-field {
+      text-align: left;
+    }
+  }
 `;

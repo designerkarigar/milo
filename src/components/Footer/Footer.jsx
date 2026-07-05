@@ -301,13 +301,13 @@ export const Footer = () => {
                 <span className="footer-icon">
                   <FontAwesomeIcon icon={faLocationDot} />
                 </span>
-                Gurugram
+                 India
               </a>
-              <a href="tel:+9112345678">
+              <a href="tel:+919927223949">
                 <span className="footer-icon">
                   <FontAwesomeIcon icon={faPhone} />
                 </span>
-                12345678
+                9927223949
               </a>
               <a href="mailto:help@milo.social">
                 <span className="footer-icon">
@@ -360,7 +360,7 @@ export const Footer = () => {
                 <YoutubeIcon fontSize="inherit" />
               </a>
             </ul>
-            <p> &copy; 2023 by Milo Pvt. Limited. All rights reserved</p>
+            <p> &copy; 2026 by Milo Pvt. Limited. All rights reserved</p>
           </div>
         </div>
       </div>
