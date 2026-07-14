@@ -2,6 +2,9 @@ import styled from "styled-components";
 
 export const StyledFeatures = styled.div`
   width: 100%;
+  background-color: #ffffff;
+  margin-bottom: -1px;
+  border-bottom: 0;
   
   .feature-main-con {
     position: relative;

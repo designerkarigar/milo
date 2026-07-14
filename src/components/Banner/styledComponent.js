@@ -4,6 +4,8 @@ export const StyledBanner = styled.div`
   width: 100%;
   background-color: #0066ba;
   position: relative;
+  margin-bottom: -1px;
+  border-bottom: 0;
 
   .banner-con {
     width: 100%;
@@ -97,7 +99,7 @@ export const StyledBanner = styled.div`
 
   .banner-wave {
     position: absolute;
-    bottom: 0;
+    bottom: -1px;
     left: 0;
     width: 100%;
     overflow: hidden;
@@ -109,7 +111,7 @@ export const StyledBanner = styled.div`
     position: relative;
     display: block;
     width: calc(151% + 1.3px);
-    height: 102px;
+    height: 103px;
     transform: rotateY(180deg);
   }
 
