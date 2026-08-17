@@ -36,6 +36,7 @@ import EventView from "./pages/SinglePages/EventView";
 import PortalEvents from "./pages/Portal/PortalEvents";
 import ManageUser from "./Panel/pages/ManageUser";
 import BookingTable from "./Panel/pages/BookingTable";
+import AllBookingsTable from "./Panel/pages/AllBookingsTable";
 import DetailPage from "./Panel/pages/DetailPage";
 
 export const routesConfig = [
@@ -218,6 +219,10 @@ export const dashboardRoutesConfig = [
   {
     path: "/dashboard/BookingTable",
     Component: BookingTable,
+  },
+  {
+    path: "/dashboard/all-bookings",
+    Component: AllBookingsTable,
   },
   {
     path: "/dashboard/DetailPage",

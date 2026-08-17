@@ -41,6 +41,12 @@ function HeartBalloonsWrapper() {
   return <HeartBalloons />;
 }
 
+function FloatingQuickActionsWrapper() {
+  const location = useLocation();
+  if (location.pathname.startsWith("/dashboard")) return null;
+  return <FloatingQuickActions />;
+}
+
 function App() {
   useEffect(() => {
     Amplify.configure({
@@ -71,7 +77,7 @@ function App() {
           <Router>
             <ScrollToTop />
             <HeartBalloonsWrapper />
-            <FloatingQuickActions />
+            <FloatingQuickActionsWrapper />
             <Routes>
             {routesConfig.map((route) => {
               const { path, Component } = route;

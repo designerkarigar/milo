@@ -104,6 +104,15 @@ export const bookingColumn = [
   },
 ];
 
+export const allBookingColumn = [
+  {
+    header: "Type",
+    name: "serviceType",
+    defaultFlex: 1,
+  },
+  ...bookingColumn,
+];
+
 export const chrecheColumn = [
   {
     header: "Name",

@@ -9,6 +9,7 @@ import {
   cilChildFriendly,
   cilBusAlt,
   cilUser,
+  cilList,
 } from "@coreui/icons";
 
 export const getNavConfig = (role) => {
@@ -84,6 +85,12 @@ export const getNavConfig = (role) => {
           to: "/dashboard/portal_events",
         },
       ],
+    },
+    {
+      component: CNavItem,
+      name: "All Bookings",
+      to: "/dashboard/all-bookings",
+      icon: <CIcon icon={cilList} customClassName="nav-icon" />,
     },
     {
       component: CNavItem,

@@ -1,1 +1,16 @@
-// Here you can add other styles
+// Disable all motion on the admin dashboard (global SVG/image
+// animations from the public site would otherwise apply here).
+body.dashboard-route,
+body.dashboard-route *,
+body.dashboard-route *::before,
+body.dashboard-route *::after,
+.dashboard-no-animations,
+.dashboard-no-animations *,
+.dashboard-no-animations *::before,
+.dashboard-no-animations *::after {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}

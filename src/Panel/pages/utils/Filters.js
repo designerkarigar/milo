@@ -179,3 +179,12 @@ export const bookingFilter = [
     operator: "contains",
   },
 ];
+
+export const allBookingFilter = [
+  {
+    name: "serviceType",
+    type: "string",
+    operator: "contains",
+  },
+  ...bookingFilter,
+];

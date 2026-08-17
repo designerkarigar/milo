@@ -40,3 +40,35 @@ export const getAllBookings = async (serviceType, serviceUID) => {
     throw new Error("Bookings");
   }
 };
+
+const mapBookingRow = (data) => ({
+  name: data.userName || data.serviceUID,
+  serviceType: data.serviceType,
+  status: data.bookingStatus,
+  amount: data.expBillAmount,
+  bookingDate: data.bookingDate,
+  time: data.bookingTime,
+  uid: data.uid,
+  date: data.date,
+});
+
+export const getAllBookingsPaginated = async (pageNo = 0, pageSize = 50) => {
+  const idToken = localStorage.getItem("idToken");
+
+  const config = {
+    headers: {
+      token: idToken,
+    },
+  };
+  try {
+    const bookings = await axios.get(
+      BaseUrl +
+        `/bookings?pageSize=${pageSize}&pageNo=${pageNo}&useQueryFilter=true`,
+      config
+    );
+    const records = bookings.data?.response?.record || [];
+    return records.map(mapBookingRow);
+  } catch (err) {
+    throw new Error("Bookings");
+  }
+};
